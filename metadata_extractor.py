@@ -128,7 +128,8 @@ import openai  # make sure your key is configured
 
 def extract_positionality(pdf_path):
     """
-    Extract positionality/reflexivity statements via regex + GPT header fallback + tail scan + conditional GPT-4 full-text pass.
+    Extract positionality/reflexivity statements via enhanced regex + AI fallbacks.
+    Uses comprehensive pattern matching with AI enhancement when available.
     Returns dict with keys: positionality_tests (list), positionality_snippets (dict), positionality_score (float).
     """
     matched = []
@@ -144,15 +145,31 @@ def extract_positionality(pdf_path):
         header_text = ""
 
     tests = {
+        # Core positionality patterns
         "explicit_positionality":   re.compile(r"\b(?:My|Our) positionality\b", re.IGNORECASE),
-        "first_person_reflexivity": re.compile(r"\bI\s+(?:reflect|acknowledge|consider|recognize)\b", re.IGNORECASE),
-        "researcher_self":          re.compile(r"\bI,?\s*as a researcher,", re.IGNORECASE),
-        "author_self":              re.compile(r"\bI,?\s*as (?:the )?author,", re.IGNORECASE),
-        "as_a_role":                re.compile(r"\bAs a [A-Z][a-z]+(?: [A-Z][a-z]+)*,\s*I\b", re.IGNORECASE),
-        "I_position":               re.compile(r"\bI\s+(?:position|situat)\b", re.IGNORECASE),
-        "I_situated":               re.compile(r"\bI\s+situat\w*\b", re.IGNORECASE),
-        "positionality":            re.compile(r"\bpositionalit\w*\b", re.IGNORECASE),
-        "self_reflexivity":         re.compile(r"\bI\s+(?:reflect|reflective|reflexiv)\w*\b", re.IGNORECASE),
+        "positionality_term":       re.compile(r"\bpositionalit\w*\b", re.IGNORECASE),
+        
+        # First-person reflexive statements
+        "first_person_reflexivity": re.compile(r"\bI\s+(?:reflect|acknowledge|consider|recognize|admit|confess|must acknowledge|should note)\b", re.IGNORECASE),
+        "researcher_positioning":   re.compile(r"\bI,?\s*as (?:a |the )?(?:researcher|scholar|author),", re.IGNORECASE),
+        "identity_disclosure":      re.compile(r"\bAs a (?:woman|man|Black|White|Latina?|Asian|Indigenous|queer|trans|disabled|working.class)[^.]{0,50}(?:researcher|scholar|I)\b", re.IGNORECASE),
+        
+        # Reflexive awareness patterns  
+        "reflexive_awareness":      re.compile(r"\b(?:acknowledge|recognize|aware|conscious) (?:that )?(?:my|our) [^.]{10,60}(?:influence|affect|shape|bias|perspective|position)", re.IGNORECASE),
+        "background_influence":     re.compile(r"\b(?:My|Our) (?:background|experience|identity|perspective) [^.]{10,80}(?:influence|shape|inform|affect)", re.IGNORECASE),
+        
+        # Positioning language
+        "positioned_researcher":    re.compile(r"\b(?:positioned|situated) as [^.]{10,60}(?:researcher|scholar)", re.IGNORECASE),
+        "social_location":          re.compile(r"\bsocial location[^.]{0,50}", re.IGNORECASE),
+        "standpoint_perspective":   re.compile(r"\b(?:standpoint|situated knowledge|insider perspective|outsider status)[^.]{0,30}", re.IGNORECASE),
+        
+        # Methodological reflexivity
+        "methodological_reflexivity": re.compile(r"\b(?:reflexiv|positional)[^.]{0,30}(?:methodology|approach|stance)", re.IGNORECASE),
+        "disclosure_statement":     re.compile(r"\b(?:I|We) (?:bring|carry|hold) [^.]{10,60}(?:perspective|lens|experience|bias)", re.IGNORECASE),
+        
+        # Bias acknowledgment
+        "bias_acknowledgment":      re.compile(r"\b(?:my|our) (?:own )?(?:bias|biases|assumptions|preconceptions)[^.]{0,50}", re.IGNORECASE),
+        "subjective_awareness":     re.compile(r"\b(?:subjective|partial|limited) (?:perspective|view|understanding)[^.]{0,30}", re.IGNORECASE),
 
     }
 
@@ -164,34 +181,38 @@ def extract_positionality(pdf_path):
             break
 
     # 2) GPT-fallback on header if no regex hit
-    if not matched and header_text:
-        snippet = header_text[:500]
-        resp = openai.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a specialist in academic research methods. "
-                        "Find sentences where the author explicitly uses first‑person language "
-                        "to reflect on their own positionality or biases. "
-                        "If none exists in the passage, reply 'NONE'."
-                    )
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        "Passage:\n\n" + header_text[:500]
-                    )
-                }
-            ],
-            temperature=0.0
-        )
+    if not matched and header_text and openai.api_key:
+        try:
+            snippet = header_text[:500]
+            resp = openai.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are a specialist in academic research methods. "
+                            "Find sentences where the author explicitly uses first‑person language "
+                            "to reflect on their own positionality or biases. "
+                            "If none exists in the passage, reply 'NONE'."
+                        )
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            "Passage:\n\n" + header_text[:500]
+                        )
+                    }
+                ],
+                temperature=0.0
+            )
 
-        answer = resp.choices[0].message.content.strip()
-        if answer.upper() != "NONE":
-            matched.append("gpt_header")
-            snippets["gpt_header"] = answer
+            answer = resp.choices[0].message.content.strip()
+            if answer.upper() != "NONE":
+                matched.append("gpt_header")
+                snippets["gpt_header"] = answer
+        except (openai.AuthenticationError, openai.APIError) as e:
+            print(f"OpenAI API error (header analysis): {e}")
+            # Continue without GPT analysis
 
     # 3) Tail-end regex scan (last 2 pages)
     try:
