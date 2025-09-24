@@ -14,14 +14,6 @@ Professional PDF viewer for human experts to label papers and improve detection 
 
 ## � **How the Two Applications Work Together**
 
-### **The Complete Workflow:**
-
-1. **🤖 Automated Detection** - Process papers automatically using current AI + regex patterns
-2. **👥 Human Review** - Experts review results using the training interface  
-3. **📝 Data Collection** - Collect human judgments, evidence quotes, and pattern suggestions
-4. **🔧 Pattern Improvement** - Use training data to enhance detection accuracy
-5. **♻️ Iterate** - Re-test automated detection with improved patterns
-
 ### **Training Interface Purpose:**
 - **Label test cases** - Create ground truth for validation
 - **Find missed patterns** - Identify what the AI doesn't catch
@@ -29,7 +21,7 @@ Professional PDF viewer for human experts to label papers and improve detection 
 - **Quality control** - Review and correct automated results
 - **Export training data** - Generate datasets for system improvement
 
-Yes - the manual detection app creates test cases that we validate against the automation routines! 🎯
+The manual detection app creates test cases that we validate against the automation routines! 🎯
 
 ---
 
@@ -110,13 +102,16 @@ This outputs a Markdown-formatted table plus summary counts of detected position
 
 ## 🎯 **Training Data Workflow**
 
-### **Step 1: Generate Baseline Results**
+### **The Complete 5-Step Process:**
+
+### **Step 1: Generate Baseline Results** 🤖
 ```bash
 # Process papers with current detection
 python test_extractor.py /path/to/papers/
 ```
+Process papers automatically using current AI + regex patterns to establish baseline performance.
 
-### **Step 2: Human Expert Review**  
+### **Step 2: Human Expert Review** 👥  
 ```bash
 # Launch training interface
 python enhanced_training_interface.py
@@ -125,28 +120,31 @@ python enhanced_training_interface.py
 - Use PDF viewer to read and analyze each paper
 - Select text containing positionality statements
 - Label as positive/negative with evidence quotes
-- Export training data when complete
+- Experts review automated results using the training interface
 
-### **Step 3: Analyze Training Results**
+### **Step 3: Data Collection & Analysis** 📝
 ```bash  
 # Analyze human labels vs AI predictions
 python training_analysis.py training_data.json --pdf-folder /path/to/papers/
 ```
 - Compare human judgments with AI predictions
+- Collect human judgments, evidence quotes, and pattern suggestions
 - Identify false positives and false negatives  
 - Generate new regex patterns from human evidence
 - Get recommendations for improving detection
 
-### **Step 4: Update Detection Patterns**
+### **Step 4: Pattern Improvement** 🔧
 - Add new regex patterns to `metadata_extractor.py`
 - Update AI prompts based on human insights
+- Use training data to enhance detection accuracy
 - Test improved detection on validation set
 
-### **Step 5: Validate Improvements**
+### **Step 5: Iterate & Validate** ♻️
 ```bash
 # Re-test with improved patterns
 python validate_test_cases.py
 ```
+Re-test automated detection with improved patterns and repeat the cycle for continuous improvement.
 
 ---
 
