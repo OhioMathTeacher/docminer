@@ -38,12 +38,6 @@ Yes - the manual detection app creates test cases that we validate against the a
 * **Python** 3.10 or higher
 * **pip** (package installer)
 
-Install dependencies:
-
-```bash
-python3 -m pip install -r requirements.txt
-```
-
 Key libraries:
 
 * `openai` for AI-powered positionality detection
