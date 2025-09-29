@@ -10,21 +10,22 @@ import sys
 import os
 import json
 import shutil
-from datetime import datetime
 from pathlib import Path
+from datetime import datetime
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QTextEdit, QPushButton, QButtonGroup, QRadioButton,
     QScrollArea, QProgressBar, QMessageBox, QFileDialog, QCheckBox,
     QComboBox, QSpinBox, QGroupBox, QGridLayout, QSplitter, QFrame,
-    QTabWidget, QSlider, QMenu, QPlainTextEdit
+    QTabWidget, QSlider, QMenu, QPlainTextEdit, QLineEdit
 )
 from PySide6.QtCore import Qt, QTimer, Signal, QRect, QPoint
 from PySide6.QtGui import QFont, QTextCursor, QPixmap, QPainter, QPen, QColor, QBrush, QAction, QClipboard
 
 import fitz  # PyMuPDF for PDF rendering
 from metadata_extractor import extract_positionality
+from github_report_uploader import GitHubReportUploader
 
 class SelectablePDFLabel(QLabel):
     """Custom QLabel with text editor-style line-based text selection"""
@@ -573,6 +574,9 @@ class EnhancedTrainingInterface(QMainWindow):
         self.load_training_data()
         self.load_settings()
         
+        # Initialize GitHub uploader
+        self.github_uploader = GitHubReportUploader()
+        
         self.setup_ui()
         
         # Initialize with default folder and README
@@ -587,10 +591,19 @@ class EnhancedTrainingInterface(QMainWindow):
         # Header with progress
         header_layout = QHBoxLayout()
         
+        # GA name input
+        ga_label = QLabel("GA Name:")
+        self.ga_name_input = QLineEdit()
+        self.ga_name_input.setPlaceholderText("Enter your name for training reports")
+        self.ga_name_input.setMaximumWidth(200)
+        header_layout.addWidget(ga_label)
+        header_layout.addWidget(self.ga_name_input)
+        
         # Folder selection
         folder_btn = QPushButton("📁 Select PDF Folder")
         folder_btn.clicked.connect(self.select_folder)
         folder_btn.setStyleSheet("QPushButton { font-weight: bold; padding: 8px; }")
+        header_layout.addWidget(folder_btn)
         header_layout.addWidget(folder_btn)
         
         # Progress tracking
@@ -670,6 +683,73 @@ class EnhancedTrainingInterface(QMainWindow):
         training_panel.setMinimumWidth(400)
         training_panel.setMaximumWidth(500)
         right_layout = QVBoxLayout(training_panel)
+        
+        # AI Pre-screening section
+        prescreening_group = QGroupBox("🔍 AI Pre-Screening (Speed Up Your Work!)")
+        prescreening_layout = QVBoxLayout(prescreening_group)
+        
+        # Initial analysis button
+        analysis_btn_layout = QHBoxLayout()
+        self.initial_analysis_btn = QPushButton("🚀 Run Initial Analysis")
+        self.initial_analysis_btn.clicked.connect(self.run_initial_analysis)
+        self.initial_analysis_btn.setStyleSheet("QPushButton { background-color: #FF9800; color: white; font-weight: bold; padding: 10px; }")
+        analysis_btn_layout.addWidget(self.initial_analysis_btn)
+        
+        self.analysis_status = QLabel("Click to analyze this paper for positionality")
+        self.analysis_status.setStyleSheet("QLabel { color: #666; font-style: italic; }")
+        analysis_btn_layout.addWidget(self.analysis_status)
+        analysis_btn_layout.addStretch()
+        prescreening_layout.addLayout(analysis_btn_layout)
+        
+        # AI findings display with scroll
+        self.ai_findings = QTextEdit()
+        self.ai_findings.setMinimumHeight(200)  # Taller for more content
+        self.ai_findings.setMaximumHeight(300)  # Allow expansion
+        self.ai_findings.setReadOnly(True)
+        self.ai_findings.setPlaceholderText("AI analysis results will appear here...\n\nClick 'Run Initial Analysis' to see:\n• Overall confidence score\n• Detected patterns\n• Evidence excerpts with locations\n• Recommended judgment")
+        self.ai_findings.setStyleSheet("QTextEdit { background: #f8f9fa; border: 1px solid #ddd; font-family: 'Segoe UI', Arial; }")
+        self.ai_findings.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        prescreening_layout.addWidget(self.ai_findings)
+        
+        # Quick validation buttons
+        quick_validate_layout = QHBoxLayout()
+        self.quick_accept_btn = QPushButton("✅ Accept AI Findings")
+        self.quick_accept_btn.clicked.connect(self.quick_accept_findings)
+        self.quick_accept_btn.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; }")
+        self.quick_accept_btn.setEnabled(False)
+        
+        self.quick_reject_btn = QPushButton("❌ Reject - Manual Review")
+        self.quick_reject_btn.clicked.connect(self.quick_reject_findings)
+        self.quick_reject_btn.setStyleSheet("QPushButton { background-color: #f44336; color: white; }")
+        self.quick_reject_btn.setEnabled(False)
+        
+        quick_validate_layout.addWidget(self.quick_accept_btn)
+        quick_validate_layout.addWidget(self.quick_reject_btn)
+        quick_validate_layout.addStretch()
+        prescreening_layout.addLayout(quick_validate_layout)
+        
+        right_layout.addWidget(prescreening_group)
+        
+        # Location dropdown for positionality findings
+        location_group = QGroupBox("📍 Location of Positionality Statements")
+        location_layout = QHBoxLayout(location_group)
+        location_label = QLabel("Primary Location:")
+        self.location_dropdown = QComboBox()
+        self.location_dropdown.addItems([
+            "Introduction/Background",
+            "Literature Review", 
+            "Methodology",
+            "Results/Findings",
+            "Discussion",
+            "Conclusion",
+            "Throughout Paper",
+            "Multiple Sections"
+        ])
+        self.location_dropdown.setStyleSheet("QComboBox { padding: 4px; }")
+        location_layout.addWidget(location_label)
+        location_layout.addWidget(self.location_dropdown)
+        location_layout.addStretch()
+        right_layout.addWidget(location_group)
         
         # Positionality judgment
         judgment_group = QGroupBox("Does this paper contain positionality statements?")
@@ -807,6 +887,11 @@ class EnhancedTrainingInterface(QMainWindow):
         export_btn = QPushButton("📤 Export Data")
         export_btn.clicked.connect(self.export_training_data)
         button_layout.addWidget(export_btn)
+        
+        upload_btn = QPushButton("🚀 Export & Upload")
+        upload_btn.clicked.connect(self.export_and_upload)
+        upload_btn.setStyleSheet("QPushButton { background-color: #2196F3; color: white; font-weight: bold; }")
+        button_layout.addWidget(upload_btn)
         
         layout.addLayout(button_layout)
         
@@ -1043,6 +1128,43 @@ class EnhancedTrainingInterface(QMainWindow):
             except Exception as e:
                 QMessageBox.critical(self, "Export Error", f"Could not export: {e}")
                 
+    def export_and_upload(self):
+        """Export training data and upload to GitHub automatically"""
+        if not self.training_data:
+            QMessageBox.information(self, "No Data", "No training data to export and upload.")
+            return
+            
+        ga_name = self.ga_name_input.text().strip()
+        if not ga_name:
+            QMessageBox.warning(self, "GA Name Required", "Please enter your name before uploading.")
+            self.ga_name_input.setFocus()
+            return
+            
+        try:
+            # Process training session (save locally + upload to GitHub)
+            result = self.github_uploader.process_training_session(self.training_data, ga_name)
+            
+            if result['success']:
+                QMessageBox.information(self, "🚀 Upload Successful", 
+                                      f"Training report uploaded successfully!\n\n"
+                                      f"GA: {ga_name}\n"
+                                      f"Session: {result['session_id']}\n"
+                                      f"Papers labeled: {len(self.training_data)}\n\n"
+                                      f"Files created:\n"
+                                      f"• {Path(result['json_file']).name}\n"
+                                      f"• {Path(result['md_file']).name}\n\n"
+                                      f"Report available on GitHub.")
+            else:
+                QMessageBox.warning(self, "Upload Failed", 
+                                  f"Report created locally but upload failed.\n\n"
+                                  f"Error: {result['message']}\n\n"
+                                  f"Files saved locally:\n"
+                                  f"• {Path(result['json_file']).name}\n"
+                                  f"• {Path(result['md_file']).name}")
+                
+        except Exception as e:
+            QMessageBox.critical(self, "Upload Error", f"Could not create or upload report: {e}")
+                
     def connect_pdf_selection(self):
         """Connect PDF text selection to the extraction area"""
         # Connect mouse release to update extracted text
@@ -1167,6 +1289,227 @@ class EnhancedTrainingInterface(QMainWindow):
             
             # Show confirmation
             self.statusBar().showMessage("✅ Text copied to evidence field", 2000)
+    
+    def run_initial_analysis(self):
+        """Run AI analysis on current paper and display findings"""
+        if not self.papers_list or self.current_paper_index >= len(self.papers_list):
+            QMessageBox.information(self, "No Paper", "No paper selected for analysis.")
+            return
+        
+        current_paper = self.papers_list[self.current_paper_index]
+        pdf_path = Path(self.pdf_folder) / current_paper
+        
+        self.analysis_status.setText("🔄 Analyzing...")
+        self.initial_analysis_btn.setEnabled(False)
+        QApplication.processEvents()  # Update UI
+        
+        try:
+            # Run our enhanced detection
+            result = extract_positionality(str(pdf_path))
+            
+            # Format findings for display
+            findings_text = self.format_ai_findings(result, current_paper)
+            self.ai_findings.setHtml(findings_text)
+            
+            # Update status and enable buttons
+            if result['positionality_score'] > 0.3:
+                self.analysis_status.setText(f"✅ Found {len(result['positionality_snippets'])} potential evidence excerpts")
+                self.quick_accept_btn.setEnabled(True)
+                self.quick_reject_btn.setEnabled(True)
+                # Store findings for quick acceptance
+                self.current_ai_findings = result
+            else:
+                self.analysis_status.setText("❌ No strong positionality indicators found")
+                self.quick_accept_btn.setEnabled(False)
+                self.quick_reject_btn.setEnabled(True)
+                self.current_ai_findings = None
+                
+        except Exception as e:
+            self.analysis_status.setText(f"❌ Analysis failed: {str(e)}")
+            self.ai_findings.setPlainText(f"Error running analysis: {e}")
+            
+        finally:
+            self.initial_analysis_btn.setEnabled(True)
+    
+    def format_ai_findings(self, result, paper_name):
+        """Enhanced format AI detection results with detailed analysis"""
+        score = result['positionality_score']
+        patterns = result['positionality_tests']
+        snippets = result['positionality_snippets']
+        
+        # Determine confidence level and recommendation
+        if score >= 0.7:
+            confidence_level = "High"
+            recommendation = "Explicit positionality detected"
+            confidence_color = "#4CAF50"
+        elif score >= 0.4:
+            confidence_level = "Medium"
+            recommendation = "Subtle/implicit positionality likely"
+            confidence_color = "#FF9800"
+        elif score > 0:
+            confidence_level = "Low"
+            recommendation = "Minimal indicators found"
+            confidence_color = "#FF5722"
+        else:
+            confidence_level = "None"
+            recommendation = "No positionality detected"
+            confidence_color = "#666"
+        
+        # Create comprehensive HTML display
+        html = f"""
+        <div style="font-family: 'Segoe UI', Arial, sans-serif;">
+        <h3 style="color: #2196F3; margin-bottom: 10px;">📋 AI Analysis for {paper_name}</h3>
+        
+        <div style="background: #f0f7ff; padding: 12px; border-radius: 6px; margin: 10px 0;">
+        <p style="margin: 5px 0;"><b>🎯 Confidence Level:</b> <span style="color: {confidence_color}; font-weight: bold;">{confidence_level}</span> ({score:.3f})</p>
+        <p style="margin: 5px 0;"><b>💡 Recommendation:</b> {recommendation}</p>
+        <p style="margin: 5px 0;"><b>🔍 Patterns Detected:</b> {', '.join(patterns).replace('_', ' ').title() if patterns else 'None'}</p>
+        </div>
+        """
+        
+        if snippets:
+            html += "<h4 style='color: #4CAF50; margin-top: 15px;'>📄 Evidence Excerpts Found:</h4>"
+            for i, (pattern, text) in enumerate(snippets.items(), 1):
+                # Clean up and intelligently truncate text
+                clean_text = text.strip()
+                if len(clean_text) > 300:
+                    # Find a good breaking point (sentence end)
+                    truncate_pos = clean_text.find('.', 250)
+                    if truncate_pos == -1:
+                        truncate_pos = 300
+                    clean_text = clean_text[:truncate_pos + 1] + "..."
+                
+                # Estimate location based on content
+                location = self.estimate_location_from_text(clean_text)
+                
+                html += f"""
+                <div style="margin: 12px 0; padding: 10px; background: #f9f9f9; border-left: 4px solid #2196F3; border-radius: 4px;">
+                <p style="margin: 0; font-weight: bold; color: #333;">#{i} - {pattern.replace('_', ' ').title()}</p>
+                <p style="margin: 5px 0; font-style: italic; color: #666;">📍 Likely Location: {location}</p>
+                <p style="margin: 5px 0; line-height: 1.4;"><i>"{clean_text}"</i></p>
+                </div>
+                """
+        else:
+            html += """
+            <div style="background: #fff3cd; padding: 10px; border-radius: 6px; margin: 10px 0;">
+            <p style="color: #856404; margin: 0;"><i>🔍 No specific evidence excerpts extracted. Consider manual review of the full paper.</i></p>
+            </div>
+            """
+        
+        # Add AI recommendation summary
+        html += f"""
+        <div style="background: #e8f5e8; padding: 12px; border-radius: 6px; margin: 15px 0 5px 0;">
+        <h4 style="color: #2e7d32; margin: 0 0 8px 0;">🤖 AI Recommendation:</h4>
+        <p style="margin: 0; color: #2e7d32;">
+        """
+        
+        if score >= 0.7:
+            html += "Strong evidence of explicit positionality statements. Recommend <b>Accept AI Findings</b> → Explicit."
+        elif score >= 0.4:
+            html += "Moderate evidence suggests subtle reflexivity. Recommend <b>Accept AI Findings</b> → Subtle/Implicit."
+        elif score > 0:
+            html += "Weak indicators found. Recommend <b>Manual Review</b> for thorough analysis."
+        else:
+            html += "No clear positionality detected. Recommend <b>Reject</b> → No positionality statements."
+            
+        html += "</p></div></div>"
+            
+        return html
+    
+    def estimate_location_from_text(self, text):
+        """Estimate paper location based on text content"""
+        text_lower = text.lower()
+        
+        # Location indicators
+        if any(word in text_lower for word in ['introduction', 'background', 'this paper', 'this study']):
+            return "Introduction/Background"
+        elif any(word in text_lower for word in ['literature', 'previous research', 'scholars have']):
+            return "Literature Review"
+        elif any(word in text_lower for word in ['methodology', 'method', 'approach', 'data collection', 'participants']):
+            return "Methodology"
+        elif any(word in text_lower for word in ['findings', 'results', 'analysis revealed', 'data showed']):
+            return "Results/Findings"
+        elif any(word in text_lower for word in ['discussion', 'implications', 'these findings']):
+            return "Discussion"
+        elif any(word in text_lower for word in ['conclusion', 'in summary', 'to conclude']):
+            return "Conclusion"
+        else:
+            return "Body/Content"
+    
+    def quick_accept_findings(self):
+        """Quickly accept AI findings and populate form"""
+        if not hasattr(self, 'current_ai_findings') or not self.current_ai_findings:
+            return
+            
+        result = self.current_ai_findings
+        
+        # Set judgment based on AI confidence
+        if result['positionality_score'] >= 0.7:
+            self.judgment_buttons['positive_explicit'].setChecked(True)
+        elif result['positionality_score'] >= 0.4:
+            self.judgment_buttons['positive_subtle'].setChecked(True)
+        else:
+            self.judgment_buttons['uncertain'].setChecked(True)
+            
+        # Populate evidence from AI findings and determine locations
+        evidence_parts = []
+        locations_found = []
+        
+        for pattern, text in result['positionality_snippets'].items():
+            clean_text = text.strip()
+            evidence_parts.append(f"[{pattern.replace('_', ' ').title()}]: \"{clean_text}\"")
+            
+            # Estimate location for each piece of evidence
+            location = self.estimate_location_from_text(clean_text)
+            locations_found.append(location)
+        
+        self.evidence_text.setPlainText("\n\n".join(evidence_parts))
+        
+        # Auto-select location based on evidence analysis
+        if locations_found:
+            from collections import Counter
+            location_counts = Counter(locations_found)
+            
+            # Determine primary location
+            if len(set(locations_found)) > 2:
+                primary_location = "Multiple Sections"
+            elif len(set(locations_found)) == 2:
+                primary_location = "Multiple Sections"
+            else:
+                primary_location = location_counts.most_common(1)[0][0]
+                
+            # Set the location dropdown
+            location_index = self.location_dropdown.findText(primary_location)
+            if location_index >= 0:
+                self.location_dropdown.setCurrentIndex(location_index)
+        
+        # Set confidence based on AI score (scale 1-5)
+        ai_confidence = min(5, max(2, int(result['positionality_score'] * 5) + 1))
+        self.confidence_slider.setValue(ai_confidence)
+        
+        # Add AI assistance note to pattern suggestions
+        patterns = ', '.join(result['positionality_tests'])
+        ai_note = f"AI-detected patterns: {patterns}"
+        if locations_found:
+            ai_note += f"\nLocations: {', '.join(set(locations_found))}"
+        self.pattern_suggestions.setPlainText(ai_note)
+        
+        location_text = self.location_dropdown.currentText()
+        self.statusBar().showMessage(f"✅ AI findings accepted! Location: {location_text}", 3000)
+        
+    def quick_reject_findings(self):
+        """Reject AI findings and proceed with manual review"""
+        # Clear AI findings and reset for manual work
+        self.ai_findings.clear()
+        self.analysis_status.setText("Manual review mode")
+        self.quick_accept_btn.setEnabled(False)
+        self.quick_reject_btn.setEnabled(False)
+        
+        # Set default negative judgment for manual verification
+        self.judgment_buttons['negative'].setChecked(True)
+        self.confidence_slider.setValue(3)
+        
+        self.statusBar().showMessage("🔍 Manual review mode - read the full paper carefully", 3000)
     
     def closeEvent(self, event):
         """Save settings when closing"""

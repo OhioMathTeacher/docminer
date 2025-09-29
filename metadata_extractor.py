@@ -171,6 +171,18 @@ def extract_positionality(pdf_path):
         "bias_acknowledgment":      re.compile(r"\b(?:my|our) (?:own )?(?:bias|biases|assumptions|preconceptions)[^.]{0,50}", re.IGNORECASE),
         "subjective_awareness":     re.compile(r"\b(?:subjective|partial|limited) (?:perspective|view|understanding)[^.]{0,30}", re.IGNORECASE),
 
+        # Enhanced academic reflexivity patterns (Research Buddy 2.0)
+        "authorial_positioning":    re.compile(r"\b(?:we|I)\s+(?:articulate|position|locate|situate)\s+(?:our|my)\s+(?:own\s+)?(?:cultural\s+)?(?:location|position|positionality|perspective)", re.IGNORECASE),
+        "research_context":         re.compile(r"\b(?:this\s+paper|this\s+research|my\s+fieldwork|our\s+study)\s+(?:has\s+)?(?:developed|emerged|stems|arises)\s+(?:out\s+of|from)\s+(?:my|our)\s+(?:experiences?|background|work)", re.IGNORECASE),
+        "positional_influence":     re.compile(r"\b(?:our|my)\s+(?:position|positionality|background|experience)\s+(?:may\s+|might\s+|could\s+|will\s+)?(?:influence|affect|shape|inform)\s+(?:curriculum|research|interpretation|analysis)", re.IGNORECASE),
+        "fieldwork_reflexivity":    re.compile(r"\b(?:I|we)\s+(?:became\s+aware|observed|recognized|realized)\s+that\s+(?:my|our)\s+(?:position|presence|background|identity)", re.IGNORECASE),
+        "assumption_acknowledgment": re.compile(r"\b(?:we|I)\s+(?:make|hold|carry|bring)\s+(?:assumptions|presuppositions|biases)\s+(?:based\s+on|about|regarding)\s+(?:our|my)\s+(?:position|background|experience)", re.IGNORECASE),
+        "contextual_positioning":   re.compile(r"\b(?:it\s+is\s+)?from\s+this\s+(?:context|position|perspective|standpoint)\s+that\s+(?:we|I)\s+(?:position|approach|understand|view)", re.IGNORECASE),
+        "political_positioning":    re.compile(r"\b(?:our|my)\s+position\s+is\s+(?:a\s+)?(?:political|critical|theoretical)\s+(?:point\s+of\s+departure|stance|perspective)", re.IGNORECASE),
+        "experiential_grounding":   re.compile(r"\bthrough\s+(?:discussion\s+of\s+)?(?:my|our)\s+(?:fieldwork\s+|research\s+|personal\s+)?experiences?\s+(?:in|with|conducting|as)", re.IGNORECASE),
+        "reflexive_observation":    re.compile(r"\b(?:as\s+I|while\s+I|when\s+I|however,?\s+I)\s+(?:got\s+to\s+know|spent\s+time|interacted|worked)\s+.{0,30}\s+(?:I\s+observed|I\s+became\s+aware|I\s+realized)", re.IGNORECASE),
+        "researcher_identity":      re.compile(r"\b(?:as\s+individuals|as\s+researchers|as\s+authors),?\s+(?:we|I)\s+(?:make|hold|carry|bring|acknowledge)", re.IGNORECASE),
+
     }
 
     for name, pat in tests.items():
