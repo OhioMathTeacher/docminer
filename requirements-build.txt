@@ -1,0 +1,44 @@
+# Research Buddy 2.0 Requirements
+# Core dependencies for building and running the application
+
+# GUI Framework
+PySide6>=6.4.0
+
+# PDF Processing
+PyMuPDF>=1.23.0
+
+# Natural Language Processing
+nltk>=3.8
+
+# Data Analysis and Processing
+pandas>=1.5.0
+numpy>=1.24.0
+
+# Text Processing and Analysis
+regex>=2023.0.0
+
+# Date and Time Utilities
+python-dateutil>=2.8.0
+
+# File and Path Utilities
+pathlib2>=2.3.0; python_version < "3.4"
+
+# JSON and Configuration
+jsonschema>=4.17.0
+
+# Build Tools (for creating executables)
+pyinstaller>=5.8.0
+
+# Optional: Enhanced GUI components
+matplotlib>=3.6.0  # For potential charts/graphs
+Pillow>=9.0.0      # For image handling in GUI
+
+# Development and Testing (optional)
+pytest>=7.0.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Platform-specific dependencies
+# Windows: No additional requirements
+# macOS: No additional requirements  
+# Linux: python3-tk (system package, not pip installable)
