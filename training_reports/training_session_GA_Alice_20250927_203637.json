@@ -1,0 +1,22 @@
+[
+  {
+    "filename": "paper_a1.pdf",
+    "judgment": "positive_explicit",
+    "evidence": "I acknowledge my position as a white researcher studying communities of color and recognize the limitations this brings.",
+    "confidence": 5,
+    "pattern_types": [
+      "authorial_positioning"
+    ],
+    "pattern_suggestions": "acknowledge position, recognize limitations"
+  },
+  {
+    "filename": "paper_a2.pdf",
+    "judgment": "positive_subtle",
+    "evidence": "This research emerged from my experiences as a graduate student navigating academic institutions.",
+    "confidence": 4,
+    "pattern_types": [
+      "experiential_grounding"
+    ],
+    "pattern_suggestions": "emerged from experiences"
+  }
+]
