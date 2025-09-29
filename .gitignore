@@ -32,6 +32,18 @@ MANIFEST
 *.manifest
 *.spec
 
+# Build artifacts and executables
+dist/
+build/
+distribution/
+*.exe
+*.app
+*.dmg
+*.deb
+*.rpm
+*.zip
+*.tar.gz
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
