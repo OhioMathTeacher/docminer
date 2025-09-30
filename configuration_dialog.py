@@ -234,11 +234,13 @@ class ConfigurationDialog(QDialog):
                               "You can generate one at: https://github.com/settings/tokens")
             return
             
+        repo_url = f"https://github.com/{github_owner}/{github_repo}"
         QMessageBox.information(self, "Test Results", 
-                              "✅ Configuration looks good!\n\n"
-                              "• OpenAI API key format is correct\n"
-                              "• GitHub settings are provided\n\n"
-                              "Save configuration to use these settings.")
+                              f"✅ Configuration looks good!\n\n"
+                              f"• OpenAI API key format is correct\n"
+                              f"• GitHub settings are provided\n\n"
+                              f"📦 Upload Destination:\n{repo_url}\n\n"
+                              f"Save configuration to use these settings.")
     
     def reset_to_defaults(self):
         """Reset configuration to defaults"""
