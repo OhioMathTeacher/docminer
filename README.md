@@ -1,74 +1,214 @@
-# 🚀 Research Buddy 4.0 - Secure Configuration & Modern Launcher
+# 📖 Research Buddy - Positionality Detection Training# 📖 Research Buddy - Positionality Detection Training# 🚀 Research Buddy 4.0 - Secure Configuration & Modern Launcher
 
-**Revolutionary academic research system: Professional AI-assisted analysis with secure credential management and one-click launch**
 
-[![GitHub Release](https://img.shields.io/github/v/release/OhioMathTeacher/research-buddy)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
-[![Platform Support](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
-[![Security](https://img.shields.io/badge/Security-Environment%20Variables-green)](#security)
-[![User Experience](https://img.shields.io/badge/UX-Modern%20Launcher-brightgreen)](#launcher)
 
-## 🎉 **What's New in Version 4.0**
+**Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
-**Complete security overhaul with modern user experience:**
 
-```
-✨ Version 4.0 Highlights:
-   🔐  Secure credential management with environment variables
-   🚀  One-click modern launcher - no command-line needed!
-   🎨  Professional first-run setup with clean UI
-   🛡️  No plain-text API keys anywhere on your system
-   📱  macOS/Windows/Linux binary distribution ready
-   ⚡  Instant launch with saved credentials
-   🎯  Zero-configuration experience for end users
-```
 
-**This transforms Research Buddy from a developer tool to a professional application.**
+Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.**Simple, professional software for analyzing academic papers contextually for various attributes (e.g., positionality statements, political or religious ideology, ).****Revolutionary academic research system: Professional AI-assisted analysis with secure credential management and one-click launch**
+
+
 
 ---
 
-## 🎯 **TL;DR - Just Want to Run Research Buddy?**
 
-### **✨ The Magic Command:**
-```bash
-python3 launch_research_buddy.py
-```
-**That's it! One command, secure setup, instant launch. Everything else is just details.** 🚀
+
+## 🚀 **Quick Start**Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.[![GitHub Release](https://img.shields.io/github/v/release/OhioMathTeacher/research-buddy)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
+
+
+
+### **Step 1: Download**[![Platform Support](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
+
+1. Go to [Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
+
+2. Download the file for your computer:---[![Security](https://img.shields.io/badge/Security-Environment%20Variables-green)](#security)
+
+   - **Windows**: `ResearchBuddy-windows.zip`
+
+   - **macOS**: `ResearchBuddy-macos.zip` [![User Experience](https://img.shields.io/badge/UX-Modern%20Launcher-brightgreen)](#launcher)
+
+   - **Linux**: `ResearchBuddy-linux.tar.gz`
+
+## 🚀 **Quick Start**
+
+### **Step 2: Install**
+
+1. Extract/unzip the downloaded file## 🎉 **What's New in Version 4.0**
+
+2. Double-click the application to run
+
+3. **That's it!** No Python or technical setup required### **Step 1: Download**
+
+
+
+### **Step 3: Start Analyzing**1. Go to [Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest)**Complete security overhaul with modern user experience:**
+
+1. The software opens with a training document
+
+2. Add your PDF papers to the `~/ExtractorPDFs` folder2. Download the file for your computer:
+
+3. Click through papers, select text, and mark positionality statements
+
+4. Export your training data when finished   - **Windows**: `ResearchBuddy-windows.zip````
+
+
+
+---   - **macOS**: `ResearchBuddy-macos.zip` ✨ Version 4.0 Highlights:
+
+
+
+## 📋 **What It Does**   - **Linux**: `ResearchBuddy-linux.tar.gz`   🔐  Secure credential management with environment variables
+
+
+
+- **PDF Viewer**: Read academic papers with professional page navigation   🚀  One-click modern launcher - no command-line needed!
+
+- **Text Selection**: Highlight and extract quotes for evidence
+
+- **AI Assistant**: Optional AI pre-screening to speed up analysis (requires OpenAI API key)### **Step 2: Install**   🎨  Professional first-run setup with clean UI
+
+- **Training Data**: Export decisions for improving detection systems
+
+- **Manual Mode**: Works completely offline without AI1. Extract/unzip the downloaded file   🛡️  No plain-text API keys anywhere on your system
+
+
+
+---2. Double-click the application to run   📱  macOS/Windows/Linux binary distribution ready
+
+
+
+## 🎯 **Perfect For**3. **That's it!** No Python or technical setup required   ⚡  Instant launch with saved credentials
+
+
+
+- **Graduate Assistants**: Easy-to-use interface, no technical background needed   🎯  Zero-configuration experience for end users
+
+- **Research Teams**: Consistent analysis across multiple reviewers  
+
+- **Academic Institutions**: Scale from individual researchers to large projects### **Step 3: Start Analyzing**```
+
+- **Qualitative Research**: Any study involving positionality analysis
+
+1. The software opens with a training document
 
 ---
 
-## 📥 **Super Simple Installation**
+2. Add your PDF papers to the `~/ExtractorPDFs` folder**This transforms Research Buddy from a developer tool to a professional application.**
 
-### **🎯 For Everyone (Recommended)**
+## 💡 **Need Help?**
+
+3. Click through papers, select text, and mark positionality statements
+
+- **Getting Started**: See `QUICK_START_FOR_GAS.md` included with download
+
+- **Questions**: Open an issue on this GitHub repository4. Export your training data when finished---
+
+- **Technical Support**: Contact your research supervisor or IT department
+
+
+
+---
+
+---## 🎯 **TL;DR - Just Want to Run Research Buddy?**
+
+## 📄 **License**
+
+
+
+**Academic and Educational Use Only**
+
+## 📋 **What It Does**### **✨ The Magic Command:**
+
+This software is licensed under Creative Commons Attribution-NonCommercial 4.0:
+
+- ✅ Free for academic research and education```bash
+
+- ✅ Share and modify for research purposes  
+
+- ❌ Commercial use requires separate licensing- **PDF Viewer**: Read academic papers with professional page navigationpython3 launch_research_buddy.py
+
+
+
+For commercial licensing, contact the project maintainer.- **Text Selection**: Highlight and extract quotes for evidence```
+
+
+
+---- **AI Assistant**: Optional AI pre-screening to speed up analysis (requires OpenAI API key)**That's it! One command, secure setup, instant launch. Everything else is just details.** 🚀
+
+
+
+**Research Buddy** - Making positionality analysis accessible to everyone in academia.- **Training Data**: Export decisions for improving detection systems
+
+- **Manual Mode**: Works completely offline without AI---
+
+
+
+---## 📥 **Super Simple Installation**
+
+
+
+## 🎯 **Perfect For**### **🎯 For Everyone (Recommended)**
+
 **Just one file to run Research Buddy - that's it!**
 
-1. **Download**: 
-   - [📦 **Research Buddy 4.0 (ZIP)**](https://github.com/OhioMathTeacher/research-buddy/archive/refs/tags/v4.0.0.zip) 
-   - [📦 **Research Buddy 4.0 (TAR.GZ)**](https://github.com/OhioMathTeacher/research-buddy/archive/refs/tags/v4.0.0.tar.gz)
-2. **Extract** the source files to any folder
-3. **Run**: `python3 launch_research_buddy.py` 
-4. **Enter your API keys once** - securely saved forever
-5. **Start analyzing papers immediately!**
+- **Graduate Assistants**: Easy-to-use interface, no technical background needed
 
-**No installation, no setup, no command-line wizardry. Just works!**
-✨ *Research Buddy 4.0 now available with modern GUI launcher and secure credentials*
+- **Research Teams**: Consistent analysis across multiple reviewers  1. **Download**: 
+
+- **Academic Institutions**: Scale from individual researchers to large projects   - [📦 **Research Buddy 4.0 (ZIP)**](https://github.com/OhioMathTeacher/research-buddy/archive/refs/tags/v4.0.0.zip) 
+
+- **Qualitative Research**: Any study involving positionality analysis   - [📦 **Research Buddy 4.0 (TAR.GZ)**](https://github.com/OhioMathTeacher/research-buddy/archive/refs/tags/v4.0.0.tar.gz)
+
+2. **Extract** the source files to any folder
+
+---3. **Run**: `python3 launch_research_buddy.py` 
+
+4. **Enter your API keys once** - securely saved forever
+
+## 💡 **Need Help?**5. **Start analyzing papers immediately!**
+
+
+
+- **Getting Started**: See `QUICK_START_FOR_GAS.md` included with download**No installation, no setup, no command-line wizardry. Just works!**
+
+- **Questions**: Open an issue on this GitHub repository✨ *Research Buddy 4.0 now available with modern GUI launcher and secure credentials*
+
+- **Technical Support**: Contact your research supervisor or IT department
 
 ### **🔐 First-Time Setup (30 seconds)**
-Research Buddy 4.0 makes setup effortless:
 
-1. **Run the launcher** - clean dialog appears
+---Research Buddy 4.0 makes setup effortless:
+
+
+
+## 📄 **License**1. **Run the launcher** - clean dialog appears
+
 2. **Enter your OpenAI API key** - securely encrypted
-3. **Add GitHub token** (optional) - for automatic uploads
-4. **Click Launch** - Research Buddy starts with your credentials
-5. **Done!** Future launches are one-click
 
-**Your credentials are stored securely using industry-standard environment variables - never in plain text files.**
+**Academic and Educational Use Only**3. **Add GitHub token** (optional) - for automatic uploads
+
+4. **Click Launch** - Research Buddy starts with your credentials
+
+This software is licensed under Creative Commons Attribution-NonCommercial 4.0:5. **Done!** Future launches are one-click
+
+- ✅ Free for academic research and education
+
+- ✅ Share and modify for research purposes  **Your credentials are stored securely using industry-standard environment variables - never in plain text files.**
+
+- ❌ Commercial use requires separate licensing
 
 ---
+
+For commercial licensing, contact the project maintainer.
 
 ## ⭐ **What Makes Version 4.0 Special**
 
+---
+
 ### **🔐 Enterprise-Grade Security**
-- **Environment Variables Only** - API keys never stored in plain text files
+
+**Research Buddy** - Making positionality analysis accessible to everyone in academia.- **Environment Variables Only** - API keys never stored in plain text files
 - **Unix File Permissions** - Credential files protected with 700 permissions (owner-only)
 - **No Shell Profile Pollution** - Credentials not added to .bashrc/.zshrc
 - **Secure Storage Location** - Hidden `.research_buddy` directory structure
