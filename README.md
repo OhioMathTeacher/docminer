@@ -13,7 +13,7 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 
 
-## 🚀 **Quick Start**Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.**Simple, professional software for analyzing academic papers contextually for various attributes (e.g., positionality statements, political or religious ideology, ).****Revolutionary academic research system: Professional AI-assisted analysis with secure credential management and one-click launch**
+## 🚀 **Quick Start**Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.
 
 
 
