@@ -1,17 +1,11 @@
 # 📖 Research Buddy – Pos### Step 2: Install & Run
 
-**For Source Code (Most Users):**
-1. Extract the ZIP file to any folder
-2. Open terminal/command prompt in that folder  
-3. Install Python 3.8+ if not already installed
-4. Install dependencies: `pip install -r requirements.txt`
-5. Run the application: `python enhanced_training_interface.py`
-6. **That's it!** The application will open with a training guide
-
-**For macOS Executable (If available):**
-1. Extract the .zip file
-2. Double-click `ResearchBuddy3.1.2.app` 
-3. You may need to right-click → Open the first time (security)ality Detection Training
+**For Executables (Easy!):**
+1. Extract/unzip the downloaded file
+2. **Windows**: Double-click `ResearchBuddy.exe`
+3. **macOS**: Double-click `ResearchBuddy.app` (right-click → Open if needed)
+4. **Linux**: Run `./ResearchBuddy` in terminal
+5. **Done!** No Python installation requiredality Detection Training
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
@@ -28,16 +22,13 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ### Step 1: Download
 
-**Option A: Source Code (Recommended for now)**  
-1. Click the green **"Code"** button at the top of this page
-2. Select **"Download ZIP"** 
-3. Extract the files and follow setup instructions below
+**Clickable Executables (Recommended)**  
+📦 **Direct Downloads:**
+- **Windows**: [ResearchBuddy-windows.zip](https://github.com/OhioMathTeacher/research-buddy/releases/latest/download/ResearchBuddy-windows.zip)
+- **macOS**: [ResearchBuddy-macos.zip](https://github.com/OhioMathTeacher/research-buddy/releases/latest/download/ResearchBuddy-macos.zip)
+- **Linux**: [ResearchBuddy-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/latest/download/ResearchBuddy-linux.tar.gz)
 
-**Option B: Pre-built Executables (Limited availability)**  
-- **macOS**: Available upon request (contact maintainer)
-- **Windows/Linux**: Source code installation required
-
-*Note: Automated executable builds are being improved. Source code installation works perfectly and only takes 2-3 minutes.*
+**If download links don't work yet:** Visit [Releases](https://github.com/OhioMathTeacher/research-buddy/releases) page
 
 ### Step 2: Install
 
