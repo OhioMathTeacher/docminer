@@ -1,6 +1,15 @@
 import os
 import openai
-openai.api_key = os.getenv("OPENAI_API_KEY", "")
+
+# Try multiple environment variable names for API key
+api_key = (os.getenv("RESEARCH_BUDDY_OPENAI_API_KEY") or 
+          os.getenv("OPENAI_API_KEY") or "")
+
+if api_key:
+    openai.api_key = api_key
+else:
+    print("⚠️  No OpenAI API key found. AI analysis will be disabled.")
+    openai.api_key = None
 import fitz  # PyMuPDF
 import re
 import pdfplumber
@@ -132,6 +141,15 @@ def extract_positionality(pdf_path):
     Uses comprehensive pattern matching with AI enhancement when available.
     Returns dict with keys: positionality_tests (list), positionality_snippets (dict), positionality_score (float).
     """
+    
+    # Refresh API key in case it was set by configuration dialog
+    api_key = (os.getenv("RESEARCH_BUDDY_OPENAI_API_KEY") or 
+              os.getenv("OPENAI_API_KEY") or "")
+    
+    if api_key and api_key != openai.api_key:
+        openai.api_key = api_key
+        print(f"✅ Updated OpenAI API key from environment")
+    
     matched = []
     snippets = {}
     score = 0.0

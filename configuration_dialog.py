@@ -223,11 +223,22 @@ class ConfigurationDialog(QDialog):
         self.github_repo_input.setText(self.config.get("github_repo", "research-buddy"))
         
     def save_configuration_data(self):
-        """Save the current configuration."""
-        # Only save non-sensitive repository settings
+        """Save the current configuration and set environment variables."""
+        # Get API key values from the input fields
+        openai_key = self.openai_key_input.text().strip()
+        github_token = self.github_token_input.text().strip()
+        
+        # Set environment variables for current process
+        if openai_key:
+            os.environ["RESEARCH_BUDDY_OPENAI_API_KEY"] = openai_key
+            print(f"✅ Set RESEARCH_BUDDY_OPENAI_API_KEY in current process")
+        
+        if github_token:
+            os.environ["RESEARCH_BUDDY_GITHUB_TOKEN"] = github_token
+            print(f"✅ Set RESEARCH_BUDDY_GITHUB_TOKEN in current process")
+        
+        # Save non-sensitive repository settings to file
         config = {
-            "openai_api_key": "",  # Not saved to file
-            "github_token": "",    # Not saved to file
             "github_owner": self.github_owner_input.text().strip(),
             "github_repo": self.github_repo_input.text().strip()
         }
@@ -236,12 +247,19 @@ class ConfigurationDialog(QDialog):
             QMessageBox.information(
                 self, 
                 "Configuration Saved", 
-                f"Repository settings saved successfully!\n\n"
+                f"Configuration saved successfully!\n\n"
+                f"✅ API keys set for current session\n"
+                f"✅ Repository settings saved\n\n"
                 f"Upload destination: https://github.com/{config['github_owner']}/{config['github_repo']}\n\n"
-                f"Remember to set your environment variables:\n"
-                f"• RESEARCH_BUDDY_OPENAI_API_KEY\n"
-                f"• RESEARCH_BUDDY_GITHUB_TOKEN"
+                f"Note: Environment variables are set for this session only.\n"
+                f"For permanent setup, add to your shell profile:\n"
+                f"export RESEARCH_BUDDY_OPENAI_API_KEY=\"your-key\"\n"
+                f"export RESEARCH_BUDDY_GITHUB_TOKEN=\"your-token\""
             )
+            
+            # Update the configuration status display
+            self.update_environment_status()
+            
         else:
             QMessageBox.critical(
                 self, 

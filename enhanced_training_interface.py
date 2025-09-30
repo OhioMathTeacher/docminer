@@ -393,6 +393,9 @@ class EmbeddedPDFViewer(QWidget):
     def __init__(self):
         super().__init__()
         self.current_pdf_path = None
+        self.current_page = 0  # Track current page
+        self.total_pages = 0   # Track total pages
+        self.pdf_document = None  # Store document object
         self.pdf_width = 612  # Standard letter width
         self.pdf_height = 792  # Standard letter height
         self.setup_ui()
@@ -404,11 +407,36 @@ class EmbeddedPDFViewer(QWidget):
         # Controls - make them smaller
         controls = QHBoxLayout()
         
+        # Page navigation
+        self.prev_btn = QPushButton("◀")
+        self.prev_btn.clicked.connect(self.previous_page)
+        self.prev_btn.setMaximumWidth(30)
+        self.prev_btn.setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }")
+        self.prev_btn.setEnabled(False)
+        controls.addWidget(self.prev_btn)
+        
+        self.page_label = QLabel("Page 1 of 1")
+        self.page_label.setAlignment(Qt.AlignCenter)
+        self.page_label.setStyleSheet("QLabel { font-size: 9px; font-weight: bold; }")
+        self.page_label.setMinimumWidth(80)
+        controls.addWidget(self.page_label)
+        
+        self.next_btn = QPushButton("▶")
+        self.next_btn.clicked.connect(self.next_page)
+        self.next_btn.setMaximumWidth(30)
+        self.next_btn.setStyleSheet("QPushButton { font-size: 12px; padding: 2px; }")
+        self.next_btn.setEnabled(False)
+        controls.addWidget(self.next_btn)
+        
+        controls.addWidget(QLabel("|"))  # Separator
+        
         self.pdf_info = QLabel("No PDF loaded")
         self.pdf_info.setAlignment(Qt.AlignCenter)
         self.pdf_info.setStyleSheet("QLabel { font-weight: bold; font-size: 10px; }")
         self.pdf_info.setMaximumHeight(20)
         controls.addWidget(self.pdf_info)
+        
+        controls.addWidget(QLabel("|"))  # Separator
         
         # Add zoom control
         zoom_label = QLabel("Zoom:")
@@ -456,8 +484,8 @@ class EmbeddedPDFViewer(QWidget):
         
     def change_zoom(self, zoom_text):
         """Handle zoom level changes"""
-        if self.current_pdf_path:
-            self.load_pdf(self.current_pdf_path)
+        if hasattr(self, 'pdf_document') and self.pdf_document:
+            self.render_current_page()
     
     def calculate_zoom_scale(self, zoom_text):
         """Calculate scale factor based on zoom selection and actual container size"""
@@ -480,58 +508,27 @@ class EmbeddedPDFViewer(QWidget):
             return 1.0  # Default to 100%
         
     def load_pdf(self, pdf_path):
-        """Load PDF with proper aspect ratio calculation"""
+        """Load PDF with proper aspect ratio calculation and page navigation"""
         self.current_pdf_path = pdf_path
         filename = Path(pdf_path).name
         self.pdf_info.setText(f"📄 {filename}")
         
         try:
             import fitz
-            doc = fitz.open(pdf_path)
-            page = doc[0]
+            # Store document for page navigation
+            if hasattr(self, 'pdf_document') and self.pdf_document:
+                self.pdf_document.close()
+            self.pdf_document = fitz.open(pdf_path)
+            self.total_pages = len(self.pdf_document)
+            self.current_page = 0  # Start with first page
             
-            # Get actual PDF dimensions
-            rect = page.rect
-            self.pdf_width = rect.width
-            self.pdf_height = rect.height
+            # Update page navigation controls
+            self.update_page_controls()
             
-            print(f"DEBUG: PDF dimensions: {self.pdf_width} x {self.pdf_height}")
-            print(f"DEBUG: PDF aspect ratio: {self.pdf_width/self.pdf_height:.2f}")
-            print(f"DEBUG: Is portrait: {self.pdf_height > self.pdf_width}")
+            # Render the current page
+            self.render_current_page()
             
-            # Use zoom control to determine scale
-            zoom_text = self.zoom_combo.currentText()
-            scale = self.calculate_zoom_scale(zoom_text)
-            
-            # Apply minimum/maximum constraints for usability
-            min_scale = 0.3
-            max_scale = 3.0
-            scale = max(min_scale, min(scale, max_scale))
-                
-            display_width = int(self.pdf_width * scale)
-            display_height = int(self.pdf_height * scale)
-            
-            print(f"DEBUG: Calculated display size: {display_width} x {display_height} (scale: {scale:.2f})")
-            
-            # Render at calculated size
-            mat = fitz.Matrix(scale, scale)
-            pix = page.get_pixmap(matrix=mat)
-            img_data = pix.tobytes("ppm")
-            
-            from PySide6.QtGui import QPixmap
-            qimg = QPixmap()
-            qimg.loadFromData(img_data)
-            
-            # Set the pixmap and adjust label size
-            self.pdf_label.setPixmap(qimg)
-            self.pdf_label.resize(display_width, display_height)
-            self.pdf_label.setMinimumSize(display_width, display_height)
-            
-            # Extract text blocks for selection (before closing document)
-            self.extract_text_blocks(page, scale)
-            
-            doc.close()
-            print("DEBUG: PDF loaded with proper aspect ratio")
+            print(f"DEBUG: PDF loaded with {self.total_pages} pages and navigation support")
             return True
             
         except Exception as e:
@@ -560,6 +557,81 @@ class EmbeddedPDFViewer(QWidget):
         except Exception as e:
             print(f"DEBUG: Text extraction failed: {e}")
             self.pdf_label.set_text_blocks([])
+
+    def update_page_controls(self):
+        """Update page navigation controls"""
+        if hasattr(self, 'total_pages') and self.total_pages > 0:
+            self.page_label.setText(f"Page {self.current_page + 1} of {self.total_pages}")
+            self.prev_btn.setEnabled(self.current_page > 0)
+            self.next_btn.setEnabled(self.current_page < self.total_pages - 1)
+        else:
+            self.page_label.setText("No pages")
+            self.prev_btn.setEnabled(False)
+            self.next_btn.setEnabled(False)
+    
+    def previous_page(self):
+        """Go to previous page"""
+        if hasattr(self, 'current_page') and self.current_page > 0:
+            self.current_page -= 1
+            self.render_current_page()
+            self.update_page_controls()
+    
+    def next_page(self):
+        """Go to next page"""
+        if hasattr(self, 'current_page') and hasattr(self, 'total_pages') and self.current_page < self.total_pages - 1:
+            self.current_page += 1
+            self.render_current_page()
+            self.update_page_controls()
+    
+    def render_current_page(self):
+        """Render the current page of the PDF"""
+        if not hasattr(self, 'pdf_document') or not self.pdf_document or self.current_page >= self.total_pages:
+            return False
+            
+        try:
+            page = self.pdf_document[self.current_page]
+            
+            # Get actual PDF dimensions
+            rect = page.rect
+            self.pdf_width = rect.width
+            self.pdf_height = rect.height
+            
+            # Use zoom control to determine scale
+            zoom_text = self.zoom_combo.currentText()
+            scale = self.calculate_zoom_scale(zoom_text)
+            
+            # Apply minimum/maximum constraints for usability
+            min_scale = 0.3
+            max_scale = 3.0
+            scale = max(min_scale, min(scale, max_scale))
+                
+            display_width = int(self.pdf_width * scale)
+            display_height = int(self.pdf_height * scale)
+            
+            print(f"DEBUG: Rendering page {self.current_page + 1}/{self.total_pages} at {display_width} x {display_height} (scale: {scale:.2f})")
+            
+            # Render at calculated size
+            mat = fitz.Matrix(scale, scale)
+            pix = page.get_pixmap(matrix=mat)
+            img_data = pix.tobytes("ppm")
+            
+            from PySide6.QtGui import QPixmap
+            qimg = QPixmap()
+            qimg.loadFromData(img_data)
+            
+            # Set the pixmap and adjust label size
+            self.pdf_label.setPixmap(qimg)
+            self.pdf_label.resize(display_width, display_height)
+            self.pdf_label.setMinimumSize(display_width, display_height)
+            
+            # Extract text blocks for selection
+            self.extract_text_blocks(page, scale)
+            
+            return True
+            
+        except Exception as e:
+            print(f"DEBUG: Error rendering page {self.current_page + 1}: {e}")
+            return False
 
     def clear_current_output(self):
         """Clear the currently active output tab"""
@@ -1958,8 +2030,32 @@ class EnhancedTrainingInterface(QMainWindow):
                 self.current_ai_findings = None
                 
         except Exception as e:
-            self.statusBar().showMessage(f"Analysis failed: {str(e)}")
-            self.ai_input.setPlainText(f"Error running analysis: {e}")
+            error_msg = str(e)
+            if "401" in error_msg or "invalid_api_key" in error_msg or "API key" in error_msg:
+                # Handle API key issues specifically
+                self.statusBar().showMessage("AI analysis requires OpenAI API key - use Configuration menu to set it up")
+                self.ai_input.setHtml("""
+                <b><font color="#FF9800">🔑 AI Analysis Requires Setup</font></b><br><br>
+                
+                <p>To use AI-powered analysis, you need to configure an OpenAI API key:</p>
+                
+                <ol>
+                <li><b>Get an API Key:</b> Visit <a href="https://platform.openai.com/account/api-keys">platform.openai.com/account/api-keys</a></li>
+                <li><b>Configure in Research Buddy:</b> Use the menu: <b>Configuration → Settings</b></li>
+                <li><b>Alternative:</b> You can still analyze papers manually using the PDF viewer and Human Input tab</li>
+                </ol>
+                
+                <p><b>Manual Analysis:</b><br>
+                • Read the PDF carefully<br>
+                • Look for first-person statements about the author's background, position, or bias<br>
+                • Select text in the PDF to copy quotes as evidence<br>
+                • Make your judgment using the radio buttons</p>
+                
+                <p><i>Research Buddy works great for manual analysis even without AI!</i></p>
+                """)
+            else:
+                self.statusBar().showMessage(f"Analysis failed: {str(e)}")
+                self.ai_input.setPlainText(f"Error running analysis: {e}")
             
         finally:
             self.initial_analysis_btn.setEnabled(True)
