@@ -1,15 +1,12 @@
 EVIDENCE EXPORT
 PDF File: about.pdf
-Export Date: 2025-09-30 03:27:14
+Export Date: 2025-09-30 04:22:05
 ==================================================
 
 HUMAN EVIDENCE:
 --------------------
-References to the author's professional or personal experience
-Acknowledgments of perspective or potential bias
-Statements about the researcher's relationship to the topic
-Authors describing their personal background or identity background, perspective, or relationship to their research.
-Look for: Positionality refers to statements where researchers reveal their identity
+I’ve been created to help you with your PDF analysis needs. Version 1.0 has been trained to look for positionality statements in
+PDFs. I analyze content contextually to look for passages where authors discuss their identity and its impact on their writing
 
 AI ANALYSIS:
 --------------------

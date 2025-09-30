@@ -1044,6 +1044,9 @@ class EnhancedTrainingInterface(QMainWindow):
         self.papers_list = []
         self.pdf_folder = ""
         
+        # Paper state persistence - stores content for each paper
+        self.paper_states = {}  # filename -> {human_text, ai_text, decision, uploaded}
+        
         # Default folder in user's home directory
         self.default_pdf_folder = Path.home() / "ExtractorPDFs" 
         self.readme_pdf_path = self.default_pdf_folder / "about.pdf"
@@ -1336,12 +1339,29 @@ class EnhancedTrainingInterface(QMainWindow):
             
         current = self.current_paper_index + 1
         total = len(self.papers_list)
-        completed = len(self.training_data)
         
-        self.progress_label.setText(f"Paper {current} of {total}")
+        # Count processed papers with status indicators
+        processed_count = 0
+        current_filename = self.papers_list[self.current_paper_index] if self.papers_list else ""
+        status_indicator = "🔴"  # Red dot for unprocessed
+        
+        for filename in self.papers_list:
+            if filename in self.paper_states and self.paper_states[filename].get('uploaded', False):
+                processed_count += 1
+        
+        # Determine current paper status
+        if current_filename in self.paper_states:
+            if self.paper_states[current_filename].get('uploaded', False):
+                status_indicator = "🟢"  # Green dot for uploaded/completed
+            elif (self.paper_states[current_filename].get('human_text') or 
+                  self.paper_states[current_filename].get('ai_text') or
+                  self.paper_states[current_filename].get('decision')):
+                status_indicator = "🟡"  # Yellow dot for in progress
+        
+        self.progress_label.setText(f"{status_indicator} Paper {current} of {total} | Processed: {processed_count}")
         self.progress_bar.setMaximum(total)
         self.progress_bar.setValue(current)
-        self.papers_completed.setText(f"{completed} papers labeled")
+        self.papers_completed.setText(f"{processed_count} papers processed")
         
     def open_pdf_externally(self):
         """Open the current PDF in the system's default PDF viewer"""
@@ -1461,22 +1481,32 @@ class EnhancedTrainingInterface(QMainWindow):
         
     def next_paper(self):
         """Move to next paper"""
+        # Save current paper state before moving
+        self.save_current_paper_state()
+        
         if self.current_paper_index < len(self.papers_list) - 1:
             self.current_paper_index += 1
             self.update_progress()
             self.load_current_paper()
+            # Load saved state for new paper
+            self.load_current_paper_state()
         else:
             QMessageBox.information(self, "🎉 Complete!", 
                                   f"All {len(self.papers_list)} papers have been reviewed!\n\n"
                                   f"Total decisions made: {len(self.training_data)} papers\n\n"
-                                  f"Use 'Make Decision' to upload your final analysis to GitHub.")
+                                  f"Use 'Upload Decision' to upload your final analysis to GitHub.")
             
     def previous_paper(self):
         """Move to previous paper"""
+        # Save current paper state before moving
+        self.save_current_paper_state()
+        
         if self.current_paper_index > 0:
             self.current_paper_index -= 1
             self.update_progress()
             self.load_current_paper()
+            # Load saved state for new paper
+            self.load_current_paper_state()
             
     # Note: Local training data persistence removed - decisions go directly to GitHub
     # This keeps the interface clean and prevents stale local data issues
@@ -1616,6 +1646,11 @@ class EnhancedTrainingInterface(QMainWindow):
             result = self.github_uploader.process_training_session(self.training_data, ga_name)
             
             if result['success']:
+                # Mark current paper as uploaded
+                if hasattr(self, 'current_paper_index') and self.current_paper_index < len(self.papers_list):
+                    current_filename = self.papers_list[self.current_paper_index]
+                    self.mark_paper_uploaded(current_filename)
+                
                 QMessageBox.information(self, "Decision Recorded", 
                                       f"Your decision has been successfully recorded and uploaded!\n\n"
                                       f"GA: {ga_name}\n"
@@ -1966,6 +2001,85 @@ class EnhancedTrainingInterface(QMainWindow):
         # Let user make their own judgment - no default selection
         
         self.statusBar().showMessage("Manual review mode - read the full paper carefully", 3000)
+    
+    def save_current_paper_state(self):
+        """Save the current paper's content to paper_states"""
+        if not self.papers_list or self.current_paper_index >= len(self.papers_list):
+            return
+            
+        filename = self.papers_list[self.current_paper_index]
+        
+        # Get current content from UI
+        human_text = self.human_input.toPlainText().strip()
+        ai_text = self.ai_input.toPlainText().strip()
+        
+        # Get current decision from radio buttons
+        decision = None
+        if hasattr(self, 'evidence_strong_radio') and self.evidence_strong_radio.isChecked():
+            decision = 'strong'
+        elif hasattr(self, 'evidence_moderate_radio') and self.evidence_moderate_radio.isChecked():
+            decision = 'moderate'
+        elif hasattr(self, 'evidence_minimal_radio') and self.evidence_minimal_radio.isChecked():
+            decision = 'minimal'
+        elif hasattr(self, 'evidence_none_radio') and self.evidence_none_radio.isChecked():
+            decision = 'none'
+        
+        # Save to paper_states
+        if filename not in self.paper_states:
+            self.paper_states[filename] = {}
+        
+        self.paper_states[filename].update({
+            'human_text': human_text,
+            'ai_text': ai_text,
+            'decision': decision
+        })
+    
+    def load_current_paper_state(self):
+        """Load the saved state for current paper"""
+        if not self.papers_list or self.current_paper_index >= len(self.papers_list):
+            return
+            
+        filename = self.papers_list[self.current_paper_index]
+        
+        if filename in self.paper_states:
+            state = self.paper_states[filename]
+            
+            # Restore text content
+            self.human_input.setPlainText(state.get('human_text', ''))
+            self.ai_input.setPlainText(state.get('ai_text', ''))
+            
+            # Restore decision radio buttons
+            decision = state.get('decision')
+            if hasattr(self, 'evidence_strong_radio'):
+                self.evidence_strong_radio.setChecked(decision == 'strong')
+            if hasattr(self, 'evidence_moderate_radio'):
+                self.evidence_moderate_radio.setChecked(decision == 'moderate')
+            if hasattr(self, 'evidence_minimal_radio'):
+                self.evidence_minimal_radio.setChecked(decision == 'minimal')
+            if hasattr(self, 'evidence_none_radio'):
+                self.evidence_none_radio.setChecked(decision == 'none')
+        else:
+            # Clear content for new paper
+            self.human_input.clear()
+            self.ai_input.clear()
+            
+            # Clear radio button selections
+            if hasattr(self, 'evidence_strong_radio'):
+                self.evidence_strong_radio.setChecked(False)
+            if hasattr(self, 'evidence_moderate_radio'):
+                self.evidence_moderate_radio.setChecked(False)
+            if hasattr(self, 'evidence_minimal_radio'):
+                self.evidence_minimal_radio.setChecked(False)
+            if hasattr(self, 'evidence_none_radio'):
+                self.evidence_none_radio.setChecked(False)
+    
+    def mark_paper_uploaded(self, filename):
+        """Mark a paper as uploaded/processed"""
+        if filename not in self.paper_states:
+            self.paper_states[filename] = {}
+        
+        self.paper_states[filename]['uploaded'] = True
+        self.update_progress()  # Refresh the status indicators
     
     def closeEvent(self, event):
         """Save settings when closing"""

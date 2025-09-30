@@ -1,4 +1,4 @@
-# Build script for creating ResearchBuddy2.0 executables
+# Build script for creating ResearchBuddy3.1 executables
 # Usage: python build.py [platform]
 # Platforms: linux, windows, macos, all
 
@@ -48,7 +48,7 @@ def build_executable(target_platform=None):
     if not target_platform:
         target_platform = platform.system().lower()
     
-    print(f"🔨 Building Research Buddy 2.0 for {target_platform}...")
+    print(f"🔨 Building Research Buddy 3.1 for {target_platform}...")
     
     # Base PyInstaller command
     base_cmd = [
@@ -64,19 +64,19 @@ def build_executable(target_platform=None):
     if target_platform == "macos":
         cmd = base_cmd + [
             "--target-arch", "universal2",
-            "--name", "ResearchBuddy2.0",
+            "--name", "ResearchBuddy3.1",
             "--osx-bundle-identifier", "edu.university.researchbuddy",
             "enhanced_training_interface.py"
         ]
     elif target_platform == "windows":
         cmd = base_cmd + [
-            "--name", "ResearchBuddy2.0.exe",
+            "--name", "ResearchBuddy3.1.exe",
             # "--icon", "app.ico",  # Add if you have an icon
             "enhanced_training_interface.py"
         ]
     else:  # linux
         cmd = base_cmd + [
-            "--name", "ResearchBuddy2.0",
+            "--name", "ResearchBuddy3.1",
             "enhanced_training_interface.py"
         ]
     
@@ -108,7 +108,7 @@ def create_distribution_package(target_platform=None):
     dist_dir = Path("./distribution")
     dist_dir.mkdir(exist_ok=True)
     
-    platform_dir = dist_dir / f"ResearchBuddy2.0-{target_platform}"
+    platform_dir = dist_dir / f"ResearchBuddy3.1-{target_platform}"
     platform_dir.mkdir(exist_ok=True)
     
     # Copy executable
@@ -122,7 +122,7 @@ def create_distribution_package(target_platform=None):
     docs = [
         "README.md",
         "QUICK_REFERENCE.md", 
-        "GA_TRAINING_GUIDE_2.0.md",
+        "GA_TRAINING_GUIDE_3.0.md",
         "requirements.txt"
     ]
     
@@ -133,11 +133,11 @@ def create_distribution_package(target_platform=None):
     
     # Create archive
     if target_platform == "windows":
-        archive_name = f"ResearchBuddy2.0-{target_platform}"
+        archive_name = f"ResearchBuddy3.0-{target_platform}"
         shutil.make_archive(str(dist_dir / archive_name), 'zip', platform_dir)
         print(f"   📦 Created {archive_name}.zip")
     else:
-        archive_name = f"ResearchBuddy2.0-{target_platform}"
+        archive_name = f"ResearchBuddy3.0-{target_platform}"
         shutil.make_archive(str(dist_dir / archive_name), 'gztar', platform_dir)
         print(f"   📦 Created {archive_name}.tar.gz")
     
@@ -148,7 +148,7 @@ def main():
     target = sys.argv[1] if len(sys.argv) > 1 else None
     current_platform = platform.system().lower()
     
-    print("🚀 Research Buddy 2.0 Build Script")
+    print("🚀 Research Buddy 3.1 Build Script")
     print(f"   Current platform: {current_platform}")
     print(f"   Target platform: {target or current_platform}")
     print()
