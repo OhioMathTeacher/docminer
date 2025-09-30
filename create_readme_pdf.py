@@ -24,13 +24,13 @@ def create_readme_pdf(output_path):
     y_pos = height - margin
     
     # Title
-    title_text = "🎓 Search Buddy Training Interface"
+    title_text = "🎓 Research Buddy 2.0 Training Interface"
     title_rect = fitz.Rect(margin, y_pos - 30, width - margin, y_pos)
     page.insert_text(title_rect.tl, title_text, fontsize=20, fontname=font_title, color=(0, 0, 1))
     y_pos -= 50
     
     # Subtitle
-    subtitle_text = "Enhanced PDF Viewer & Positionality Detection Training"
+    subtitle_text = "Professional AI-Assisted Positionality Analysis & Training"
     subtitle_rect = fitz.Rect(margin, y_pos - 15, width - margin, y_pos)
     page.insert_text(subtitle_rect.tl, subtitle_text, fontsize=14, fontname=font_body)
     y_pos -= 40
@@ -38,11 +38,11 @@ def create_readme_pdf(output_path):
     # Content sections
     sections = [
         {
-            "title": "🚀 Welcome!",
+            "title": "🚀 Welcome to Research Buddy 2.0!",
             "content": [
-                "This is your training interface for improving the positionality detection system.",
-                "You're currently viewing this README in the integrated PDF viewer - the same viewer",
-                "you'll use to analyze academic papers for positionality statements."
+                "This is Training Buddy - your AI-assisted interface for training the positionality",
+                "detection system. You're viewing this guide in the integrated PDF viewer that",
+                "you'll use to analyze academic papers with AI pre-screening assistance."
             ]
         },
         {

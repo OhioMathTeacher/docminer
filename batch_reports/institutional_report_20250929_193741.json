@@ -1,0 +1,86 @@
+{
+  "report_date": "2025-09-29T19:37:41.012998",
+  "analysis_period": "weekly",
+  "summary": {
+    "total_papers_labeled": 7,
+    "total_gas_active": 2,
+    "total_sessions": 4,
+    "new_patterns_discovered": 2
+  },
+  "judgment_distribution": {
+    "positive_explicit": 3,
+    "positive_subtle": 2,
+    "negative": 1,
+    "positive_strong": 1
+  },
+  "ga_performance": {
+    "GA": {
+      "papers_labeled": 4,
+      "sessions": 2,
+      "positive_rate": 0.75,
+      "explicit_rate": 0.5,
+      "average_confidence": 4.5,
+      "evidence_rate": 0.75,
+      "avg_evidence_length": 110.66666666666667
+    },
+    "TestGA": {
+      "papers_labeled": 3,
+      "sessions": 2,
+      "positive_rate": 1.0,
+      "explicit_rate": 0.3333333333333333,
+      "average_confidence": 4.333333333333333,
+      "evidence_rate": 1.0,
+      "avg_evidence_length": 114.33333333333333
+    }
+  },
+  "quality_metrics": {
+    "inter_ga_agreement": 0,
+    "average_confidence": 4.428571428571429,
+    "evidence_collection_rate": 0.8571428571428571,
+    "ga_productivity_avg": 3.5,
+    "ga_productivity_variance": 0.25,
+    "total_multi_labeled": 0,
+    "high_confidence_rate": 1.0
+  },
+  "pattern_discoveries": [
+    {
+      "name": "collective_authorial_positioning",
+      "pattern": "\\b(?:we|our team|the authors?)\\s+(?:acknowledge|recognize|position|locate)\\s+(?:ourselves?|our)",
+      "examples": [
+        "We position our work within critical race theory, acknowledging our own racial identities shape our ...",
+        "The authors clearly state: we position our research within a feminist framework that acknowledges ou...",
+        "This paper demonstrates clear authorial positioning when the authors state \"we position our work wit..."
+      ],
+      "count": 3
+    },
+    {
+      "name": "methodology_embedded_reflexivity",
+      "pattern": "\\b(?:this\\s+study|this\\s+research|our\\s+methodology)\\s+(?:emerged|developed|grew)\\s+(?:from|out\\s+of)\\s+(?:my|our)",
+      "examples": [
+        "This research emerged from my experiences as a graduate student navigating academic institutions....",
+        "This study emerged from my fieldwork experiences in rural communities where I observed my own assump..."
+      ],
+      "count": 2
+    }
+  ],
+  "recommendations": [
+    {
+      "category": "Training",
+      "priority": "High",
+      "recommendation": "Inter-GA agreement below 70% - consider additional training or clearer guidelines",
+      "metric": "Current agreement: 0.0%"
+    },
+    {
+      "category": "Staffing",
+      "priority": "Medium",
+      "recommendation": "Consider recruiting additional GAs for better coverage and reliability",
+      "metric": "Current GAs: 2"
+    },
+    {
+      "category": "Recognition",
+      "priority": "Low",
+      "recommendation": "Recognize high-performing GAs: TestGA",
+      "metric": "High confidence + evidence collection"
+    }
+  ]
+}
