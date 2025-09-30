@@ -41,13 +41,14 @@ python3 launch_research_buddy.py
 ### **🎯 For Everyone (Recommended)**
 **Just one file to run Research Buddy - that's it!**
 
-1. **Download**: [📦 Latest Release](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
-2. **Extract** the file for your platform
+1. **Download**: [📦 **Research Buddy 4.0** - Latest Release](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
+2. **Extract** the source files to any folder
 3. **Run**: `python3 launch_research_buddy.py` 
 4. **Enter your API keys once** - securely saved forever
 5. **Start analyzing papers immediately!**
 
-**No installation, no setup, no command-line wizardry. Just works.**
+**No installation, no setup, no command-line wizardry. Just works!**
+✨ *Research Buddy 4.0 now available with modern GUI launcher and secure credentials*
 
 ### **🔐 First-Time Setup (30 seconds)**
 Research Buddy 4.0 makes setup effortless:
