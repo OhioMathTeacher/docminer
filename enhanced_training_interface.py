@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """
-Enhanced Training Interface with PDF Viewer
+Research Buddy - Enhanced Training Interface for Positionality Detection
+Copyright (c) 2025 Todd Miller (OhioMathTeacher)
 
-This version includes a proper PDF renderer that displays pages as images,
-making it much easier to read and annotate papers for training data collection.
+Licensed under Creative Commons Attribution-NonCommercial 4.0 International License
+For commercial use, please contact the copyright holder.
+Academic and educational use is freely permitted.
+
+This enhanced training interface provides a professional PDF viewer with AI-assisted
+positionality detection capabilities for academic research training.
 """
 
 import sys
