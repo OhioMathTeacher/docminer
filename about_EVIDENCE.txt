@@ -1,0 +1,46 @@
+EVIDENCE EXPORT
+PDF File: about.pdf
+Export Date: 2025-09-30 03:27:14
+==================================================
+
+HUMAN EVIDENCE:
+--------------------
+References to the author's professional or personal experience
+Acknowledgments of perspective or potential bias
+Statements about the researcher's relationship to the topic
+Authors describing their personal background or identity background, perspective, or relationship to their research.
+Look for: Positionality refers to statements where researchers reveal their identity
+
+AI ANALYSIS:
+--------------------
+AI Analysis for about.pdf
+
+Confidence Level: Medium (0.500)
+Recommendation: Subtle/implicit positionality likely
+Patterns Detected: Positionality Term, Identity Disclosure, Disclosure Statement
+
+
+Evidence Excerpts Found: #1 - Positionality Term
+Likely Location: Body/Content
+"Positionality"
+
+
+#2 - Tail Positionality Term
+Likely Location: Body/Content
+"SmartBuddy Positionality Detection Software for the Rest of Us Enhanced PDF Viewer & Positionality Detection Training I’m SmartBuddy, your open-source, low-budget qualitative research assistant. You'r..."
+
+
+#3 - Tail Identity Disclosure
+Likely Location: Body/Content
+"SmartBuddy Positionality Detection Software for the Rest of Us Enhanced PDF Viewer & Positionality Detection Training I’m SmartBuddy, your open-source, low-budget qualitative research assistant. You'r..."
+
+
+#4 - Tail Disclosure Statement
+Likely Location: Body/Content
+"SmartBuddy Positionality Detection Software for the Rest of Us Enhanced PDF Viewer & Positionality Detection Training I’m SmartBuddy, your open-source, low-budget qualitative research assistant. You'r..."
+
+
+
+AI Recommendation:
+Moderate evidence suggests subtle reflexivity. Recommend categorizing as Subtle/Implicit.
+

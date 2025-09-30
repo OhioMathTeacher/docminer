@@ -151,6 +151,7 @@ class SelectablePDFLabel(QLabel):
     def set_text_blocks(self, text_blocks):
         """Set the text blocks from PDF page and organize them into lines"""
         self.text_blocks = text_blocks
+        print(f"DEBUG - set_text_blocks called with {len(text_blocks)} blocks")
         self.organize_text_into_lines()
         
     def organize_text_into_lines(self):
@@ -407,6 +408,23 @@ class EmbeddedPDFViewer(QWidget):
         self.pdf_info.setMaximumHeight(20)
         controls.addWidget(self.pdf_info)
         
+        # Add zoom control
+        zoom_label = QLabel("Zoom:")
+        zoom_label.setStyleSheet("QLabel { font-size: 9px; }")
+        controls.addWidget(zoom_label)
+        
+        self.zoom_combo = QComboBox()
+        self.zoom_combo.addItems([
+            "Fit Width", "Fit Page", "100%", "125%", "150%", "80%", "65%", "50%"
+        ])
+        self.zoom_combo.setCurrentText("Fit Width")
+        self.zoom_combo.setMaximumWidth(100)
+        self.zoom_combo.setStyleSheet("QComboBox { font-size: 9px; padding: 2px; }")
+        self.zoom_combo.currentTextChanged.connect(self.change_zoom)
+        controls.addWidget(self.zoom_combo)
+        
+        controls.addStretch()
+        
         layout.addLayout(controls)
         
         # Always use PyMuPDF for reliable aspect ratio control
@@ -425,13 +443,39 @@ class EmbeddedPDFViewer(QWidget):
         # No maximum width - use what's available
         self.scroll_area.setMinimumHeight(500)  # Reasonable minimum height
         
-        self.pdf_label = QLabel()
+        # Use SelectablePDFLabel instead of regular QLabel for text selection
+        self.pdf_label = SelectablePDFLabel()
         self.pdf_label.setAlignment(Qt.AlignCenter)
         self.pdf_label.setStyleSheet("QLabel { background-color: white; border: 1px solid #ddd; margin: 5px; }")
         self.pdf_label.setScaledContents(False)  # Don't auto-scale - we'll control this
         
         self.scroll_area.setWidget(self.pdf_label)
         layout.addWidget(self.scroll_area)
+        
+    def change_zoom(self, zoom_text):
+        """Handle zoom level changes"""
+        if self.current_pdf_path:
+            self.load_pdf(self.current_pdf_path)
+    
+    def calculate_zoom_scale(self, zoom_text):
+        """Calculate scale factor based on zoom selection and actual container size"""
+        # Get actual available space in the PDF container
+        available_width = self.scroll_area.width() - 40  # Account for scrollbars/margins
+        available_height = self.scroll_area.height() - 40
+        
+        if zoom_text == "Fit Width":
+            return available_width / self.pdf_width
+        elif zoom_text == "Fit Page":
+            # Fit to both width and height constraints
+            width_scale = available_width / self.pdf_width
+            height_scale = available_height / self.pdf_height
+            return min(width_scale, height_scale)  # Use smaller scale to fit both dimensions
+        elif zoom_text.endswith("%"):
+            # Parse percentage
+            percentage = int(zoom_text.replace("%", ""))
+            return percentage / 100.0
+        else:
+            return 1.0  # Default to 100%
         
     def load_pdf(self, pdf_path):
         """Load PDF with proper aspect ratio calculation"""
@@ -453,20 +497,14 @@ class EmbeddedPDFViewer(QWidget):
             print(f"DEBUG: PDF aspect ratio: {self.pdf_width/self.pdf_height:.2f}")
             print(f"DEBUG: Is portrait: {self.pdf_height > self.pdf_width}")
             
-            # Calculate optimal display size for much narrower PDF pane
-            container_width = 480  # Much narrower available width
-            padding = 40  # Account for margins and scrollbars
-            available_width = container_width - padding
+            # Use zoom control to determine scale
+            zoom_text = self.zoom_combo.currentText()
+            scale = self.calculate_zoom_scale(zoom_text)
             
-            # Calculate scale to fit width while maintaining aspect ratio
-            scale = available_width / self.pdf_width
-            
-            # For portrait documents, work with narrower space
-            if self.pdf_height > self.pdf_width:  # Portrait
-                # Ensure readable scale in narrow container
-                min_scale = 0.6  # Lower minimum for narrow space
-                max_scale = 0.8  # Keep it reasonable
-                scale = max(min_scale, min(scale, max_scale))
+            # Apply minimum/maximum constraints for usability
+            min_scale = 0.3
+            max_scale = 3.0
+            scale = max(min_scale, min(scale, max_scale))
                 
             display_width = int(self.pdf_width * scale)
             display_height = int(self.pdf_height * scale)
@@ -487,14 +525,72 @@ class EmbeddedPDFViewer(QWidget):
             self.pdf_label.resize(display_width, display_height)
             self.pdf_label.setMinimumSize(display_width, display_height)
             
+            # Extract text blocks for selection (before closing document)
+            self.extract_text_blocks(page, scale)
+            
             doc.close()
             print("DEBUG: PDF loaded with proper aspect ratio")
             return True
             
         except Exception as e:
-            print(f"DEBUG: PDF loading failed: {e}")
-            self.pdf_label.setText(f"Error loading PDF: {e}")
-            return False
+            return self.handle_load_error(e)
+
+    def extract_text_blocks(self, page, scale):
+        """Extract text blocks from PDF page for text selection"""
+        try:
+            text_blocks = []
+            
+            # Extract word-level text with positions
+            words = page.get_text("words")  # Returns list of (x0, y0, x1, y1, "word", block_no, line_no, word_no)
+            
+            for word in words:
+                if len(word) >= 5:  # Ensure we have all required fields
+                    x0, y0, x1, y1, text = word[:5]
+                    # Scale coordinates to match display
+                    text_blocks.append({
+                        'bbox': (x0 * scale, y0 * scale, x1 * scale, y1 * scale),
+                        'text': text
+                    })
+            
+            print(f"DEBUG: Extracted {len(text_blocks)} text blocks for selection")
+            self.pdf_label.set_text_blocks(text_blocks)
+            
+        except Exception as e:
+            print(f"DEBUG: Text extraction failed: {e}")
+            self.pdf_label.set_text_blocks([])
+
+    def clear_current_output(self):
+        """Clear the currently active output tab"""
+        # Get the currently active tab in evidence_tabs
+        evidence_tabs = self.findChild(QTabWidget)
+        if evidence_tabs:
+            current_tab = evidence_tabs.currentWidget()
+            if current_tab:
+                # Find text widgets in the current tab and clear them
+                for widget in current_tab.findChildren(QTextEdit):
+                    widget.clear()
+                for widget in current_tab.findChildren(QPlainTextEdit):
+                    widget.clear()
+
+    def merge_outputs(self):
+        """Merge AI analysis and evidence into final tab"""
+        ai_content = self.ai_input.toPlainText()
+        evidence_content = self.human_input.toPlainText()
+        
+        combined = ""
+        if ai_content:
+            combined += "=== AI Analysis ===\n" + ai_content + "\n\n"
+        if evidence_content:
+            combined += "=== Evidence ===\n" + evidence_content
+            
+        # For now, show in pattern suggestions area
+        self.pattern_suggestions.setPlainText(combined)
+        
+    def handle_load_error(self, error):
+        """Handle PDF loading errors"""
+        print(f"DEBUG: PDF loading failed: {error}")
+        self.pdf_label.setText(f"Error loading PDF: {error}")
+        return False
         
     def try_fallback_load(self, pdf_path):
         """Removed - functionality integrated into load_pdf method"""
@@ -954,10 +1050,10 @@ class EnhancedTrainingInterface(QMainWindow):
         
         # Settings file to remember state
         self.settings_file = Path(__file__).parent / "interface_settings.json"
-        self.training_file = "training_data.json"
         
-        # Load existing training data and settings
-        self.load_training_data()
+        # Initialize without loading any local training data
+        # Each session starts fresh - decisions go directly to GitHub
+        self.training_data = []
         self.load_settings()
         
         # Initialize GitHub uploader
@@ -1002,6 +1098,8 @@ class EnhancedTrainingInterface(QMainWindow):
         
         # Main content area with splitter
         splitter = QSplitter(Qt.Horizontal)
+        splitter.setHandleWidth(1)  # Thin separator line
+        splitter.setChildrenCollapsible(False)  # Prevent collapsing
         
         # Left panel: PDF Viewer - prioritize PDF display
         pdf_panel = QGroupBox("PDF Document Viewer")
@@ -1022,6 +1120,10 @@ class EnhancedTrainingInterface(QMainWindow):
         
         # PDF viewer - use embedded system viewer
         self.pdf_viewer = EmbeddedPDFViewer()
+        
+        # Connect text selection signal from PDF viewer to main interface
+        self.pdf_viewer.pdf_label.text_selected.connect(self.on_text_selected)
+        
         pdf_layout.addWidget(self.pdf_viewer)
         
 
@@ -1031,13 +1133,13 @@ class EnhancedTrainingInterface(QMainWindow):
         text_extract_layout = QVBoxLayout(text_extract_group)
         text_extract_layout.setContentsMargins(2, 2, 2, 2)  # Minimal margins
         text_extract_layout.setSpacing(1)  # Very tight spacing
-        text_extract_group.setMaximumHeight(100)  # Smaller
         
         self.extracted_text = QPlainTextEdit()
         self.extracted_text.setReadOnly(False)  # Allow manual typing
         self.extracted_text.setFont(QFont("Courier New", 12))  # Larger, more readable font
         self.extracted_text.setStyleSheet("QPlainTextEdit { margin: 0px; padding: 1px; border: 1px solid #ddd; }")
         self.extracted_text.setPlaceholderText("Select text in PDF above or type quotes for evidence...")
+        self.extracted_text.setMinimumHeight(180)  # Expanded to use space from removed AI Detection section
         text_extract_layout.addWidget(self.extracted_text)
         
         # Quick action buttons
@@ -1057,19 +1159,6 @@ class EnhancedTrainingInterface(QMainWindow):
         
         pdf_layout.addWidget(text_extract_group)
         
-        # AI Detection Results (compact)
-        ai_group = QGroupBox("🤖 Current AI Detection")
-        ai_layout = QVBoxLayout(ai_group)
-        ai_group.setMaximumHeight(100)  # More compact
-        
-        self.ai_results = QLabel("No detection results")
-        self.ai_results.setWordWrap(True)
-        self.ai_results.setFont(QFont("Courier New", 9))  # Smaller font
-        self.ai_results.setStyleSheet("QLabel { background: white; padding: 3px; border: 1px solid #666666; color: black; }")
-        ai_layout.addWidget(self.ai_results)
-        
-        pdf_layout.addWidget(ai_group)
-        
         # Set PDF panel to prefer smaller size
         pdf_panel.setMaximumWidth(500)  # Limit PDF panel width
         pdf_panel.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
@@ -1077,7 +1166,7 @@ class EnhancedTrainingInterface(QMainWindow):
         splitter.addWidget(pdf_panel)
         
         # Right panel: Training interface - make it larger
-        training_panel = QGroupBox("Human Expert Analysis and Labeling")
+        training_panel = QGroupBox("Evidence")
         training_panel.setMinimumWidth(400)  # Adequate minimum for usability
         # No maximum width - let it expand as needed
         # Remove maximum width constraint to let it use full available space
@@ -1087,50 +1176,19 @@ class EnhancedTrainingInterface(QMainWindow):
         right_layout.setSpacing(1)  # Very tight spacing
         
         # AI Pre-screening section
-        prescreening_group = QGroupBox("🔍 AI Pre-Screening (Speed Up Your Work!)")
+        prescreening_group = QGroupBox("🔍 AI Analysis")
         prescreening_layout = QVBoxLayout(prescreening_group)
         prescreening_layout.setContentsMargins(2, 2, 2, 2)  # Minimal margins
         prescreening_layout.setSpacing(1)  # Very tight spacing
         
         # Initial analysis button
         analysis_btn_layout = QHBoxLayout()
-        self.initial_analysis_btn = QPushButton("🚀 Run Initial Analysis")
+        self.initial_analysis_btn = QPushButton("🚀 Run AI Analysis")
         self.initial_analysis_btn.clicked.connect(self.run_initial_analysis)
         self.initial_analysis_btn.setStyleSheet("QPushButton { background-color: #333333; color: white; font-weight: bold; padding: 6px; font-family: 'Courier New', monospace; }")
         analysis_btn_layout.addWidget(self.initial_analysis_btn)
-        
-        self.analysis_status = QLabel("Click to analyze this paper for positionality")
-        self.analysis_status.setStyleSheet("QLabel { color: #666; font-style: italic; }")
-        analysis_btn_layout.addWidget(self.analysis_status)
-        analysis_btn_layout.addStretch()
+        analysis_btn_layout.addStretch()  # Make button wider by removing text and adding stretch
         prescreening_layout.addLayout(analysis_btn_layout)
-        
-        # AI findings display with scroll
-        self.ai_findings = QTextEdit()
-        self.ai_findings.setMinimumHeight(150)  # Smaller
-        self.ai_findings.setMaximumHeight(200)  # More compact
-        self.ai_findings.setReadOnly(True)
-        self.ai_findings.setPlaceholderText("AI analysis results will appear here...\n\nClick 'Run Initial Analysis' to see:\n• Overall confidence score\n• Detected patterns\n• Evidence excerpts with locations\n• Recommended judgment")
-        self.ai_findings.setStyleSheet("QTextEdit { background: #f8f9fa; border: 1px solid #ddd; font-family: 'Segoe UI', Arial; margin: 0px; padding: 2px; }")
-        self.ai_findings.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        prescreening_layout.addWidget(self.ai_findings)
-        
-        # Quick validation buttons
-        quick_validate_layout = QHBoxLayout()
-        self.quick_accept_btn = QPushButton("✅ Accept AI Findings")
-        self.quick_accept_btn.clicked.connect(self.quick_accept_findings)
-        self.quick_accept_btn.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; }")
-        self.quick_accept_btn.setEnabled(False)
-        
-        self.quick_reject_btn = QPushButton("❌ Reject - Manual Review")
-        self.quick_reject_btn.clicked.connect(self.quick_reject_findings)
-        self.quick_reject_btn.setStyleSheet("QPushButton { background-color: #f44336; color: white; }")
-        self.quick_reject_btn.setEnabled(False)
-        
-        quick_validate_layout.addWidget(self.quick_accept_btn)
-        quick_validate_layout.addWidget(self.quick_reject_btn)
-        quick_validate_layout.addStretch()
-        prescreening_layout.addLayout(quick_validate_layout)
         
         right_layout.addWidget(prescreening_group)
         
@@ -1139,6 +1197,8 @@ class EnhancedTrainingInterface(QMainWindow):
         # Positionality judgment
         judgment_group = QGroupBox("Does this paper contain positionality statements?")
         judgment_layout = QVBoxLayout(judgment_group)
+        judgment_layout.setContentsMargins(1, 1, 1, 1)  # Minimal margins
+        judgment_layout.setSpacing(1)  # Very tight spacing
         
         self.judgment_group = QButtonGroup()
         self.judgment_buttons = {}
@@ -1159,97 +1219,53 @@ class EnhancedTrainingInterface(QMainWindow):
             
         right_layout.addWidget(judgment_group)
         
-        # Evidence collection (tabbed for space efficiency)
-        evidence_tabs = QTabWidget()
+        # Evidence collection (simplified to two tabs)
+        self.evidence_tabs = QTabWidget()
         
-        # Evidence tab
-        evidence_tab = QWidget()
-        evidence_layout = QVBoxLayout(evidence_tab)
+        # Human Input tab (editable)
+        human_tab = QWidget()
+        human_layout = QVBoxLayout(human_tab)
+        human_layout.setContentsMargins(2, 2, 2, 2)
         
-        evidence_layout.addWidget(QLabel("Quote specific text:"))
-        self.evidence_text = QTextEdit()
-        self.evidence_text.setMaximumHeight(80)
-        self.evidence_text.setFont(QFont("Arial", 12))
-        evidence_layout.addWidget(self.evidence_text)
+        human_layout.addWidget(QLabel("Human Evidence:"))
+        self.human_input = QTextEdit()
+        self.human_input.setMinimumHeight(200)
+        self.human_input.setFont(QFont("Arial", 13))  # Increased from 12
+        self.human_input.setPlaceholderText("Enter evidence quotes and analysis here...")
+        self.human_input.setStyleSheet("QTextEdit { margin: 0px; padding: 2px; border: 1px solid #ddd; }")
+        human_layout.addWidget(self.human_input)
         
-        # Location dropdown
-        location_layout = QHBoxLayout()
-        location_layout.addWidget(QLabel("Location:"))
-        self.location_combo = QComboBox()
-        self.location_combo.addItems([
-            "Introduction/Background", "Methods/Methodology", 
-            "Discussion/Conclusion", "Author Note", "Other"
-        ])
-        location_layout.addWidget(self.location_combo)
-        evidence_layout.addLayout(location_layout)
+        self.evidence_tabs.addTab(human_tab, "Human Input")
         
-        evidence_tabs.addTab(evidence_tab, "📝 Evidence")
+        # AI Input tab (editable)  
+        ai_tab = QWidget()
+        ai_layout = QVBoxLayout(ai_tab)
+        ai_layout.setContentsMargins(2, 2, 2, 2)
         
-        # Patterns tab
-        patterns_tab = QWidget()
-        pattern_layout = QGridLayout(patterns_tab)
+        ai_layout.addWidget(QLabel("AI Analysis:"))
+        self.ai_input = QTextEdit()
+        self.ai_input.setMinimumHeight(200)
+        self.ai_input.setFont(QFont("Arial", 13))  # Increased from 11
+        self.ai_input.setPlaceholderText("AI analysis results will appear here...")
+        self.ai_input.setStyleSheet("QTextEdit { margin: 0px; padding: 2px; border: 1px solid #ddd; }")
+        # Enable HTML rendering
+        self.ai_input.setAcceptRichText(True)
+        ai_layout.addWidget(self.ai_input)
         
-        self.pattern_checkboxes = {}
-        patterns = [
-            ("identity", "Identity disclosure"),
-            ("researcher_pos", "Researcher positioning"),
-            ("bias_ack", "Bias acknowledgment"),
-            ("reflexive", "Reflexive awareness"),
-            ("methodological", "Methodological reflexivity"),
-            ("social_location", "Social location/standpoint")
-        ]
-        
-        for i, (key, label) in enumerate(patterns):
-            cb = QCheckBox(label)
-            cb.setStyleSheet("QCheckBox { font-size: 10px; }")
-            self.pattern_checkboxes[key] = cb
-            pattern_layout.addWidget(cb, i // 2, i % 2)
-            
-        evidence_tabs.addTab(patterns_tab, "🏷️ Patterns")
-        
-        # Notes tab
-        notes_tab = QWidget()
-        notes_layout = QVBoxLayout(notes_tab)
-        
-        # Confidence rating
-        confidence_layout = QHBoxLayout()
-        confidence_layout.addWidget(QLabel("Confidence:"))
-        self.confidence_spin = QSpinBox()
-        self.confidence_spin.setRange(1, 5)
-        self.confidence_spin.setValue(3)
-        self.confidence_spin.setSuffix("/5")
-        confidence_layout.addWidget(self.confidence_spin)
-        confidence_layout.addStretch()
-        notes_layout.addLayout(confidence_layout)
-        
-        # Explanation
-        notes_layout.addWidget(QLabel("Explanation:"))
-        self.explanation_text = QTextEdit()
-        self.explanation_text.setMaximumHeight(60)
-        self.explanation_text.setFont(QFont("Arial", 12))
-        notes_layout.addWidget(self.explanation_text)
-        
-        # Pattern suggestions
-        notes_layout.addWidget(QLabel("AI Pattern Suggestions:"))
-        self.pattern_suggestions = QTextEdit()
-        self.pattern_suggestions.setMaximumHeight(50)
-        self.pattern_suggestions.setFont(QFont("Arial", 9))
-        notes_layout.addWidget(self.pattern_suggestions)
-        
-        evidence_tabs.addTab(notes_tab, "📋 Notes")
-        
-        right_layout.addWidget(evidence_tabs)
+        self.evidence_tabs.addTab(ai_tab, "AI Input")
+
+        right_layout.addWidget(self.evidence_tabs)
         
         splitter.addWidget(training_panel)
         
-        # Set stretch factors for reasonable proportions
-        splitter.setStretchFactor(0, 2)  # PDF panel gets 2 parts  
-        splitter.setStretchFactor(1, 1)  # Analysis panel gets 1 part
+        # Set stretch factors for better proportions
+        splitter.setStretchFactor(0, 1)  # PDF panel gets 1 part  
+        splitter.setStretchFactor(1, 1)  # Analysis panel gets 1 part (equal space)
         
         layout.addWidget(splitter)
         
-        # Set reasonable default proportions - user can adjust splitter
-        splitter.setSizes([700, 500])  # Give Analysis Pane adequate space
+        # Set more balanced default proportions
+        splitter.setSizes([500, 700])  # Give more space to the right panel
         
         # Bottom buttons
         button_layout = QHBoxLayout()
@@ -1258,12 +1274,7 @@ class EnhancedTrainingInterface(QMainWindow):
         prev_btn.clicked.connect(self.previous_paper)
         button_layout.addWidget(prev_btn)
         
-        save_btn = QPushButton("💾 Save & Next Paper")
-        save_btn.clicked.connect(self.save_and_next)
-        save_btn.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-weight: bold; padding: 8px; }")
-        button_layout.addWidget(save_btn)
-        
-        skip_btn = QPushButton("Skip Paper ▶")
+        skip_btn = QPushButton("⏭️ Next Paper")
         skip_btn.clicked.connect(self.next_paper)
         button_layout.addWidget(skip_btn)
         
@@ -1274,19 +1285,19 @@ class EnhancedTrainingInterface(QMainWindow):
         self.papers_completed.setStyleSheet("QLabel { color: #666; font-style: italic; }")
         button_layout.addWidget(self.papers_completed)
         
-        export_btn = QPushButton("📤 Export Data")
-        export_btn.clicked.connect(self.export_training_data)
+        export_btn = QPushButton("� Export Evidence")
+        export_btn.clicked.connect(self.export_evidence)
         button_layout.addWidget(export_btn)
         
-        upload_btn = QPushButton("🚀 Export & Upload")
-        upload_btn.clicked.connect(self.export_and_upload)
-        upload_btn.setStyleSheet("QPushButton { background-color: #2196F3; color: white; font-weight: bold; }")
+        upload_btn = QPushButton("🚀 Upload Decision")
+        upload_btn.clicked.connect(self.upload_decision)
+        upload_btn.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-weight: bold; }")
         button_layout.addWidget(upload_btn)
         
         layout.addLayout(button_layout)
         
         # Status bar
-        self.statusBar().showMessage("Ready to start training. Select a PDF folder to begin.")
+        self.statusBar().showMessage("Ready to analyze papers and make decisions. Select a PDF folder to begin.")
         
     def select_folder(self):
         """Select folder containing PDFs to train on"""
@@ -1378,16 +1389,17 @@ class EnhancedTrainingInterface(QMainWindow):
             ai_summary += f"Prediction: {'POSITIVE' if score > 0.2 else 'NEGATIVE'}\n"
             ai_summary += f"Patterns: {', '.join(tests) if tests else 'None detected'}"
             
-            self.ai_results.setText(ai_summary)
+            # AI results are now shown in the AI Input tab instead
             
         except Exception as e:
-            self.ai_results.setText(f"AI detection failed: {e}")
+            # AI detection error handling - no longer showing in separate widget
+            pass
         
         # Clear previous inputs
         self.clear_inputs()
         
-        # Load existing training data for this paper if available
-        self.load_existing_label(filename)
+        # Always start fresh - no loading of previous decisions
+        # Each session focuses on current analysis only
         
         self.statusBar().showMessage(f"Loaded: {filename} - Text selection available in PDF viewer", 3000)
         
@@ -1395,32 +1407,9 @@ class EnhancedTrainingInterface(QMainWindow):
         """Clear all input fields"""
         for btn in self.judgment_buttons.values():
             btn.setChecked(False)
-        self.evidence_text.clear()
-        self.explanation_text.clear()
-        self.pattern_suggestions.clear()
-        for cb in self.pattern_checkboxes.values():
-            cb.setChecked(False)
-        self.confidence_spin.setValue(3)
-        
-    def load_existing_label(self, filename):
-        """Load existing training label for this paper if available"""
-        for entry in self.training_data:
-            if entry["filename"] == filename:
-                # Restore previous inputs
-                if entry["judgment"] in self.judgment_buttons:
-                    self.judgment_buttons[entry["judgment"]].setChecked(True)
-                self.evidence_text.setText(entry.get("evidence", ""))
-                self.explanation_text.setText(entry.get("explanation", ""))
-                self.pattern_suggestions.setText(entry.get("pattern_suggestions", ""))
-                self.confidence_spin.setValue(entry.get("confidence", 3))
-                
-                # Restore pattern checkboxes
-                patterns = entry.get("pattern_types", [])
-                for key, cb in self.pattern_checkboxes.items():
-                    cb.setChecked(key in patterns)
-                    
-                self.statusBar().showMessage(f"Loaded existing label for {filename}")
-                break
+        self.human_input.clear()
+        self.ai_input.clear()
+        self.extracted_text.clear()
         
     def save_and_next(self):
         """Save current training data and move to next paper"""
@@ -1442,36 +1431,32 @@ class EnhancedTrainingInterface(QMainWindow):
                 break
                 
         if not judgment:
-            QMessageBox.warning(self, "Missing Data", "Please select a judgment before saving.")
+            QMessageBox.warning(self, "Decision Required", "Please select a judgment option before making your decision.")
             return False
         
-        # Get pattern types
-        pattern_types = [key for key, cb in self.pattern_checkboxes.items() if cb.isChecked()]
-        
-        # Create training entry
+        # Create simplified training entry with available data
         entry = {
             "filename": filename,
             "timestamp": datetime.now().isoformat(),
             "judgment": judgment,
-            "evidence": self.evidence_text.toPlainText().strip(),
-            "location": self.location_combo.currentText(),
-            "pattern_types": pattern_types,
-            "confidence": self.confidence_spin.value(),
-            "explanation": self.explanation_text.toPlainText().strip(),
-            "pattern_suggestions": self.pattern_suggestions.toPlainText().strip(),
+            "evidence": self.extracted_text.toPlainText().strip(),
+            "ai_analysis": self.ai_input.toPlainText().strip(),
+            "pattern_types": [],  # Simplified - no pattern checkboxes in current interface
+            "confidence": 3,  # Default confidence
+            "explanation": "",  # No explanation field in current interface
+            "pattern_suggestions": "",  # No pattern suggestions in current interface
         }
         
         # Remove existing entry for this file if present
         self.training_data = [d for d in self.training_data if d["filename"] != filename]
         
-        # Add new entry
+        # Add new entry to session data only (no local file persistence)
         self.training_data.append(entry)
         
-        # Save to file
-        self.save_training_data()
+        # Update progress display
         self.update_progress()
         
-        self.statusBar().showMessage(f"Saved training data for {filename}")
+        self.statusBar().showMessage(f"Saved decision data for {Path(filename).name}")
         return True
         
     def next_paper(self):
@@ -1483,8 +1468,8 @@ class EnhancedTrainingInterface(QMainWindow):
         else:
             QMessageBox.information(self, "🎉 Complete!", 
                                   f"All {len(self.papers_list)} papers have been reviewed!\n\n"
-                                  f"Total labeled: {len(self.training_data)} papers\n"
-                                  f"Ready to export training data for analysis.")
+                                  f"Total decisions made: {len(self.training_data)} papers\n\n"
+                                  f"Use 'Make Decision' to upload your final analysis to GitHub.")
             
     def previous_paper(self):
         """Move to previous paper"""
@@ -1493,24 +1478,79 @@ class EnhancedTrainingInterface(QMainWindow):
             self.update_progress()
             self.load_current_paper()
             
-    def load_training_data(self):
-        """Load existing training data"""
-        if os.path.exists(self.training_file):
-            try:
-                with open(self.training_file, 'r') as f:
-                    self.training_data = json.load(f)
-            except Exception as e:
-                print(f"Error loading training data: {e}")
-                self.training_data = []
-                
-    def save_training_data(self):
-        """Save training data to file"""
+    # Note: Local training data persistence removed - decisions go directly to GitHub
+    # This keeps the interface clean and prevents stale local data issues
+    
+    def check_network_connectivity(self):
+        """Check if we have internet connectivity for GitHub upload"""
+        import socket
         try:
-            with open(self.training_file, 'w') as f:
-                json.dump(self.training_data, f, indent=2)
-        except Exception as e:
-            QMessageBox.critical(self, "Save Error", f"Could not save training data: {e}")
+            # Try to connect to GitHub
+            socket.create_connection(("github.com", 443), timeout=3)
+            return True
+        except (socket.timeout, socket.error):
+            return False
+    
+    def check_network_and_update_buttons(self):
+        """Update button states based on network connectivity"""
+        has_network = self.check_network_connectivity()
+        
+        if has_network:
+            self.upload_btn.setEnabled(True)
+            self.upload_btn.setToolTip("Upload your decision to GitHub")
+        else:
+            self.upload_btn.setEnabled(False)
+            self.upload_btn.setToolTip("No internet connection - use 'Export Evidence' to save your work locally")
+            self.upload_btn.setStyleSheet("QPushButton { background-color: #888; color: #ccc; font-weight: bold; }")
             
+    def export_evidence(self):
+        """Export current evidence (AI + Human) to text file next to PDF"""
+        if not hasattr(self, 'current_paper_index') or self.current_paper_index >= len(self.papers_list):
+            QMessageBox.information(self, "No Paper", "No paper currently loaded to export evidence from.")
+            return
+            
+        # Get current evidence
+        human_evidence = self.extracted_text.toPlainText().strip()
+        ai_evidence = self.ai_input.toPlainText().strip()
+        
+        if not human_evidence and not ai_evidence:
+            QMessageBox.information(self, "No Evidence", "No evidence collected to export.")
+            return
+            
+        # Get current PDF file path and create evidence file path
+        current_pdf_path = Path(self.papers_list[self.current_paper_index])
+        evidence_filename = current_pdf_path.stem + "_EVIDENCE.txt"
+        evidence_path = current_pdf_path.parent / evidence_filename
+        
+        try:
+            # Create evidence content
+            content = f"EVIDENCE EXPORT\n"
+            content += f"PDF File: {current_pdf_path.name}\n"
+            content += f"Export Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            content += f"{'='*50}\n\n"
+            
+            if human_evidence:
+                content += f"HUMAN EVIDENCE:\n"
+                content += f"{'-'*20}\n"
+                content += f"{human_evidence}\n\n"
+            
+            if ai_evidence:
+                content += f"AI ANALYSIS:\n"
+                content += f"{'-'*20}\n"
+                content += f"{ai_evidence}\n\n"
+            
+            # Write to file
+            with open(evidence_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+                
+            QMessageBox.information(self, "Export Successful", 
+                                  f"Evidence exported successfully!\n\n"
+                                  f"File: {evidence_filename}\n"
+                                  f"Saved in same folder as PDF")
+                                  
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", f"Could not export evidence: {e}")
+
     def export_training_data(self):
         """Export training data for analysis"""
         if not self.training_data:
@@ -1534,15 +1574,40 @@ class EnhancedTrainingInterface(QMainWindow):
             except Exception as e:
                 QMessageBox.critical(self, "Export Error", f"Could not export: {e}")
                 
-    def export_and_upload(self):
-        """Export training data and upload to GitHub automatically"""
+    def upload_decision(self):
+        """Upload final decision to GitHub (requires internet connection)"""
+        
+        # First, try to save current state if there's an active paper
+        if hasattr(self, 'current_paper_index') and self.current_paper_index < len(self.papers_list):
+            current_filename = self.papers_list[self.current_paper_index]
+            
+            # Check if user has made any selections for current paper
+            judgment_selected = any(btn.isChecked() for btn in self.judgment_buttons.values())
+            evidence_text = self.extracted_text.toPlainText().strip()
+            
+            if judgment_selected or evidence_text:
+                # Auto-save current paper's data
+                saved = self.save_current_training()
+                if not saved:
+                    return  # User was warned about missing data, let them fix it
+        
+        # Now check if we have any training data at all
         if not self.training_data:
-            QMessageBox.information(self, "No Data", "No training data to export and upload.")
-            return
+            # Check if there's at least some evidence in the interface
+            evidence_text = self.extracted_text.toPlainText().strip()
+            ai_analysis = self.ai_input.toPlainText().strip()
+            
+            if evidence_text or ai_analysis:
+                QMessageBox.information(self, "Decision Required", 
+                                      "Please select a judgment option (radio button) before uploading your decision.\n\nAlternatively, use 'Export Evidence' to save your work locally.")
+                return
+            else:
+                QMessageBox.information(self, "No Decision", "No evidence collected to upload.\n\nCollect evidence first, then make a decision.")
+                return
             
         ga_name = self.ga_name_input.text().strip()
         if not ga_name:
-            QMessageBox.warning(self, "GA Name Required", "Please enter your name before uploading.")
+            QMessageBox.warning(self, "GA Name Required", "Please enter your name before recording your decision.")
             self.ga_name_input.setFocus()
             return
             
@@ -1551,25 +1616,25 @@ class EnhancedTrainingInterface(QMainWindow):
             result = self.github_uploader.process_training_session(self.training_data, ga_name)
             
             if result['success']:
-                QMessageBox.information(self, "Upload Successful", 
-                                      f"Training report uploaded successfully!\n\n"
+                QMessageBox.information(self, "Decision Recorded", 
+                                      f"Your decision has been successfully recorded and uploaded!\n\n"
                                       f"GA: {ga_name}\n"
                                       f"Session: {result['session_id']}\n"
-                                      f"Papers labeled: {len(self.training_data)}\n\n"
-                                      f"Files created:\n"
+                                      f"Papers analyzed: {len(self.training_data)}\n\n"
+                                      f"Decision files created:\n"
                                       f"• {Path(result['json_file']).name}\n"
                                       f"• {Path(result['md_file']).name}\n\n"
-                                      f"Report available on GitHub.")
+                                      f"Your decision is now available on GitHub for review.")
             else:
                 QMessageBox.warning(self, "Upload Failed", 
-                                  f"Report created locally but upload failed.\n\n"
+                                  f"Decision recorded locally but GitHub upload failed.\n\n"
                                   f"Error: {result['message']}\n\n"
-                                  f"Files saved locally:\n"
+                                  f"Decision files saved locally:\n"
                                   f"• {Path(result['json_file']).name}\n"
                                   f"• {Path(result['md_file']).name}")
                 
         except Exception as e:
-            QMessageBox.critical(self, "Upload Error", f"Could not create or upload report: {e}")
+            QMessageBox.critical(self, "Decision Error", f"Could not record or upload decision: {e}")
                 
     def connect_pdf_selection(self):
         """Connect PDF text selection to the extraction area"""
@@ -1693,25 +1758,31 @@ class EnhancedTrainingInterface(QMainWindow):
     
     def on_text_selected(self, selected_text):
         """Handle text selection from PDF viewer"""
+        print(f"DEBUG - on_text_selected called with: '{selected_text[:100] if selected_text else 'EMPTY'}'")
         if selected_text.strip():
             self.extracted_text.setPlainText(selected_text)
             self.statusBar().showMessage("Text selected from PDF", 2000)
+            print(f"DEBUG - Text set in extracted_text widget")
         else:
             self.extracted_text.clear()
+            print(f"DEBUG - Cleared extracted_text widget")
             
     def copy_to_evidence(self):
-        """Copy extracted text to evidence field"""
+        """Copy extracted text to Human Input tab and switch focus"""
         text = self.extracted_text.toPlainText().strip()
         if text:
-            current_evidence = self.evidence_text.toPlainText().strip()
+            current_evidence = self.human_input.toPlainText().strip()
             if current_evidence:
                 new_evidence = current_evidence + "\n\n" + text
             else:
                 new_evidence = text
-            self.evidence_text.setPlainText(new_evidence)
+            self.human_input.setPlainText(new_evidence)
+            
+            # Switch to Human Input tab
+            self.evidence_tabs.setCurrentIndex(0)  # Human Input is index 0
             
             # Show confirmation
-            self.statusBar().showMessage("Text copied to evidence field", 2000)
+            self.statusBar().showMessage("Text copied to Human Input", 2000)
     
     def run_initial_analysis(self):
         """Run AI analysis on current paper and display findings"""
@@ -1722,7 +1793,7 @@ class EnhancedTrainingInterface(QMainWindow):
         current_paper = self.papers_list[self.current_paper_index]
         pdf_path = Path(self.pdf_folder) / current_paper
         
-        self.analysis_status.setText("🔄 Analyzing...")
+        self.statusBar().showMessage("🔄 Analyzing...")
         self.initial_analysis_btn.setEnabled(False)
         QApplication.processEvents()  # Update UI
         
@@ -1732,30 +1803,29 @@ class EnhancedTrainingInterface(QMainWindow):
             
             # Format findings for display
             findings_text = self.format_ai_findings(result, current_paper)
-            self.ai_findings.setHtml(findings_text)
+            self.ai_input.setHtml(findings_text)
             
-            # Update status and enable buttons
+            # Switch to AI Input tab
+            self.evidence_tabs.setCurrentIndex(1)  # AI Input is index 1
+            
+            # Update status 
             if result['positionality_score'] > 0.3:
-                self.analysis_status.setText(f"Found {len(result['positionality_snippets'])} potential evidence excerpts")
-                self.quick_accept_btn.setEnabled(True)
-                self.quick_reject_btn.setEnabled(True)
-                # Store findings for quick acceptance
+                self.statusBar().showMessage(f"Found {len(result['positionality_snippets'])} potential evidence excerpts")
+                # Store findings for reference
                 self.current_ai_findings = result
             else:
-                self.analysis_status.setText("No strong positionality indicators found")
-                self.quick_accept_btn.setEnabled(False)
-                self.quick_reject_btn.setEnabled(True)
+                self.statusBar().showMessage("No strong positionality indicators found")
                 self.current_ai_findings = None
                 
         except Exception as e:
-            self.analysis_status.setText(f"Analysis failed: {str(e)}")
-            self.ai_findings.setPlainText(f"Error running analysis: {e}")
+            self.statusBar().showMessage(f"Analysis failed: {str(e)}")
+            self.ai_input.setPlainText(f"Error running analysis: {e}")
             
         finally:
             self.initial_analysis_btn.setEnabled(True)
     
     def format_ai_findings(self, result, paper_name):
-        """Enhanced format AI detection results with detailed analysis"""
+        """Format AI detection results as clean, professional plain text"""
         score = result['positionality_score']
         patterns = result['positionality_tests']
         snippets = result['positionality_snippets']
@@ -1764,37 +1834,28 @@ class EnhancedTrainingInterface(QMainWindow):
         if score >= 0.7:
             confidence_level = "High"
             recommendation = "Explicit positionality detected"
-            confidence_color = "#4CAF50"
         elif score >= 0.4:
             confidence_level = "Medium"
             recommendation = "Subtle/implicit positionality likely"
-            confidence_color = "#FF9800"
         elif score > 0:
             confidence_level = "Low"
             recommendation = "Minimal indicators found"
-            confidence_color = "#FF5722"
         else:
             confidence_level = "None"
             recommendation = "No positionality detected"
-            confidence_color = "#666"
         
-        # Create comprehensive HTML display
-        html = f"""
-        <div style="font-family: 'Courier New', monospace;">
-        <h3 style="color: #2196F3; margin-bottom: 10px;">AI Analysis for {paper_name}</h3>
-        
-        <div style="background: #f0f7ff; padding: 12px; border-radius: 6px; margin: 10px 0;">
-        <p style="margin: 5px 0;"><b>Confidence Level:</b> <span style="color: {confidence_color}; font-weight: bold;">{confidence_level}</span> ({score:.3f})</p>
-        <p style="margin: 5px 0;"><b>Recommendation:</b> {recommendation}</p>
-        <p style="margin: 5px 0;"><b>Patterns Detected:</b> {', '.join(patterns).replace('_', ' ').title() if patterns else 'None'}</p>
-        </div>
-        """
+        # Create clean plain text with rich formatting
+        text = f"""<b><font color="#2196F3">AI Analysis for {paper_name}</font></b><br><br>
+
+<b>Confidence Level:</b> <font color="#FF9800">{confidence_level}</font> ({score:.3f})<br>
+<b>Recommendation:</b> {recommendation}<br>
+<b>Patterns Detected:</b> {', '.join(patterns).replace('_', ' ').title() if patterns else 'None'}<br><br><br>"""
         
         if snippets:
-            html += "<h4 style='color: #4CAF50; margin-top: 15px;'>Evidence Excerpts Found:</h4>"
-            for i, (pattern, text) in enumerate(snippets.items(), 1):
+            text += "<b><font color=\"#4CAF50\">Evidence Excerpts Found:</font></b>\n\n"
+            for i, (pattern, excerpt) in enumerate(snippets.items(), 1):
                 # Clean up and intelligently truncate text
-                clean_text = text.strip()
+                clean_text = excerpt.strip()
                 if len(clean_text) > 300:
                     # Find a good breaking point (sentence end)
                     truncate_pos = clean_text.find('.', 250)
@@ -1805,39 +1866,25 @@ class EnhancedTrainingInterface(QMainWindow):
                 # Estimate location based on content
                 location = self.estimate_location_from_text(clean_text)
                 
-                html += f"""
-                <div style="margin: 12px 0; padding: 10px; background: #f9f9f9; border-left: 4px solid #2196F3; border-radius: 4px;">
-                <p style="margin: 0; font-weight: bold; color: #333;">#{i} - {pattern.replace('_', ' ').title()}</p>
-                <p style="margin: 5px 0; font-style: italic; color: #666;">Likely Location: {location}</p>
-                <p style="margin: 5px 0; line-height: 1.4;"><i>"{clean_text}"</i></p>
-                </div>
-                """
+                text += f"""<b>#{i} - {pattern.replace('_', ' ').title()}</b><br>
+<i>Likely Location: {location}</i><br>
+"{clean_text}"<br><br><br>"""
         else:
-            html += """
-            <div style="background: #fff3cd; padding: 10px; border-radius: 6px; margin: 10px 0;">
-            <p style="color: #856404; margin: 0;"><i>No specific evidence excerpts extracted. Consider manual review of the full paper.</i></p>
-            </div>
-            """
+            text += "<i><font color=\"#856404\">No specific evidence excerpts extracted. Consider manual review of the full paper.</font></i><br><br>"
         
         # Add AI recommendation summary
-        html += f"""
-        <div style="background: #e8f5e8; padding: 12px; border-radius: 6px; margin: 15px 0 5px 0;">
-        <h4 style="color: #2e7d32; margin: 0 0 8px 0;">AI Recommendation:</h4>
-        <p style="margin: 0; color: #2e7d32;">
-        """
+        text += "<br><b><font color=\"#2e7d32\">AI Recommendation:</font></b><br>"
         
         if score >= 0.7:
-            html += "Strong evidence of explicit positionality statements. Recommend <b>Accept AI Findings</b> → Explicit."
+            text += "Strong evidence of explicit positionality statements. Recommend categorizing as Explicit."
         elif score >= 0.4:
-            html += "Moderate evidence suggests subtle reflexivity. Recommend <b>Accept AI Findings</b> → Subtle/Implicit."
+            text += "Moderate evidence suggests subtle reflexivity. Recommend categorizing as Subtle/Implicit."
         elif score > 0:
-            html += "Weak indicators found. Recommend <b>Manual Review</b> for thorough analysis."
+            text += "Weak indicators found. Recommend manual review for thorough analysis."
         else:
-            html += "No clear positionality detected. Recommend <b>Reject</b> → No positionality statements."
+            text += "No clear positionality detected. Recommend categorizing as No positionality statements."
             
-        html += "</p></div></div>"
-            
-        return html
+        return text
     
     def estimate_location_from_text(self, text):
         """Estimate paper location based on text content"""
@@ -1866,14 +1913,9 @@ class EnhancedTrainingInterface(QMainWindow):
             
         result = self.current_ai_findings
         
-        # Set judgment based on AI confidence
-        if result['positionality_score'] >= 0.7:
-            self.judgment_buttons['positive_explicit'].setChecked(True)
-        elif result['positionality_score'] >= 0.4:
-            self.judgment_buttons['positive_subtle'].setChecked(True)
-        else:
-            self.judgment_buttons['uncertain'].setChecked(True)
-            
+        # Let user make their own judgment decision - no auto-selection
+        # AI results are shown in the AI Input tab for reference
+        
         # Populate evidence from AI findings and determine locations
         evidence_parts = []
         locations_found = []
@@ -1906,16 +1948,11 @@ class EnhancedTrainingInterface(QMainWindow):
             if location_index >= 0:
                 self.location_dropdown.setCurrentIndex(location_index)
         
-        # Set confidence based on AI score (scale 1-5)
-        ai_confidence = min(5, max(2, int(result['positionality_score'] * 5) + 1))
-        self.confidence_slider.setValue(ai_confidence)
+        # AI confidence and pattern information is now shown in AI Input tab
+        # No separate confidence slider or pattern suggestions in simplified interface
         
-        # Add AI assistance note to pattern suggestions
-        patterns = ', '.join(result['positionality_tests'])
-        ai_note = f"AI-detected patterns: {patterns}"
-        if locations_found:
-            ai_note += f"\nLocations: {', '.join(set(locations_found))}"
-        self.pattern_suggestions.setPlainText(ai_note)
+        # Switch to AI Input tab to show the results
+        self.evidence_tabs.setCurrentIndex(1)  # Switch to AI Input tab
         
         location_text = self.location_dropdown.currentText()
         self.statusBar().showMessage(f"AI findings accepted! Location: {location_text}", 3000)
@@ -1923,14 +1960,10 @@ class EnhancedTrainingInterface(QMainWindow):
     def quick_reject_findings(self):
         """Reject AI findings and proceed with manual review"""
         # Clear AI findings and reset for manual work
-        self.ai_findings.clear()
-        self.analysis_status.setText("Manual review mode")
-        self.quick_accept_btn.setEnabled(False)
-        self.quick_reject_btn.setEnabled(False)
+        self.ai_input.clear()
+        self.statusBar().showMessage("Manual review mode")
         
-        # Set default negative judgment for manual verification
-        self.judgment_buttons['negative'].setChecked(True)
-        self.confidence_slider.setValue(3)
+        # Let user make their own judgment - no default selection
         
         self.statusBar().showMessage("Manual review mode - read the full paper carefully", 3000)
     
