@@ -302,13 +302,24 @@ Research Buddy 4.0 implements the same security practices used by professional a
 
 ## 📄 **License & Citation**
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### **📜 License**
+This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International License**.
+
+- ✅ **Academic Use**: Freely permitted for educational and research purposes
+- ✅ **Sharing**: Copy, redistribute, and adapt the software
+- ✅ **Attribution**: Give appropriate credit when using or modifying
+- ❌ **Commercial Use**: Commercial applications require separate licensing
+
+For commercial licensing inquiries, please contact the project maintainer.
+
+See the [LICENSE](LICENSE) file for complete details or visit [CC BY-NC 4.0](http://creativecommons.org/licenses/by-nc/4.0/).
 
 ### **Academic Citation**
-If you use Research Buddy 4.0 in your research, please cite:
+If you use Research Buddy in your research, please cite:
 ```
-Research Buddy 4.0: Secure AI-Assisted Academic Research Analysis
-OhioMathTeacher (2025)
+Research Buddy: AI-Assisted Positionality Detection for Academic Research
+Todd Miller (OhioMathTeacher) (2025)
+Licensed under CC BY-NC 4.0
 https://github.com/OhioMathTeacher/research-buddy
 ```
 
