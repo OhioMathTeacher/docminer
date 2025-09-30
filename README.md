@@ -1,4 +1,4 @@
-# 📖 Research Buddy - Positionality Detection Training# 📖 Research Buddy - Positionality Detection Training# 🚀 Research Buddy 4.0 - Secure Configuration & Modern Launcher
+# 📖 Research Buddy - Positionality Detection Training# 📖 Research Buddy - Positionality Detection Training# 📖 Research Buddy - Positionality Detection Training# 🚀 Research Buddy 4.0 - Secure Configuration & Modern Launcher
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.**Simple, professional software for analyzing academic papers contextually for various attributes (e.g., positionality statements, political or religious ideology, ).****Revolutionary academic research system: Professional AI-assisted analysis with secure credential management and one-click launch**
+Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.**Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
 
 
@@ -14,67 +14,143 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 
 
-## 🚀 **Quick Start**Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.[![GitHub Release](https://img.shields.io/github/v/release/OhioMathTeacher/research-buddy)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
+## 🚀 **Quick Start**Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.**Simple, professional software for analyzing academic papers contextually for various attributes (e.g., positionality statements, political or religious ideology, ).****Revolutionary academic research system: Professional AI-assisted analysis with secure credential management and one-click launch**
 
 
 
-### **Step 1: Download**[![Platform Support](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
+### **Step 1: Download**
+
+
+
+**Option A: Pre-built Executables (Recommended)**---
 
 1. Go to [Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
 
-2. Download the file for your computer:---[![Security](https://img.shields.io/badge/Security-Environment%20Variables-green)](#security)
+2. Download the file for your computer:
 
    - **Windows**: `ResearchBuddy-windows.zip`
 
-   - **macOS**: `ResearchBuddy-macos.zip` [![User Experience](https://img.shields.io/badge/UX-Modern%20Launcher-brightgreen)](#launcher)
+   - **macOS**: `ResearchBuddy-macos.zip` ## 🚀 **Quick Start**Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.[![GitHub Release](https://img.shields.io/github/v/release/OhioMathTeacher/research-buddy)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
 
    - **Linux**: `ResearchBuddy-linux.tar.gz`
 
-## 🚀 **Quick Start**
+
+
+**Option B: Source Code (If no releases available yet)**
+
+1. Click the green "Code" button above → "Download ZIP"### **Step 1: Download**[![Platform Support](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
+
+2. Extract the files and run: `python enhanced_training_interface.py`
+
+1. Go to [Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
 
 ### **Step 2: Install**
 
-1. Extract/unzip the downloaded file## 🎉 **What's New in Version 4.0**
+1. Extract/unzip the downloaded file2. Download the file for your computer:---[![Security](https://img.shields.io/badge/Security-Environment%20Variables-green)](#security)
 
 2. Double-click the application to run
 
-3. **That's it!** No Python or technical setup required### **Step 1: Download**
+3. **That's it!** No Python or technical setup required   - **Windows**: `ResearchBuddy-windows.zip`
 
 
 
-### **Step 3: Start Analyzing**1. Go to [Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest)**Complete security overhaul with modern user experience:**
+### **Step 3: Start Analyzing**   - **macOS**: `ResearchBuddy-macos.zip` [![User Experience](https://img.shields.io/badge/UX-Modern%20Launcher-brightgreen)](#launcher)
 
 1. The software opens with a training document
 
-2. Add your PDF papers to the `~/ExtractorPDFs` folder2. Download the file for your computer:
+2. Add your PDF papers to the `~/ExtractorPDFs` folder   - **Linux**: `ResearchBuddy-linux.tar.gz`
 
 3. Click through papers, select text, and mark positionality statements
 
-4. Export your training data when finished   - **Windows**: `ResearchBuddy-windows.zip````
+4. Export your training data when finished## 🚀 **Quick Start**
 
 
 
----   - **macOS**: `ResearchBuddy-macos.zip` ✨ Version 4.0 Highlights:
+---### **Step 2: Install**
 
 
 
-## 📋 **What It Does**   - **Linux**: `ResearchBuddy-linux.tar.gz`   🔐  Secure credential management with environment variables
+## 📋 **What It Does**1. Extract/unzip the downloaded file## 🎉 **What's New in Version 4.0**
 
 
 
-- **PDF Viewer**: Read academic papers with professional page navigation   🚀  One-click modern launcher - no command-line needed!
+- **PDF Viewer**: Read academic papers with professional page navigation2. Double-click the application to run
 
 - **Text Selection**: Highlight and extract quotes for evidence
 
-- **AI Assistant**: Optional AI pre-screening to speed up analysis (requires OpenAI API key)### **Step 2: Install**   🎨  Professional first-run setup with clean UI
+- **AI Assistant**: Optional AI pre-screening to speed up analysis (requires OpenAI API key)3. **That's it!** No Python or technical setup required### **Step 1: Download**
 
 - **Training Data**: Export decisions for improving detection systems
 
-- **Manual Mode**: Works completely offline without AI1. Extract/unzip the downloaded file   🛡️  No plain-text API keys anywhere on your system
+- **Manual Mode**: Works completely offline without AI
 
 
 
----2. Double-click the application to run   📱  macOS/Windows/Linux binary distribution ready
+---### **Step 3: Start Analyzing**1. Go to [Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest)**Complete security overhaul with modern user experience:**
+
+
+
+## 🎯 **Perfect For**1. The software opens with a training document
+
+
+
+- **Graduate Assistants**: Easy-to-use interface, no technical background needed2. Add your PDF papers to the `~/ExtractorPDFs` folder2. Download the file for your computer:
+
+- **Research Teams**: Consistent analysis across multiple reviewers  
+
+- **Academic Institutions**: Scale from individual researchers to large projects3. Click through papers, select text, and mark positionality statements
+
+- **Qualitative Research**: Any study involving positionality analysis
+
+4. Export your training data when finished   - **Windows**: `ResearchBuddy-windows.zip````
+
+---
+
+
+
+## 💡 **Need Help?**
+
+---   - **macOS**: `ResearchBuddy-macos.zip` ✨ Version 4.0 Highlights:
+
+- **Getting Started**: See `QUICK_START_FOR_GAS.md` included with download
+
+- **Questions**: Open an issue on this GitHub repository
+
+- **Technical Support**: Contact your research supervisor or IT department
+
+## 📋 **What It Does**   - **Linux**: `ResearchBuddy-linux.tar.gz`   🔐  Secure credential management with environment variables
+
+---
+
+
+
+## 📄 **License**
+
+- **PDF Viewer**: Read academic papers with professional page navigation   🚀  One-click modern launcher - no command-line needed!
+
+**Academic and Educational Use Only**
+
+- **Text Selection**: Highlight and extract quotes for evidence
+
+This software is licensed under Creative Commons Attribution-NonCommercial 4.0:
+
+- ✅ Free for academic research and education- **AI Assistant**: Optional AI pre-screening to speed up analysis (requires OpenAI API key)### **Step 2: Install**   🎨  Professional first-run setup with clean UI
+
+- ✅ Share and modify for research purposes  
+
+- ❌ Commercial use requires separate licensing- **Training Data**: Export decisions for improving detection systems
+
+
+
+For commercial licensing, contact the project maintainer.- **Manual Mode**: Works completely offline without AI1. Extract/unzip the downloaded file   🛡️  No plain-text API keys anywhere on your system
+
+
+
+---
+
+
+
+**Research Buddy** - Making positionality analysis accessible to everyone in academia.---2. Double-click the application to run   📱  macOS/Windows/Linux binary distribution ready
 
 
 
