@@ -16,17 +16,31 @@ from pathlib import Path
 class GitHubReportUploader:
     """Handle automatic upload of training reports to GitHub"""
     
-    def __init__(self, repo_owner=None, repo_name=None):
-        # Load configuration from settings file
-        self.config = self.load_config()
+    def __init__(self):
+        """Initialize the GitHub uploader with configuration from environment variables and settings file."""
+        from configuration_dialog import load_configuration
         
-        # Use provided values or fall back to configuration
-        self.repo_owner = repo_owner or self.config.get("github_owner", "OhioMathTeacher")
-        self.repo_name = repo_name or self.config.get("github_repo", "research-buddy")
-        self.github_token = self.config.get("github_token", "")
+        # Load configuration using the new secure method
+        self.config = load_configuration()
         
-        self.reports_dir = Path("training_reports")
-        self.reports_dir.mkdir(exist_ok=True)
+        # Get sensitive data from environment variables
+        self.token = os.environ.get("RESEARCH_BUDDY_GITHUB_TOKEN", "")
+        
+        # Get repository settings from config file
+        self.owner = self.config.get("github_owner", "")
+        self.repo = self.config.get("github_repo", "")
+        
+        if not self.token:
+            print("⚠️  GitHub token not found in RESEARCH_BUDDY_GITHUB_TOKEN environment variable")
+        
+        if not self.owner or not self.repo:
+            print("⚠️  GitHub repository settings not configured. Please run configuration dialog.")
+            
+        self.base_url = f"https://api.github.com/repos/{self.owner}/{self.repo}"
+        self.headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github.v3+json"
+        }
         
     def load_config(self):
         """Load configuration from interface_settings.json"""
