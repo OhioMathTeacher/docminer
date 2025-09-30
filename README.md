@@ -26,6 +26,16 @@
 
 ---
 
+## 🎯 **TL;DR - Just Want to Run Research Buddy?**
+
+### **✨ The Magic Command:**
+```bash
+python3 launch_research_buddy.py
+```
+**That's it! One command, secure setup, instant launch. Everything else is just details.** 🚀
+
+---
+
 ## 📥 **Super Simple Installation**
 
 ### **🎯 For Everyone (Recommended)**
