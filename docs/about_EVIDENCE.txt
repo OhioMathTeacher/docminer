@@ -1,0 +1,36 @@
+EVIDENCE EXPORT
+PDF File: about.pdf
+Export Date: 2025-09-30 14:20:50
+==================================================
+
+HUMAN EVIDENCE:
+--------------------
+Provides AI-assisted paper-by-paper analysis (10–20 papers/hour).
+Features: scrollable previews, live highlighting, one-click acceptance/rejection, and smart
+Goal: Train the AI while keeping graduate assistants in the loop, ensuring scholarly rigor.
+2. Automation Buddy (Institutional Batch Engine)
+The high-volume batch processor for thousands of papers.
+
+AI ANALYSIS:
+--------------------
+AI Analysis for about.pdf
+
+Confidence Level: Medium (0.500)
+Recommendation: Subtle/implicit positionality likely
+Patterns Detected: Positionality Term
+
+
+Evidence Excerpts Found: #1 - Positionality Term
+Likely Location: Body/Content
+"positionality"
+
+
+#2 - Tail Positionality Term
+Likely Location: Body/Content
+"ResearchBuddy Contextual Document Analysis Software for the Rest of Us Enhanced PDF Viewer & Contextual Detection Training Research Buddy 2.0 is the complete AI-assisted document analysis platform. It..."
+
+
+
+AI Recommendation:
+Moderate evidence suggests subtle reflexivity. Recommend categorizing as Subtle/Implicit.
+
