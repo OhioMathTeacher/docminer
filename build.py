@@ -26,9 +26,9 @@ def check_dependencies():
     print("🔍 Checking build dependencies...")
     
     deps = [
-        ("python", "python3 --version"),
+        ("python", "python --version"),
         ("pip", "pip --version"), 
-        ("pyinstaller", "python3 -m PyInstaller --version")
+        ("pyinstaller", "python -m PyInstaller --version")
     ]
     
     missing = []
@@ -52,7 +52,7 @@ def build_executable(target_platform=None):
     
     # Base PyInstaller command
     base_cmd = [
-        "python3", "-m", "PyInstaller",
+        "python", "-m", "PyInstaller",
         "--onefile",
         "--windowed", 
         "--distpath", "./dist",

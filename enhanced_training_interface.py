@@ -1908,8 +1908,8 @@ class EnhancedTrainingInterface(QMainWindow):
     def ensure_readme_exists(self):
         """Ensure the README PDF exists in the default folder"""
         if not self.readme_pdf_path.exists():
-            # Copy from app directory
-            source_readme = Path(__file__).parent / "about.pdf"
+            # Copy from documentation folder
+            source_readme = Path(__file__).parent / "archive" / "documentation" / "about.pdf"
             if source_readme.exists():
                 import shutil
                 shutil.copy2(source_readme, self.readme_pdf_path)
@@ -1921,9 +1921,9 @@ class EnhancedTrainingInterface(QMainWindow):
                 print(f"Created README at {self.readme_pdf_path}")
     
     def find_readme_index(self):
-        """Find the index of the README PDF in papers list"""
+        """Find the index of the about.pdf file in papers list"""
         for i, paper in enumerate(self.papers_list):
-            if "README" in paper or "readme" in paper.lower():
+            if "about.pdf" in paper.lower():
                 return i
         return -1
     
