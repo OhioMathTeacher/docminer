@@ -1,0 +1,13 @@
+[
+  {
+    "filename": "about.pdf",
+    "timestamp": "2025-09-30T04:19:51.099513",
+    "judgment": "positive_subtle",
+    "evidence": "I\u2019ve been created to help you with your PDF analysis needs. Version 1.0 has been trained to look for positionality statements in\nPDFs. I analyze content contextually to look for passages where authors discuss their identity and its impact on their writing\nAdd PDFs: Copy your academic papers to the ExtractorPDFs folder",
+    "ai_analysis": "AI Analysis for about.pdf\n\nConfidence Level: Medium (0.500)\nRecommendation: Subtle/implicit positionality likely\nPatterns Detected: Positionality Term, Identity Disclosure, Disclosure Statement\n\n\nEvidence Excerpts Found: #1 - Positionality Term\nLikely Location: Body/Content\n\"Positionality\"\n\n\n#2 - Tail Positionality Term\nLikely Location: Body/Content\n\"SmartBuddy Positionality Detection Software for the Rest of Us Enhanced PDF Viewer & Positionality Detection Training I\u2019m SmartBuddy, your open-source, low-budget qualitative research assistant. You'r...\"\n\n\n#3 - Tail Identity Disclosure\nLikely Location: Body/Content\n\"SmartBuddy Positionality Detection Software for the Rest of Us Enhanced PDF Viewer & Positionality Detection Training I\u2019m SmartBuddy, your open-source, low-budget qualitative research assistant. You'r...\"\n\n\n#4 - Tail Disclosure Statement\nLikely Location: Body/Content\n\"SmartBuddy Positionality Detection Software for the Rest of Us Enhanced PDF Viewer & Positionality Detection Training I\u2019m SmartBuddy, your open-source, low-budget qualitative research assistant. You'r...\"\n\n\n\nAI Recommendation:\nModerate evidence suggests subtle reflexivity. Recommend categorizing as Subtle/Implicit.",
+    "pattern_types": [],
+    "confidence": 3,
+    "explanation": "",
+    "pattern_suggestions": ""
+  }
+]
