@@ -42,6 +42,10 @@ class GitHubReportUploader:
             "Accept": "application/vnd.github.v3+json"
         }
         
+        # Initialize reports directory
+        self.reports_dir = Path("training_reports")
+        self.reports_dir.mkdir(exist_ok=True)
+        
     def load_config(self):
         """Load configuration from interface_settings.json"""
         config_file = Path("interface_settings.json")

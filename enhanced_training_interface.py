@@ -1142,7 +1142,7 @@ class EnhancedTrainingInterface(QMainWindow):
             else:
                 self.statusBar().showMessage(f"{current_status} {repo_info}")
             
-            repo_url = f"https://github.com/{self.github_uploader.repo_owner}/{self.github_uploader.repo_name}"
+            repo_url = f"https://github.com/{self.github_uploader.owner}/{self.github_uploader.repo}"
             QMessageBox.information(self, "Configuration Updated", 
                                   f"Configuration has been updated successfully!\n\n"
                                   f"📦 Upload Destination:\n{repo_url}\n\n"
@@ -1394,7 +1394,7 @@ class EnhancedTrainingInterface(QMainWindow):
         layout.addLayout(button_layout)
         
         # Status bar
-        repo_info = f"📦 Uploads to: {self.github_uploader.repo_owner}/{self.github_uploader.repo_name}"
+        repo_info = f"📦 Uploads to: {self.github_uploader.owner}/{self.github_uploader.repo}"
         self.statusBar().showMessage(f"Ready to analyze papers and make decisions. Select a PDF folder to begin. {repo_info}")
         
     def select_folder(self):
@@ -1763,7 +1763,7 @@ class EnhancedTrainingInterface(QMainWindow):
                                       f"• {Path(result['json_file']).name}\n"
                                       f"• {Path(result['md_file']).name}\n\n"
                                       f"📦 Uploaded to Repository:\n"
-                                      f"https://github.com/{self.github_uploader.repo_owner}/{self.github_uploader.repo_name}\n\n"
+                                      f"https://github.com/{self.github_uploader.owner}/{self.github_uploader.repo}\n\n"
                                       f"Your decision is now available on GitHub for review.")
             else:
                 QMessageBox.warning(self, "Upload Failed", 
