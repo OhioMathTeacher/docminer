@@ -1,15 +1,17 @@
-# 📖 Research Buddy – Pos### Step 2: Setup & Run
+# 📖 Research Buddy – Pos### Step 2: Install & Run
 
-**For Source Code Download:**
+**For Pre-built Executables:**
+1. Extract/unzip the downloaded file
+2. **Windows**: Double-click `ResearchBuddy3.1.2.exe`
+3. **macOS**: Double-click `ResearchBuddy3.1.2.app` (you may need to right-click → Open first time)
+4. **Linux**: Run `./ResearchBuddy3.1.2` in terminal
+5. **That's it!** No Python or technical setup required
+
+**For Source Code:**
 1. Extract the ZIP file to any folder
 2. Open terminal/command prompt in that folder
 3. Install dependencies: `pip install -r requirements.txt`
-4. Run the application: `python enhanced_training_interface.py`
-
-**For Pre-built Executables (when available):**
-1. Extract/unzip the downloaded file
-2. Double-click the application to run
-3. **That's it!** No Python or technical setup requiredality Detection Training
+4. Run the application: `python enhanced_training_interface.py`ality Detection Training
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
@@ -26,13 +28,17 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ### Step 1: Download
 
-**Option A: Source Code (Current)**  
+**Option A: Pre-built Executables (Recommended)**  
+
+📦 **Direct Downloads:**
+- **Windows**: [ResearchBuddy3.1.2-windows.zip](https://github.com/OhioMathTeacher/research-buddy/releases/download/v3.1.2/ResearchBuddy3.1.2-windows.zip)
+- **macOS**: [ResearchBuddy3.1.2-macos.zip](https://github.com/OhioMathTeacher/research-buddy/releases/download/v3.1.2/ResearchBuddy3.1.2-macos.zip)
+- **Linux**: [ResearchBuddy3.1.2-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/download/v3.1.2/ResearchBuddy3.1.2-linux.tar.gz)
+
+**Option B: Source Code (If executables don't work)**  
 1. Click the green **"Code"** button at the top of this page
 2. Select **"Download ZIP"** 
 3. Extract the files and run: `python enhanced_training_interface.py`
-
-**Option B: Pre-built Executables (Coming Soon)**  
-Automated builds are in progress. Check the [Actions tab](https://github.com/OhioMathTeacher/research-buddy/actions) for build status.
 
 ### Step 2: Install
 
