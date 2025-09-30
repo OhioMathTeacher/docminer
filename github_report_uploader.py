@@ -16,11 +16,36 @@ from pathlib import Path
 class GitHubReportUploader:
     """Handle automatic upload of training reports to GitHub"""
     
-    def __init__(self, repo_owner="OhioMathTeacher", repo_name="research-buddy"):
-        self.repo_owner = repo_owner
-        self.repo_name = repo_name
+    def __init__(self, repo_owner=None, repo_name=None):
+        # Load configuration from settings file
+        self.config = self.load_config()
+        
+        # Use provided values or fall back to configuration
+        self.repo_owner = repo_owner or self.config.get("github_owner", "OhioMathTeacher")
+        self.repo_name = repo_name or self.config.get("github_repo", "research-buddy")
+        self.github_token = self.config.get("github_token", "")
+        
         self.reports_dir = Path("training_reports")
         self.reports_dir.mkdir(exist_ok=True)
+        
+    def load_config(self):
+        """Load configuration from interface_settings.json"""
+        config_file = Path("interface_settings.json")
+        default_config = {
+            "github_owner": "OhioMathTeacher",
+            "github_repo": "research-buddy", 
+            "github_token": ""
+        }
+        
+        if config_file.exists():
+            try:
+                with open(config_file, 'r') as f:
+                    config = json.load(f)
+                    default_config.update(config)
+            except Exception as e:
+                print(f"Warning: Could not load configuration: {e}")
+                
+        return default_config
         
     def create_training_report(self, training_data, ga_name, session_id):
         """Create a markdown report from training data"""
