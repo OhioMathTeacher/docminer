@@ -1068,6 +1068,9 @@ class EnhancedTrainingInterface(QMainWindow):
         
         self.setup_ui()
         
+        # Check network connectivity and update button states
+        self.check_network_and_update_buttons()
+        
         # Initialize with default folder and README
         self.initialize_with_readme()
         
@@ -1103,9 +1106,25 @@ class EnhancedTrainingInterface(QMainWindow):
         if dialog.exec() == QDialog.Accepted:
             # Refresh GitHub uploader with new configuration
             self.github_uploader = GitHubReportUploader()
+            
+            # Update button tooltips with new repository info
+            self.check_network_and_update_buttons()
+            
+            # Update status bar with new repository info
+            repo_info = f"📦 Uploads to: {self.github_uploader.repo_owner}/{self.github_uploader.repo_name}"
+            current_status = self.statusBar().currentMessage()
+            if "📦 Uploads to:" in current_status:
+                # Replace the repository part
+                base_message = current_status.split("📦 Uploads to:")[0].strip()
+                self.statusBar().showMessage(f"{base_message} {repo_info}")
+            else:
+                self.statusBar().showMessage(f"{current_status} {repo_info}")
+            
+            repo_url = f"https://github.com/{self.github_uploader.repo_owner}/{self.github_uploader.repo_name}"
             QMessageBox.information(self, "Configuration Updated", 
-                                  "Configuration has been updated successfully!\n\n"
-                                  "New settings will be used for future uploads.")
+                                  f"Configuration has been updated successfully!\n\n"
+                                  f"📦 Upload Destination:\n{repo_url}\n\n"
+                                  f"New settings will be used for future uploads.")
     
     def show_about(self):
         """Show about dialog"""
@@ -1345,15 +1364,16 @@ class EnhancedTrainingInterface(QMainWindow):
         export_btn.clicked.connect(self.export_evidence)
         button_layout.addWidget(export_btn)
         
-        upload_btn = QPushButton("🚀 Upload Decision")
-        upload_btn.clicked.connect(self.upload_decision)
-        upload_btn.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-weight: bold; }")
-        button_layout.addWidget(upload_btn)
+        self.upload_btn = QPushButton("🚀 Upload Decision")
+        self.upload_btn.clicked.connect(self.upload_decision)
+        self.upload_btn.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-weight: bold; }")
+        button_layout.addWidget(self.upload_btn)
         
         layout.addLayout(button_layout)
         
         # Status bar
-        self.statusBar().showMessage("Ready to analyze papers and make decisions. Select a PDF folder to begin.")
+        repo_info = f"📦 Uploads to: {self.github_uploader.repo_owner}/{self.github_uploader.repo_name}"
+        self.statusBar().showMessage(f"Ready to analyze papers and make decisions. Select a PDF folder to begin. {repo_info}")
         
     def select_folder(self):
         """Select folder containing PDFs to train on"""
@@ -1580,7 +1600,8 @@ class EnhancedTrainingInterface(QMainWindow):
         
         if has_network:
             self.upload_btn.setEnabled(True)
-            self.upload_btn.setToolTip("Upload your decision to GitHub")
+            repo_url = f"https://github.com/{self.github_uploader.repo_owner}/{self.github_uploader.repo_name}"
+            self.upload_btn.setToolTip(f"Upload your decision to:\n{repo_url}")
         else:
             self.upload_btn.setEnabled(False)
             self.upload_btn.setToolTip("No internet connection - use 'Export Evidence' to save your work locally")
@@ -1712,6 +1733,8 @@ class EnhancedTrainingInterface(QMainWindow):
                                       f"Decision files created:\n"
                                       f"• {Path(result['json_file']).name}\n"
                                       f"• {Path(result['md_file']).name}\n\n"
+                                      f"📦 Uploaded to Repository:\n"
+                                      f"https://github.com/{self.github_uploader.repo_owner}/{self.github_uploader.repo_name}\n\n"
                                       f"Your decision is now available on GitHub for review.")
             else:
                 QMessageBox.warning(self, "Upload Failed", 
