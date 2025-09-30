@@ -1921,7 +1921,7 @@ class EnhancedTrainingInterface(QMainWindow):
                 print(f"Copied professional training guide to {self.readme_pdf_path}")
             else:
                 # Create README if it doesn't exist
-                from create_readme_pdf import create_readme_pdf
+                from utils.create_readme_pdf import create_readme_pdf
                 create_readme_pdf(self.readme_pdf_path)
                 print(f"Created README at {self.readme_pdf_path}")
     
