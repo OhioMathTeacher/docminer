@@ -1,9 +1,11 @@
-name: 🚀 Build Research Buddy 2.0 Executables
+name: 🚀 Build Research Buddy 3.1 Executables
 
 on:
   push:
     tags:
-      - 'v*'  # Trigger on version tags like v2.0.0
+      - 'v*'  # Trigger on version tags like v3.1.0
+    branches:
+      - main  # Also build on main branch pushes
   workflow_dispatch:  # Allow manual triggering
 
 jobs:
@@ -14,19 +16,15 @@ jobs:
           - os: ubuntu-latest
             platform: linux
             arch: x64
-            executable: ResearchBuddy2.0
+            executable: ResearchBuddy3.1
           - os: windows-latest
             platform: windows
             arch: x64
-            executable: ResearchBuddy2.0.exe
-          - os: windows-latest
-            platform: windows
-            arch: x86
-            executable: ResearchBuddy2.0-x86.exe
+            executable: ResearchBuddy3.1.exe
           - os: macos-latest
             platform: macos
             arch: universal
-            executable: ResearchBuddy2.0
+            executable: ResearchBuddy3.1.app
 
     runs-on: ${{ matrix.os }}
     
@@ -37,8 +35,8 @@ jobs:
     - name: 🐍 Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
-        architecture: ${{ matrix.arch == 'x86' && 'x86' || 'x64' }}
+        python-version: '3.11'  # Updated to 3.11 for better compatibility
+        architecture: x64
 
     - name: 📦 Install Dependencies
       run: |
@@ -57,10 +55,10 @@ jobs:
     - name: 🔨 Build Executable (macOS Universal)
       if: matrix.platform == 'macos'
       run: |
-        python -m PyInstaller --onefile --windowed \
+        python -m PyInstaller --onedir --windowed \
           --target-arch universal2 \
-          --name "${{ matrix.executable }}" \
-          --osx-bundle-identifier "edu.university.researchbuddy" \
+          --name "ResearchBuddy3.1" \
+          --osx-bundle-identifier "edu.university.researchbuddy31" \
           --distpath ./dist \
           enhanced_training_interface.py
 
@@ -68,12 +66,22 @@ jobs:
       shell: bash
       run: |
         # Basic executable test (check if it exists and is executable)
-        if [ -f "./dist/${{ matrix.executable }}" ]; then
-          echo "✅ Executable created successfully"
-          ls -la "./dist/${{ matrix.executable }}"
+        if [ "${{ matrix.platform }}" = "macos" ]; then
+          if [ -d "./dist/ResearchBuddy3.1.app" ]; then
+            echo "✅ macOS app bundle created successfully"
+            ls -la "./dist/ResearchBuddy3.1.app"
+          else
+            echo "❌ macOS app bundle not found"
+            exit 1
+          fi
         else
-          echo "❌ Executable not found"
-          exit 1
+          if [ -f "./dist/${{ matrix.executable }}" ]; then
+            echo "✅ Executable created successfully"
+            ls -la "./dist/${{ matrix.executable }}"
+          else
+            echo "❌ Executable not found"
+            exit 1
+          fi
         fi
 
     - name: 📦 Create Distribution Package
@@ -82,41 +90,39 @@ jobs:
         mkdir -p release
         
         # Copy executable
-        cp "./dist/${{ matrix.executable }}" release/
+        if [ "${{ matrix.platform }}" = "macos" ]; then
+          cp -r "./dist/ResearchBuddy3.1.app" release/
+        else
+          cp "./dist/${{ matrix.executable }}" release/
+        fi
         
         # Copy essential files
         cp README.md release/
-        cp QUICK_REFERENCE.md release/
-        cp GA_TRAINING_GUIDE_2.0.md release/
+        cp QUICK_START_FOR_GAS.md release/
         
         # Create platform-specific archive
         if [ "${{ matrix.platform }}" = "windows" ]; then
           # Windows: Create ZIP
           cd release
-          if [ "${{ matrix.arch }}" = "x86" ]; then
-            7z a "../ResearchBuddy2.0-windows-x86.zip" *
-          else
-            7z a "../ResearchBuddy2.0-windows-x64.zip" *
-          fi
+          powershell Compress-Archive -Path "*" -DestinationPath "../ResearchBuddy3.1-windows.zip"
         elif [ "${{ matrix.platform }}" = "macos" ]; then
           # macOS: Create ZIP with proper permissions
           cd release
-          chmod +x "${{ matrix.executable }}"
-          zip -r "../ResearchBuddy2.0-macos-universal.zip" *
+          zip -r "../ResearchBuddy3.1-macos.zip" *
         else
           # Linux: Create tar.gz
           cd release
           chmod +x "${{ matrix.executable }}"
-          tar -czf "../ResearchBuddy2.0-linux-x64.tar.gz" *
+          tar -czf "../ResearchBuddy3.1-linux.tar.gz" *
         fi
 
     - name: 📤 Upload Build Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: ResearchBuddy2.0-${{ matrix.platform }}-${{ matrix.arch }}
+        name: ResearchBuddy3.1-${{ matrix.platform }}
         path: |
-          ResearchBuddy2.0-*.zip
-          ResearchBuddy2.0-*.tar.gz
+          ResearchBuddy3.1-*.zip
+          ResearchBuddy3.1-*.tar.gz
         retention-days: 90
 
   release:
@@ -143,39 +149,46 @@ jobs:
     - name: 📝 Generate Release Notes
       run: |
         cat > release-notes.md << EOF
-        # 🚀 Research Buddy 2.0 Release
+        # 🚀 Research Buddy 3.1 Release
         
-        ## AI-Assisted Positionality Analysis System
+        ## Enhanced Training Interface with Standalone Executables
         
-        This release includes pre-built executables for all major platforms:
+        **Perfect for Graduate Assistants - No technical setup required!**
         
         ### 📥 Downloads
-        - **macOS**: ResearchBuddy2.0-macos-universal.zip (Universal Binary)
-        - **Windows 64-bit**: ResearchBuddy2.0-windows-x64.zip (Recommended)
-        - **Windows 32-bit**: ResearchBuddy2.0-windows-x86.zip
-        - **Linux**: ResearchBuddy2.0-linux-x64.tar.gz
+        - **macOS**: ResearchBuddy3.1-macos.zip (Universal Binary)
+        - **Windows**: ResearchBuddy3.1-windows.zip (64-bit)
+        - **Linux**: ResearchBuddy3.1-linux.tar.gz (64-bit)
+        
+        ### ✨ What's New in 3.1
+        - **📄 Page Navigation**: Navigate multi-page PDFs with ◀ ▶ buttons
+        - **🔧 API Key Management**: Configure OpenAI keys directly in the GUI
+        - **🛡️ Better Error Handling**: Helpful instructions when setup needed
+        - **📦 Standalone Executables**: Just download, extract, and run!
         
         ### 🎯 Key Features
-        - **10x Speed Improvement**: AI pre-screening with 80% accuracy
-        - **Professional GUI**: Enhanced training interface with auto-selection
-        - **Institutional Analytics**: Batch processing and comprehensive reporting
-        - **Complete Documentation**: Training guides and deployment procedures
+        - **Professional PDF Viewer**: Built-in viewer with text selection
+        - **AI-Assisted Analysis**: Optional OpenAI integration for pre-screening
+        - **Manual Analysis Mode**: Works great without AI for complete independence
+        - **Evidence Collection**: Easy text selection and quote extraction
+        - **GitHub Integration**: Direct upload of training decisions
         
         ### 🚀 Quick Start
-        1. Download the appropriate version for your platform
-        2. Extract the archive
-        3. Run the executable (no installation required!)
-        4. See GA_TRAINING_GUIDE_2.0.md for usage instructions
+        1. Download the file for your operating system
+        2. Extract/unzip the files  
+        3. Double-click the executable to run
+        4. See QUICK_START_FOR_GAS.md for detailed instructions
         
-        ### 📊 Performance
-        - Processes 15-25 papers/hour (vs 6-8 manual)
-        - 80% AI detection accuracy with human oversight
-        - Scales to 1000+ papers/week for institutions
+        ### 📊 Perfect for Research Teams
+        - No Python installation required
+        - No command line knowledge needed
+        - Professional interface for academic paper analysis
+        - Scales from individual researchers to large institutions
         
         ### 📚 Documentation Included
-        - Quick Reference Guide
-        - Complete GA Training Manual
-        - System requirements and troubleshooting
+        - Quick Start Guide for Graduate Assistants
+        - Complete setup and usage instructions
+        - Troubleshooting and FAQ
         
         For technical support or questions, please open an issue in this repository.
         EOF
