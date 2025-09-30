@@ -48,6 +48,7 @@ class SelectablePDFLabel(QLabel):
                 border: 1px solid #ccc;
                 background-color: white;
                 selection-background-color: #316AC5;
+                font-family: 'Courier New', monospace;
             }
         """)
         
@@ -354,31 +355,66 @@ class PDFViewer(QWidget):
         self.zoom_label.setMinimumWidth(40)
         controls.addWidget(self.zoom_label)
         
+        # Paper size ratio controls
+        controls.addWidget(QLabel("|"))  # Separator
+        controls.addWidget(QLabel("Aspect:"))
+        
+        self.paper_ratio_combo = QComboBox()
+        self.paper_ratio_combo.addItems(["Letter (8.5×11)", "A4 (210×297)", "Custom"])
+        self.paper_ratio_combo.setCurrentText("Letter (8.5×11)")
+        self.paper_ratio_combo.currentTextChanged.connect(self.on_paper_ratio_changed)
+        self.paper_ratio_combo.setMaximumWidth(120)
+        self.paper_ratio_combo.setToolTip("Optimize viewing for standard paper sizes")
+        controls.addWidget(self.paper_ratio_combo)
+        
+        # Fit PDF button for optimal viewing
+        fit_pdf_btn = QPushButton("📏 Fit PDF")
+        fit_pdf_btn.clicked.connect(self.fit_pdf_to_window)
+        fit_pdf_btn.setMaximumWidth(80)
+        fit_pdf_btn.setToolTip("Automatically adjust zoom to fit PDF perfectly in window")
+        controls.addWidget(fit_pdf_btn)
+        
         layout.addLayout(controls)
         
         # PDF display area with text selection
         self.scroll_area = QScrollArea()
         self.pdf_label = SelectablePDFLabel()
-        self.pdf_label.setText("📄 Load a PDF to begin training...")
+        self.pdf_label.setText("Load a PDF document to begin analysis...")
         self.pdf_label.setAlignment(Qt.AlignCenter)  # Center the initial message
         self.pdf_label.setStyleSheet("""
             QLabel { 
-                background-color: #f9f9f9; 
-                border: 2px dashed #ccc; 
-                color: #666;
-                font-size: 14px;
+                background-color: white; 
+                border: 1px solid #666666; 
+                color: black;
+                font-family: 'Courier New', monospace;
+                font-size: 12px;
                 padding: 20px;
             }
         """)
-        # Set a reasonable initial size that will be updated when PDF loads
-        self.pdf_label.setMinimumSize(600, 700)
+        # Set a good initial size that will be updated when PDF loads
+        self.pdf_label.setMinimumSize(650, 850)  # Better initial readable size
+        # Remove maximum size constraints to let PDF display naturally
         
-        # Configure scroll area for proper scrolling
-        self.scroll_area.setWidget(self.pdf_label)
+        # Create a widget that constrains the PDF to Letter proportions
+        self.pdf_widget = QWidget()
+        self.pdf_widget.setMinimumWidth(400)  # Minimum readable width
+        
+        pdf_layout = QVBoxLayout(self.pdf_widget)
+        pdf_layout.setContentsMargins(0, 0, 0, 0)
+        pdf_layout.addWidget(self.pdf_label)
+        
+        # Configure scroll area for proper scrolling with container
+        self.scroll_area.setWidget(self.pdf_widget)
         self.scroll_area.setWidgetResizable(True)  # Allow resizing initially
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        layout.addWidget(self.scroll_area)
+        
+        # Create a container for Letter-proportioned viewing
+        viewer_container = QHBoxLayout()
+        viewer_container.addWidget(self.scroll_area)
+        viewer_container.addStretch()  # Push everything to the left
+        
+        layout.addLayout(viewer_container)
         
     def load_pdf(self, pdf_path):
         """Load a PDF file for viewing"""
@@ -387,6 +423,12 @@ class PDFViewer(QWidget):
             self.current_page = 0
             self.render_page()
             self.update_controls()
+            # Adjust container size for optimal viewing
+            print("DEBUG: Adjusting container size for PDF load")
+            QTimer.singleShot(100, self.adjust_pdf_container_size)
+            # Automatically fit PDF to window for optimal viewing with longer delay
+            print("DEBUG: Scheduling auto-fit for PDF load")
+            QTimer.singleShot(300, self.fit_pdf_to_window)  # Longer delay after container resize
             return True
         except Exception as e:
             QMessageBox.critical(self, "PDF Error", f"Could not load PDF: {e}")
@@ -394,6 +436,63 @@ class PDFViewer(QWidget):
             
     def render_page(self):
         """Render the current page as an image and extract text blocks"""
+        if not self.pdf_document:
+            return
+            
+        try:
+            page = self.pdf_document[self.current_page]
+            
+            # Create transformation matrix for zoom
+            mat = fitz.Matrix(self.zoom_level, self.zoom_level)
+            
+            # Render page to pixmap
+            pix = page.get_pixmap(matrix=mat)
+            
+            # Convert to QPixmap
+            img_data = pix.tobytes("ppm")
+            qimg = QPixmap()
+            qimg.loadFromData(img_data)
+            
+            # Set the pixmap to the label
+            self.pdf_label.setPixmap(qimg)
+            self.pdf_label.setAlignment(Qt.AlignCenter)
+            
+            # Let the label size itself naturally to the pixmap
+            self.pdf_label.adjustSize()
+            
+            print(f"DEBUG: PDF rendered at {qimg.width()}x{qimg.height()}, zoom: {self.zoom_level:.2f}")
+            
+        except Exception as e:
+            print(f"Error rendering page: {e}")
+            
+    def adjust_pdf_container_size(self):
+        """Adjust the PDF container to maintain reasonable viewing size"""
+        if not hasattr(self, 'scroll_area') or not hasattr(self, 'pdf_widget'):
+            print("DEBUG: Missing scroll_area or pdf_widget")
+            return
+            
+        try:
+            # Set a reasonable maximum width that adapts to window size
+            available_width = self.scroll_area.width()
+            # Use 70% of available width but ensure it's sufficient for readability
+            max_reasonable_width = max(650, int(available_width * 0.7))  # At least 650px, or 70% of available
+            
+            print(f"DEBUG: Setting PDF container max width to {max_reasonable_width}px (adaptive sizing)")
+            
+            # Set adaptive width for good viewing
+            self.pdf_widget.setMaximumWidth(max_reasonable_width)
+            self.pdf_widget.setMinimumWidth(500)  # Ensure good minimum readability
+            
+        except Exception as e:
+            print(f"Error adjusting PDF container size: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def resizeEvent(self, event):
+        """Handle window resize to maintain PDF proportions"""
+        super().resizeEvent(event)
+        # Small delay to ensure layout is complete
+        QTimer.singleShot(50, self.adjust_pdf_container_size)
         if not self.pdf_document:
             return
             
@@ -508,7 +607,8 @@ class PDFViewer(QWidget):
             self.pdf_label.setStyleSheet("""
                 QLabel { 
                     background-color: white; 
-                    border: 1px solid #ccc; 
+                    border: 1px solid #666666;
+                    font-family: 'Courier New', monospace;
                 }
             """)
             
@@ -549,12 +649,67 @@ class PDFViewer(QWidget):
         self.zoom_label.setText(f"{value}%")
         if self.pdf_document:
             self.render_page()
+    
+    def fit_pdf_to_window(self):
+        """Automatically adjust zoom to fit PDF perfectly based on selected paper ratio"""
+        if not self.pdf_document or not hasattr(self, 'scroll_area'):
+            print("DEBUG: Cannot fit PDF - missing document or scroll area")
+            return
+            
+        try:
+            # Get current page
+            page = self.pdf_document[self.current_page]
+            page_rect = page.rect
+            
+            # Get available space in scroll area (accounting for scrollbars and margins)
+            available_width = self.scroll_area.viewport().width() - 40
+            available_height = self.scroll_area.viewport().height() - 40
+            
+            print(f"DEBUG: Available space: {available_width}x{available_height}")
+            print(f"DEBUG: PDF page size: {page_rect.width}x{page_rect.height}")
+            
+            # Ensure we have valid dimensions
+            if available_width <= 0 or available_height <= 0:
+                print("DEBUG: Invalid available dimensions")
+                return
+            
+            # Calculate zoom to fit PDF in available space
+            width_zoom = available_width / page_rect.width
+            height_zoom = available_height / page_rect.height
+            
+            # Use the smaller ratio to ensure both dimensions fit, with 95% margin
+            zoom_factor = min(width_zoom, height_zoom) * 0.95
+            
+            # Ensure reasonable zoom range
+            zoom_factor = max(0.3, min(2.0, zoom_factor))  # Between 30% and 200%
+            
+            # Convert to percentage and apply (with broader range)
+            zoom_percentage = int(zoom_factor * 100)
+            zoom_percentage = max(25, min(300, zoom_percentage))
+            
+            print(f"Auto-fitting PDF: {zoom_percentage}% zoom (fit to available space)")
+            
+            self.zoom_slider.setValue(zoom_percentage)
+            # change_zoom will be called automatically via signal
+            
+        except Exception as e:
+            print(f"Error fitting PDF to window: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def on_paper_ratio_changed(self):
+        """Handle paper ratio selection change"""
+        # Adjust container size for new ratio
+        self.adjust_pdf_container_size()
+        # Auto-fit when ratio changes
+        if self.pdf_document:
+            QTimer.singleShot(100, self.fit_pdf_to_window)
 
 class EnhancedTrainingInterface(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("🎓 Search Buddy Training Interface - Enhanced PDF Viewer")
-        self.setGeometry(100, 100, 1400, 1000)
+        self.setWindowTitle("Training Buddy - Professional Positionality Analysis Interface")
+        self.setGeometry(100, 100, 1600, 1000)  # Wider for better PDF fit
         
         # Training data storage
         self.training_data = []
@@ -564,7 +719,7 @@ class EnhancedTrainingInterface(QMainWindow):
         
         # Default folder in user's home directory
         self.default_pdf_folder = Path.home() / "ExtractorPDFs" 
-        self.readme_pdf_path = self.default_pdf_folder / "README_Training_Guide.pdf"
+        self.readme_pdf_path = self.default_pdf_folder / "about.pdf"
         
         # Settings file to remember state
         self.settings_file = Path(__file__).parent / "interface_settings.json"
@@ -604,11 +759,10 @@ class EnhancedTrainingInterface(QMainWindow):
         folder_btn.clicked.connect(self.select_folder)
         folder_btn.setStyleSheet("QPushButton { font-weight: bold; padding: 8px; }")
         header_layout.addWidget(folder_btn)
-        header_layout.addWidget(folder_btn)
         
         # Progress tracking
         self.progress_label = QLabel("No papers loaded")
-        self.progress_label.setFont(QFont("Arial", 10, QFont.Bold))
+        self.progress_label.setFont(QFont("Courier New", 10, QFont.Bold))
         self.progress_bar = QProgressBar()
         header_layout.addWidget(self.progress_label)
         header_layout.addWidget(self.progress_bar)
@@ -619,14 +773,15 @@ class EnhancedTrainingInterface(QMainWindow):
         splitter = QSplitter(Qt.Horizontal)
         
         # Left panel: PDF Viewer
-        pdf_panel = QGroupBox("📖 PDF Viewer")
+        pdf_panel = QGroupBox("PDF Document Viewer")
+        pdf_panel.setMinimumWidth(250)  # Ensure title is not truncated
         pdf_panel.setMinimumWidth(600)
         pdf_layout = QVBoxLayout(pdf_panel)
         
         # Paper info
         self.paper_info = QLabel("No paper selected")
-        self.paper_info.setFont(QFont("Arial", 12, QFont.Bold))
-        self.paper_info.setStyleSheet("QLabel { padding: 8px; background: #e3f2fd; border-radius: 4px; }")
+        self.paper_info.setFont(QFont("Courier New", 11, QFont.Bold))
+        self.paper_info.setStyleSheet("QLabel { padding: 8px; background: white; border: 1px solid #666666; color: black; }")
         pdf_layout.addWidget(self.paper_info)
         
         # PDF viewer
@@ -643,7 +798,7 @@ class EnhancedTrainingInterface(QMainWindow):
         
         self.extracted_text = QPlainTextEdit()
         self.extracted_text.setReadOnly(True)
-        self.extracted_text.setFont(QFont("Arial", 9))
+        self.extracted_text.setFont(QFont("Courier New", 10))
         self.extracted_text.setPlaceholderText("Select text in PDF above to copy quotes for evidence...")
         text_extract_layout.addWidget(self.extracted_text)
         
@@ -671,15 +826,16 @@ class EnhancedTrainingInterface(QMainWindow):
         
         self.ai_results = QLabel("No detection results")
         self.ai_results.setWordWrap(True)
-        self.ai_results.setFont(QFont("Courier", 9))
-        self.ai_results.setStyleSheet("QLabel { background: #f5f5f5; padding: 8px; border-radius: 4px; }")
+        self.ai_results.setFont(QFont("Courier New", 10))
+        self.ai_results.setStyleSheet("QLabel { background: white; padding: 8px; border: 1px solid #666666; color: black; }")
         ai_layout.addWidget(self.ai_results)
         
         pdf_layout.addWidget(ai_group)
         splitter.addWidget(pdf_panel)
         
         # Right panel: Training interface
-        training_panel = QGroupBox("🎯 Human Expert Labeling")
+        training_panel = QGroupBox("Human Expert Analysis and Labeling")
+        training_panel.setMinimumWidth(300)  # Ensure title is not truncated
         training_panel.setMinimumWidth(400)
         training_panel.setMaximumWidth(500)
         right_layout = QVBoxLayout(training_panel)
@@ -692,7 +848,7 @@ class EnhancedTrainingInterface(QMainWindow):
         analysis_btn_layout = QHBoxLayout()
         self.initial_analysis_btn = QPushButton("🚀 Run Initial Analysis")
         self.initial_analysis_btn.clicked.connect(self.run_initial_analysis)
-        self.initial_analysis_btn.setStyleSheet("QPushButton { background-color: #FF9800; color: white; font-weight: bold; padding: 10px; }")
+        self.initial_analysis_btn.setStyleSheet("QPushButton { background-color: #333333; color: white; font-weight: bold; padding: 10px; font-family: 'Courier New', monospace; }")
         analysis_btn_layout.addWidget(self.initial_analysis_btn)
         
         self.analysis_status = QLabel("Click to analyze this paper for positionality")
@@ -858,8 +1014,8 @@ class EnhancedTrainingInterface(QMainWindow):
         splitter.addWidget(training_panel)
         layout.addWidget(splitter)
         
-        # Set splitter proportions
-        splitter.setSizes([800, 500])  # Give more space to PDF viewer
+        # Set splitter proportions for optimal PDF viewing
+        splitter.setSizes([650, 650])  # More balanced layout for Letter portrait PDFs
         
         # Bottom buttons
         button_layout = QHBoxLayout()
@@ -919,11 +1075,11 @@ class EnhancedTrainingInterface(QMainWindow):
             self.update_progress()
             if self.papers_list:
                 self.load_current_paper()
-                self.statusBar().showMessage(f"✅ Loaded {len(self.papers_list)} papers from {Path(folder_path).name}")
+                self.statusBar().showMessage(f"Loaded {len(self.papers_list)} papers from {Path(folder_path).name}")
             else:
                 self.statusBar().showMessage(f"📁 No PDF files found in {Path(folder_path).name}")
         except Exception as e:
-            self.statusBar().showMessage(f"❌ Error loading folder: {e}")
+            self.statusBar().showMessage(f"Error loading folder: {e}")
             
     def update_progress(self):
         """Update progress indicators"""
@@ -1065,7 +1221,7 @@ class EnhancedTrainingInterface(QMainWindow):
         self.save_training_data()
         self.update_progress()
         
-        self.statusBar().showMessage(f"✅ Saved training data for {filename}")
+        self.statusBar().showMessage(f"Saved training data for {filename}")
         return True
         
     def next_paper(self):
@@ -1121,7 +1277,7 @@ class EnhancedTrainingInterface(QMainWindow):
             try:
                 with open(filename, 'w') as f:
                     json.dump(self.training_data, f, indent=2)
-                QMessageBox.information(self, "✅ Exported", 
+                QMessageBox.information(self, "Exported", 
                                       f"Training data exported to {filename}\n\n"
                                       f"Papers labeled: {len(self.training_data)}\n"
                                       f"Use training_analysis.py to analyze the results.")
@@ -1145,7 +1301,7 @@ class EnhancedTrainingInterface(QMainWindow):
             result = self.github_uploader.process_training_session(self.training_data, ga_name)
             
             if result['success']:
-                QMessageBox.information(self, "🚀 Upload Successful", 
+                QMessageBox.information(self, "Upload Successful", 
                                       f"Training report uploaded successfully!\n\n"
                                       f"GA: {ga_name}\n"
                                       f"Session: {result['session_id']}\n"
@@ -1218,7 +1374,7 @@ class EnhancedTrainingInterface(QMainWindow):
             if self.papers_list:
                 self.current_paper_index = 0
                 self.load_current_paper()
-                self.statusBar().showMessage(f"✅ Loaded {len(self.papers_list)} PDFs from ExtractorPDFs folder", 3000)
+                self.statusBar().showMessage(f"Loaded {len(self.papers_list)} PDFs from ExtractorPDFs folder", 3000)
             else:
                 self.statusBar().showMessage("� Add PDF files to your ~/ExtractorPDFs folder to begin training", 5000)
     
@@ -1226,11 +1382,11 @@ class EnhancedTrainingInterface(QMainWindow):
         """Ensure the README PDF exists in the default folder"""
         if not self.readme_pdf_path.exists():
             # Copy from app directory
-            source_readme = Path(__file__).parent / "README_Training_Guide.pdf"
+            source_readme = Path(__file__).parent / "about.pdf"
             if source_readme.exists():
                 import shutil
                 shutil.copy2(source_readme, self.readme_pdf_path)
-                print(f"Copied README to {self.readme_pdf_path}")
+                print(f"Copied professional training guide to {self.readme_pdf_path}")
             else:
                 # Create README if it doesn't exist
                 from create_readme_pdf import create_readme_pdf
@@ -1251,7 +1407,16 @@ class EnhancedTrainingInterface(QMainWindow):
                 with open(self.settings_file, 'r') as f:
                     settings = json.load(f)
                     self.pdf_folder = settings.get("pdf_folder", str(self.default_pdf_folder))
-                    # Could add more settings here like window position, zoom level, etc.
+                    
+                    # Load window geometry if saved
+                    window_geometry = settings.get("window_geometry")
+                    if window_geometry:
+                        self.setGeometry(
+                            window_geometry.get("x", 100),
+                            window_geometry.get("y", 100),
+                            window_geometry.get("width", 1400),
+                            window_geometry.get("height", 1000)
+                        )
         except Exception as e:
             print(f"Could not load settings: {e}")
             self.pdf_folder = str(self.default_pdf_folder)
@@ -1259,8 +1424,16 @@ class EnhancedTrainingInterface(QMainWindow):
     def save_settings(self):
         """Save interface settings to file"""
         try:
+            # Get current window geometry
+            geometry = self.geometry()
             settings = {
                 "pdf_folder": self.pdf_folder,
+                "window_geometry": {
+                    "x": geometry.x(),
+                    "y": geometry.y(),
+                    "width": geometry.width(),
+                    "height": geometry.height()
+                },
                 "last_updated": datetime.now().isoformat()
             }
             with open(self.settings_file, 'w') as f:
@@ -1272,7 +1445,7 @@ class EnhancedTrainingInterface(QMainWindow):
         """Handle text selection from PDF viewer"""
         if selected_text.strip():
             self.extracted_text.setPlainText(selected_text)
-            self.statusBar().showMessage("✅ Text selected from PDF", 2000)
+            self.statusBar().showMessage("Text selected from PDF", 2000)
         else:
             self.extracted_text.clear()
             
@@ -1288,7 +1461,7 @@ class EnhancedTrainingInterface(QMainWindow):
             self.evidence_text.setPlainText(new_evidence)
             
             # Show confirmation
-            self.statusBar().showMessage("✅ Text copied to evidence field", 2000)
+            self.statusBar().showMessage("Text copied to evidence field", 2000)
     
     def run_initial_analysis(self):
         """Run AI analysis on current paper and display findings"""
@@ -1313,19 +1486,19 @@ class EnhancedTrainingInterface(QMainWindow):
             
             # Update status and enable buttons
             if result['positionality_score'] > 0.3:
-                self.analysis_status.setText(f"✅ Found {len(result['positionality_snippets'])} potential evidence excerpts")
+                self.analysis_status.setText(f"Found {len(result['positionality_snippets'])} potential evidence excerpts")
                 self.quick_accept_btn.setEnabled(True)
                 self.quick_reject_btn.setEnabled(True)
                 # Store findings for quick acceptance
                 self.current_ai_findings = result
             else:
-                self.analysis_status.setText("❌ No strong positionality indicators found")
+                self.analysis_status.setText("No strong positionality indicators found")
                 self.quick_accept_btn.setEnabled(False)
                 self.quick_reject_btn.setEnabled(True)
                 self.current_ai_findings = None
                 
         except Exception as e:
-            self.analysis_status.setText(f"❌ Analysis failed: {str(e)}")
+            self.analysis_status.setText(f"Analysis failed: {str(e)}")
             self.ai_findings.setPlainText(f"Error running analysis: {e}")
             
         finally:
@@ -1357,18 +1530,18 @@ class EnhancedTrainingInterface(QMainWindow):
         
         # Create comprehensive HTML display
         html = f"""
-        <div style="font-family: 'Segoe UI', Arial, sans-serif;">
-        <h3 style="color: #2196F3; margin-bottom: 10px;">📋 AI Analysis for {paper_name}</h3>
+        <div style="font-family: 'Courier New', monospace;">
+        <h3 style="color: #2196F3; margin-bottom: 10px;">AI Analysis for {paper_name}</h3>
         
         <div style="background: #f0f7ff; padding: 12px; border-radius: 6px; margin: 10px 0;">
-        <p style="margin: 5px 0;"><b>🎯 Confidence Level:</b> <span style="color: {confidence_color}; font-weight: bold;">{confidence_level}</span> ({score:.3f})</p>
-        <p style="margin: 5px 0;"><b>💡 Recommendation:</b> {recommendation}</p>
-        <p style="margin: 5px 0;"><b>🔍 Patterns Detected:</b> {', '.join(patterns).replace('_', ' ').title() if patterns else 'None'}</p>
+        <p style="margin: 5px 0;"><b>Confidence Level:</b> <span style="color: {confidence_color}; font-weight: bold;">{confidence_level}</span> ({score:.3f})</p>
+        <p style="margin: 5px 0;"><b>Recommendation:</b> {recommendation}</p>
+        <p style="margin: 5px 0;"><b>Patterns Detected:</b> {', '.join(patterns).replace('_', ' ').title() if patterns else 'None'}</p>
         </div>
         """
         
         if snippets:
-            html += "<h4 style='color: #4CAF50; margin-top: 15px;'>📄 Evidence Excerpts Found:</h4>"
+            html += "<h4 style='color: #4CAF50; margin-top: 15px;'>Evidence Excerpts Found:</h4>"
             for i, (pattern, text) in enumerate(snippets.items(), 1):
                 # Clean up and intelligently truncate text
                 clean_text = text.strip()
@@ -1385,21 +1558,21 @@ class EnhancedTrainingInterface(QMainWindow):
                 html += f"""
                 <div style="margin: 12px 0; padding: 10px; background: #f9f9f9; border-left: 4px solid #2196F3; border-radius: 4px;">
                 <p style="margin: 0; font-weight: bold; color: #333;">#{i} - {pattern.replace('_', ' ').title()}</p>
-                <p style="margin: 5px 0; font-style: italic; color: #666;">📍 Likely Location: {location}</p>
+                <p style="margin: 5px 0; font-style: italic; color: #666;">Likely Location: {location}</p>
                 <p style="margin: 5px 0; line-height: 1.4;"><i>"{clean_text}"</i></p>
                 </div>
                 """
         else:
             html += """
             <div style="background: #fff3cd; padding: 10px; border-radius: 6px; margin: 10px 0;">
-            <p style="color: #856404; margin: 0;"><i>🔍 No specific evidence excerpts extracted. Consider manual review of the full paper.</i></p>
+            <p style="color: #856404; margin: 0;"><i>No specific evidence excerpts extracted. Consider manual review of the full paper.</i></p>
             </div>
             """
         
         # Add AI recommendation summary
         html += f"""
         <div style="background: #e8f5e8; padding: 12px; border-radius: 6px; margin: 15px 0 5px 0;">
-        <h4 style="color: #2e7d32; margin: 0 0 8px 0;">🤖 AI Recommendation:</h4>
+        <h4 style="color: #2e7d32; margin: 0 0 8px 0;">AI Recommendation:</h4>
         <p style="margin: 0; color: #2e7d32;">
         """
         
@@ -1495,7 +1668,7 @@ class EnhancedTrainingInterface(QMainWindow):
         self.pattern_suggestions.setPlainText(ai_note)
         
         location_text = self.location_dropdown.currentText()
-        self.statusBar().showMessage(f"✅ AI findings accepted! Location: {location_text}", 3000)
+        self.statusBar().showMessage(f"AI findings accepted! Location: {location_text}", 3000)
         
     def quick_reject_findings(self):
         """Reject AI findings and proceed with manual review"""
@@ -1509,7 +1682,7 @@ class EnhancedTrainingInterface(QMainWindow):
         self.judgment_buttons['negative'].setChecked(True)
         self.confidence_slider.setValue(3)
         
-        self.statusBar().showMessage("🔍 Manual review mode - read the full paper carefully", 3000)
+        self.statusBar().showMessage("Manual review mode - read the full paper carefully", 3000)
     
     def closeEvent(self, event):
         """Save settings when closing"""

@@ -1,6 +1,6 @@
-# 🚀 Research Buddy 2.0 - AI-Assisted Positionality Analysis
+# 🚀 Research Buddy 2.0 - Training Buddy & Automation Buddy
 
-**Revolutionary academic research tool: Train on 10-20 papers, then automate analysis of thousands**
+**Revolutionary academic research system: Train on 10-20 papers, then automate analysis of thousands**
 
 [![GitHub Release](https://img.shields.io/github/v/release/OhioMathTeacher/research-buddy)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
 [![Platform Support](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
@@ -50,19 +50,19 @@ python enhanced_training_interface.py
 
 ## ⭐ **What's New in Research Buddy 2.0**
 
-### **🤖 AI Pre-Screening Engine**
+### **🎓 Training Buddy (AI-Assisted GA Interface)**
 - **80% detection accuracy** on academic reflexivity statements
 - **10 enhanced patterns** for academic positionality recognition
 - **Confidence scoring** with automatic recommendations
 - **Evidence extraction** with location estimation
 
-### **🖥️ Professional Training Interface**
+### **🖥️ Professional Human-AI Collaboration**
 - **AI-assisted workflow** for 10x speed improvement (15-25 papers/hour vs 6-8 manual)
 - **Scrollable analysis preview** with formatted results
 - **One-click acceptance** for high-confidence AI findings
 - **Smart auto-selection** of forms and dropdowns
 
-### **🏭 INSTITUTIONAL AUTOMATION (The Game Changer)**
+### **🤖 Automation Buddy (Large-Scale Processing Engine)**
 - **Batch processing of 1000+ papers** with minimal human oversight
 - **75% full automation rate** - AI handles clear accept/reject cases
 - **88.8% time savings** compared to manual analysis
@@ -93,7 +93,7 @@ python enhanced_training_interface.py
 
 ### **🏭 Institutional Automation Scale**
 
-**After training on 10-20 papers, Research Buddy 2.0 can process thousands automatically:**
+**After training on 10-20 papers, Training Buddy enables efficient GA work while Automation Buddy processes thousands:**
 
 ```
 📊 1,000 Papers per Week Analysis:
@@ -110,13 +110,13 @@ python enhanced_training_interface.py
 - **Large-scale cross-institutional studies** (1000s of papers)
 - **Longitudinal positionality trend analysis** across decades
 - **Meta-studies on reflexivity** across academic disciplines
-- **Previously impossible research** now feasible with automation
+- **Previously impossible research** now feasible with Automation Buddy
 
 ### **Performance Comparison**
 | Method | Speed | Weekly Capacity | GA Staff | Annual Cost |
 |--------|-------|-----------------|----------|-------------|
 | **Manual Only** | 6-8 papers/hour | 240 papers | 4-5 GAs | $166K |
-| **Research Buddy 2.0** | 20+ papers/hour | 1000+ papers | 1-2 GAs | $42K |
+| **Training + Automation Buddy** | 20+ papers/hour | 1000+ papers | 1-2 GAs | $42K |
 | **Automation Gain** | **3-4x faster** | **4x capacity** | **75% reduction** | **$124K saved** |
 
 ---
