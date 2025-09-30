@@ -11,10 +11,6 @@
 
 Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.  
 
-[![GitHub Release](https://img.shields.io/github/v/release/OhioMathTeacher/research-buddy)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
-[![Platform Support](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
-[![Security](https://img.shields.io/badge/Security-Environment%20Variables-green)](#security)
-[![User Experience](https://img.shields.io/badge/UX-Modern%20Launcher-brightgreen)](#launcher)
 
 ---
 
