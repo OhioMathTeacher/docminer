@@ -1,4 +1,15 @@
-# 📖 Research Buddy – Positionality Detection Training
+# 📖 Research Buddy – Pos### Step 2: Setup & Run
+
+**For Source Code Download:**
+1. Extract the ZIP file to any folder
+2. Open terminal/command prompt in that folder
+3. Install dependencies: `pip install -r requirements.txt`
+4. Run the application: `python enhanced_training_interface.py`
+
+**For Pre-built Executables (when available):**
+1. Extract/unzip the downloaded file
+2. Double-click the application to run
+3. **That's it!** No Python or technical setup requiredality Detection Training
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
@@ -15,11 +26,13 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ### Step 1: Download
 
-**Option A: Pre-built Executables (Recommended)**  
-Go to the [Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest) page and download for your system:
-- **Windows**: `ResearchBuddy-windows.zip`
-- **macOS**: `ResearchBuddy-macos.zip`
-- **Linux**: `ResearchBuddy-linux.tar.gz`
+**Option A: Source Code (Current)**  
+1. Click the green **"Code"** button at the top of this page
+2. Select **"Download ZIP"** 
+3. Extract the files and run: `python enhanced_training_interface.py`
+
+**Option B: Pre-built Executables (Coming Soon)**  
+Automated builds are in progress. Check the [Actions tab](https://github.com/OhioMathTeacher/research-buddy/actions) for build status.
 
 ### Step 2: Install
 
