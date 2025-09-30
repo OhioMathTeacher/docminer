@@ -147,24 +147,24 @@ Research Buddy 4.0 uses the same security practices as professional applications
 
 ## 💻 **System Requirements**
 
-### **For Binaries (Coming Soon)**
+### **For Research Buddy 4.0 (Current)**
 - **Windows**: Windows 10+ (64-bit)
 - **macOS**: macOS 10.15+ (Catalina or newer) 
 - **Linux**: Ubuntu 20.04+ or equivalent
+- **Python**: 3.10+ (for source installation)
 - **Memory**: 8GB RAM minimum, 16GB recommended
 - **Storage**: 150MB for application + space for papers
 
-### **For Source Code (Current)**
-- **Python**: 3.10 or higher
-- **Dependencies**: PySide6, PyMuPDF, NLTK, pandas, requests
-- **Platforms**: macOS, Windows, Linux
-- **Installation**: `pip install -r requirements.txt`
+### **For Future Binary Releases**
+- **Self-contained executables** will eliminate Python requirement
+- **One-click installers** for institutional deployment
+- **Native platform packages** (.app, .exe, .deb)
 
 ---
 
 ## 🚀 **Getting Started**
 
-### **Option 1: Source Code (Current)**
+### **Option 1: Modern Launcher (Recommended)**
 ```bash
 # Clone repository
 git clone https://github.com/OhioMathTeacher/research-buddy.git
@@ -175,22 +175,25 @@ python3 -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# Launch Research Buddy 4.0
+# Launch Research Buddy 4.0 (easy!)
 python3 launch_research_buddy.py
 ```
 
-### **Option 2: Binaries (Coming Soon)**
-1. Download executable for your platform
-2. Extract and double-click to run
-3. Enter API keys in first-run setup
-4. Start analyzing papers!
+### **Option 2: Direct Launch (Advanced)**
+```bash
+# After setup above, you can also run directly:
+python3 enhanced_training_interface.py
+# (But you'll need to set environment variables manually)
+```
 
-### **First Launch Experience**
-1. **Modern launcher opens** with clean, professional interface
-2. **Enter OpenAI API key** - securely saved with environment variables
-3. **Add GitHub token** (optional) - for automatic report uploads
-4. **Repository settings** - configure where reports are uploaded
-5. **Launch Research Buddy** - main application opens ready for analysis
+### **First Launch Experience (30 seconds)**
+1. **Run the launcher** - `python3 launch_research_buddy.py`
+2. **Clean dialog appears** - Professional Research Buddy interface
+3. **Enter OpenAI API key** - Securely stored with environment variables
+4. **Add GitHub token** (optional) - For automatic report uploads
+5. **Click "Launch Research Buddy"** - Main application opens immediately!
+
+**Future launches**: Just run the launcher again and click "Quick Launch" - instant startup!
 
 ---
 
