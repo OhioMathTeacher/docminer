@@ -1,12 +1,10 @@
-name: 🚀 Build Research Buddy 3.1 Executables
+name: 🚀 Build Research Buddy Executables
 
 on:
   push:
     tags:
-      - 'v*'  # Trigger on version tags like v3.1.0
-    branches:
-      - main  # Also build on main branch pushes
-  workflow_dispatch:  # Allow manual triggering
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -15,28 +13,24 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
-            arch: x64
-            executable: ResearchBuddy3.1
+            name: ResearchBuddy-linux
           - os: windows-latest
-            platform: windows
-            arch: x64
-            executable: ResearchBuddy3.1.exe
+            platform: windows  
+            name: ResearchBuddy-windows
           - os: macos-latest
             platform: macos
-            arch: universal
-            executable: ResearchBuddy3.1.app
+            name: ResearchBuddy-macos
 
     runs-on: ${{ matrix.os }}
     
     steps:
-    - name: 📥 Checkout Repository
+    - name: 📥 Checkout
       uses: actions/checkout@v4
 
     - name: 🐍 Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'  # Updated to 3.11 for better compatibility
-        architecture: x64
+        python-version: '3.11'
 
     - name: 📦 Install Dependencies
       run: |
@@ -44,86 +38,51 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
-    - name: 🔨 Build Executable (Linux/Windows)
-      if: matrix.platform != 'macos'
+    - name: 🔨 Build Windows Executable  
+      if: matrix.platform == 'windows'
       run: |
-        python -m PyInstaller --onefile --windowed \
-          --name "${{ matrix.executable }}" \
-          --distpath ./dist \
-          enhanced_training_interface.py
+        python -m PyInstaller --onefile --noconsole --name "ResearchBuddy" enhanced_training_interface.py
+        mkdir release
+        copy dist\ResearchBuddy.exe release\
+        copy README.md release\
+        copy QUICK_START_FOR_GAS.md release\
 
-    - name: 🔨 Build Executable (macOS Universal)
-      if: matrix.platform == 'macos'
+    - name: 🔨 Build Linux Executable
+      if: matrix.platform == 'linux'
       run: |
-        python -m PyInstaller --onedir --windowed \
-          --target-arch universal2 \
-          --name "ResearchBuddy3.1" \
-          --osx-bundle-identifier "edu.university.researchbuddy31" \
-          --distpath ./dist \
-          enhanced_training_interface.py
-
-    - name: 🧪 Test Executable
-      shell: bash
-      run: |
-        # Basic executable test (check if it exists and is executable)
-        if [ "${{ matrix.platform }}" = "macos" ]; then
-          if [ -d "./dist/ResearchBuddy3.1.app" ]; then
-            echo "✅ macOS app bundle created successfully"
-            ls -la "./dist/ResearchBuddy3.1.app"
-          else
-            echo "❌ macOS app bundle not found"
-            exit 1
-          fi
-        else
-          if [ -f "./dist/${{ matrix.executable }}" ]; then
-            echo "✅ Executable created successfully"
-            ls -la "./dist/${{ matrix.executable }}"
-          else
-            echo "❌ Executable not found"
-            exit 1
-          fi
-        fi
-
-    - name: 📦 Create Distribution Package
-      shell: bash
-      run: |
-        mkdir -p release
-        
-        # Copy executable
-        if [ "${{ matrix.platform }}" = "macos" ]; then
-          cp -r "./dist/ResearchBuddy3.1.app" release/
-        else
-          cp "./dist/${{ matrix.executable }}" release/
-        fi
-        
-        # Copy essential files
+        python -m PyInstaller --onefile --name "ResearchBuddy" enhanced_training_interface.py
+        mkdir release
+        cp dist/ResearchBuddy release/
         cp README.md release/
         cp QUICK_START_FOR_GAS.md release/
-        
-        # Create platform-specific archive
+        chmod +x release/ResearchBuddy
+
+    - name: 🔨 Build macOS Executable
+      if: matrix.platform == 'macos'
+      run: |
+        python -m PyInstaller --onedir --windowed --name "ResearchBuddy" enhanced_training_interface.py
+        mkdir release
+        cp -r dist/ResearchBuddy.app release/
+        cp README.md release/
+        cp QUICK_START_FOR_GAS.md release/
+
+    - name: 📦 Create Package
+      shell: bash
+      run: |
+        cd release
         if [ "${{ matrix.platform }}" = "windows" ]; then
-          # Windows: Create ZIP
-          cd release
-          powershell Compress-Archive -Path "*" -DestinationPath "../ResearchBuddy3.1-windows.zip"
+          7z a "../${{ matrix.name }}.zip" *
         elif [ "${{ matrix.platform }}" = "macos" ]; then
-          # macOS: Create ZIP with proper permissions
-          cd release
-          zip -r "../ResearchBuddy3.1-macos.zip" *
+          zip -r "../${{ matrix.name }}.zip" *
         else
-          # Linux: Create tar.gz
-          cd release
-          chmod +x "${{ matrix.executable }}"
-          tar -czf "../ResearchBuddy3.1-linux.tar.gz" *
+          tar -czf "../${{ matrix.name }}.tar.gz" *
         fi
 
-    - name: 📤 Upload Build Artifacts
+    - name: 📤 Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ResearchBuddy3.1-${{ matrix.platform }}
-        path: |
-          ResearchBuddy3.1-*.zip
-          ResearchBuddy3.1-*.tar.gz
-        retention-days: 90
+        name: ${{ matrix.name }}
+        path: ${{ matrix.name }}.*
 
   release:
     needs: build
@@ -131,13 +90,19 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     
     steps:
-    - name: 📥 Checkout Repository
-      uses: actions/checkout@v4
-
-    - name: 📥 Download All Artifacts
+    - name: 📥 Download Artifacts
       uses: actions/download-artifact@v3
       with:
         path: artifacts
+
+    - name: 🏷️ Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: artifacts/**/*
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: 📋 Prepare Release Assets
       run: |
