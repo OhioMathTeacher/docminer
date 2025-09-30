@@ -1,17 +1,17 @@
 # 📖 Research Buddy – Pos### Step 2: Install & Run
 
-**For Pre-built Executables:**
-1. Extract/unzip the downloaded file
-2. **Windows**: Double-click `ResearchBuddy3.1.2.exe`
-3. **macOS**: Double-click `ResearchBuddy3.1.2.app` (you may need to right-click → Open first time)
-4. **Linux**: Run `./ResearchBuddy3.1.2` in terminal
-5. **That's it!** No Python or technical setup required
-
-**For Source Code:**
+**For Source Code (Most Users):**
 1. Extract the ZIP file to any folder
-2. Open terminal/command prompt in that folder
-3. Install dependencies: `pip install -r requirements.txt`
-4. Run the application: `python enhanced_training_interface.py`ality Detection Training
+2. Open terminal/command prompt in that folder  
+3. Install Python 3.8+ if not already installed
+4. Install dependencies: `pip install -r requirements.txt`
+5. Run the application: `python enhanced_training_interface.py`
+6. **That's it!** The application will open with a training guide
+
+**For macOS Executable (If available):**
+1. Extract the .zip file
+2. Double-click `ResearchBuddy3.1.2.app` 
+3. You may need to right-click → Open the first time (security)ality Detection Training
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
@@ -28,17 +28,16 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ### Step 1: Download
 
-**Option A: Pre-built Executables (Recommended)**  
-
-📦 **Direct Downloads:**
-- **Windows**: [ResearchBuddy3.1.2-windows.zip](https://github.com/OhioMathTeacher/research-buddy/releases/download/v3.1.2/ResearchBuddy3.1.2-windows.zip)
-- **macOS**: [ResearchBuddy3.1.2-macos.zip](https://github.com/OhioMathTeacher/research-buddy/releases/download/v3.1.2/ResearchBuddy3.1.2-macos.zip)
-- **Linux**: [ResearchBuddy3.1.2-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/download/v3.1.2/ResearchBuddy3.1.2-linux.tar.gz)
-
-**Option B: Source Code (If executables don't work)**  
+**Option A: Source Code (Recommended for now)**  
 1. Click the green **"Code"** button at the top of this page
 2. Select **"Download ZIP"** 
-3. Extract the files and run: `python enhanced_training_interface.py`
+3. Extract the files and follow setup instructions below
+
+**Option B: Pre-built Executables (Limited availability)**  
+- **macOS**: Available upon request (contact maintainer)
+- **Windows/Linux**: Source code installation required
+
+*Note: Automated executable builds are being improved. Source code installation works perfectly and only takes 2-3 minutes.*
 
 ### Step 2: Install
 
