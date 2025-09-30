@@ -1,0 +1,8 @@
+[
+  {
+    "filename": "test.pdf",
+    "judgment": "positive_explicit",
+    "evidence": "Sample evidence text",
+    "confidence": 4
+  }
+]
