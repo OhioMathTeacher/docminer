@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
     QLabel, QTextEdit, QPushButton, QButtonGroup, QRadioButton,
     QScrollArea, QProgressBar, QMessageBox, QFileDialog, QCheckBox,
     QComboBox, QSpinBox, QGroupBox, QGridLayout, QSplitter, QFrame,
-    QTabWidget, QSlider, QMenu, QPlainTextEdit, QLineEdit, QSizePolicy
+    QTabWidget, QSlider, QMenu, QPlainTextEdit, QLineEdit, QSizePolicy, QDialog
 )
 from PySide6.QtCore import Qt, QTimer, Signal, QRect, QPoint, QUrl
 from PySide6.QtGui import QFont, QTextCursor, QPixmap, QPainter, QPen, QColor, QBrush, QAction, QClipboard
@@ -29,6 +29,7 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 import fitz  # PyMuPDF for PDF rendering
 from metadata_extractor import extract_positionality
 from github_report_uploader import GitHubReportUploader
+from configuration_dialog import ConfigurationDialog
 
 def open_pdf_with_system_viewer(pdf_path):
     """
@@ -1034,7 +1035,7 @@ class PDFViewer(QWidget):
 class EnhancedTrainingInterface(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Training Buddy - Professional Positionality Analysis Interface")
+        self.setWindowTitle("Research Buddy 3.1 - Professional Positionality Analysis Interface")
         # Set reasonable default size but allow user to resize
         self.resize(1200, 800)  # Default size - user can resize as needed
         
@@ -1059,13 +1060,65 @@ class EnhancedTrainingInterface(QMainWindow):
         self.training_data = []
         self.load_settings()
         
-        # Initialize GitHub uploader
+        # Create menu bar
+        self.create_menu_bar()
+        
+        # Initialize GitHub uploader with configuration
         self.github_uploader = GitHubReportUploader()
         
         self.setup_ui()
         
         # Initialize with default folder and README
         self.initialize_with_readme()
+        
+    def create_menu_bar(self):
+        """Create the application menu bar"""
+        menubar = self.menuBar()
+        
+        # File menu
+        file_menu = menubar.addMenu('📁 File')
+        
+        # Configuration action
+        config_action = file_menu.addAction('⚙️ Configuration...')
+        config_action.triggered.connect(self.show_configuration)
+        config_action.setStatusTip('Configure API keys and GitHub repository settings')
+        
+        file_menu.addSeparator()
+        
+        # Exit action
+        exit_action = file_menu.addAction('❌ Exit')
+        exit_action.triggered.connect(self.close)
+        exit_action.setStatusTip('Exit Research Buddy')
+        
+        # Help menu
+        help_menu = menubar.addMenu('❓ Help')
+        
+        about_action = help_menu.addAction('📖 About Research Buddy...')
+        about_action.triggered.connect(self.show_about)
+        about_action.setStatusTip('About Research Buddy')
+        
+    def show_configuration(self):
+        """Show the configuration dialog"""
+        dialog = ConfigurationDialog(self)
+        if dialog.exec() == QDialog.Accepted:
+            # Refresh GitHub uploader with new configuration
+            self.github_uploader = GitHubReportUploader()
+            QMessageBox.information(self, "Configuration Updated", 
+                                  "Configuration has been updated successfully!\n\n"
+                                  "New settings will be used for future uploads.")
+    
+    def show_about(self):
+        """Show about dialog"""
+        QMessageBox.about(self, "About Research Buddy 3.1", 
+                         "🎓 Research Buddy 3.1\n\n"
+                         "Enhanced State Management Interface\n\n"
+                         "Features:\n"
+                         "• Paper state persistence\n"
+                         "• Visual progress indicators\n"
+                         "• Configurable GitHub uploads\n"
+                         "• Professional positionality analysis\n\n"
+                         "Built for Graduate Assistants and Research Teams\n\n"
+                         "© 2025 Research Buddy Project")
         
     def setup_ui(self):
         """Create the enhanced training interface"""
