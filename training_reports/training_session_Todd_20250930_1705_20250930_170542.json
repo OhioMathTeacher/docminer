@@ -1,0 +1,13 @@
+[
+  {
+    "filename": "about.pdf",
+    "timestamp": "2025-09-30T17:05:42.046447",
+    "judgment": "positive_subtle",
+    "evidence": "Provides AI-assisted paper-by-paper analysis (10\u201320 papers/hour).\nFeatures: scrollable previews, live highlighting, one-click acceptance/rejection, and smart\nGoal: Train the AI while keeping graduate assistants in the loop, ensuring scholarly rigor.\n2. Automation Buddy (Institutional Batch Engine)\nThe high-volume batch processor for thousands of papers.",
+    "ai_analysis": "",
+    "pattern_types": [],
+    "confidence": 3,
+    "explanation": "",
+    "pattern_suggestions": ""
+  }
+]
