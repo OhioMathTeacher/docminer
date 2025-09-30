@@ -1,6 +1,6 @@
-# 🚀 Research Buddy 3.0 - Decision Support & Automation System
+# 🚀 Research Buddy 3.1 - Enhanced State Management & Configuration
 
-**Revolutionary academic research system: Professional decision interface with streamlined workflow**
+**Revolutionary academic research system: Professional decision interface with enhanced workflow and configurable uploads**
 
 [![GitHub Release](https://img.shields.io/github/v/release/OhioMathTeacher/research-buddy)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
 [![Platform Support](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
@@ -34,10 +34,21 @@ Download ready-to-run executables - **no installation required!**
 
 1. **Visit**: [📦 GitHub Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
 2. **Download** your platform:
-   - **Windows**: `ResearchBuddy3.0-windows-x64.zip` 
-   - **macOS**: `ResearchBuddy3.0-macos-universal.zip`
-   - **Linux**: `ResearchBuddy3.0-linux-x64.tar.gz`
+   - **macOS**: `ResearchBuddy3.1-darwin.tar.gz` 
+   - **Windows**: `ResearchBuddy3.1-windows.zip` (coming soon)
+   - **Linux**: `ResearchBuddy3.1-linux.tar.gz` (coming soon)
 3. **Extract** and run - no Python installation needed!
+
+### **⚙️ First-Time Configuration (NEW in 3.1)**
+After downloading, configure Research Buddy for your organization:
+
+1. **Launch** Research Buddy 3.1
+2. **Go to** File → Configuration...
+3. **Enter** your OpenAI API key
+4. **Configure** your GitHub repository settings
+5. **Test** configuration and save
+
+📖 See [Configuration Guide](CONFIGURATION_GUIDE.md) for detailed setup instructions.
 
 ### **🛠 For Developers (Source Installation)**
 ```bash
