@@ -1161,7 +1161,7 @@ class EnhancedTrainingInterface(QMainWindow):
         self.setup_ui()
         
         # Check network connectivity and update button states
-        self.check_network_and_update_buttons()
+        self.update_button_states()
         
         # Initialize with default folder and README
         self.initialize_with_readme()
@@ -1200,7 +1200,7 @@ class EnhancedTrainingInterface(QMainWindow):
             self.github_uploader = GitHubReportUploader()
             
             # Update button tooltips with new repository info
-            self.check_network_and_update_buttons()
+            self.update_button_states()
             
             # Update status bar with new repository info
             # Show upload destination in status bar if configured
@@ -1359,7 +1359,6 @@ class EnhancedTrainingInterface(QMainWindow):
         analysis_btn_layout = QHBoxLayout()
         self.initial_analysis_btn = QPushButton("🚀 Run AI Analysis")
         self.initial_analysis_btn.clicked.connect(self.run_initial_analysis)
-        self.initial_analysis_btn.setStyleSheet("QPushButton { background-color: #333333; color: white; font-weight: bold; padding: 6px; font-family: 'Courier New', monospace; }")
         analysis_btn_layout.addWidget(self.initial_analysis_btn)
         analysis_btn_layout.addStretch()  # Make button wider by removing text and adding stretch
         prescreening_layout.addLayout(analysis_btn_layout)
@@ -1694,24 +1693,59 @@ class EnhancedTrainingInterface(QMainWindow):
             return False
     
     def check_network_and_update_buttons(self):
-        """Update button states based on network connectivity"""
+        """Update button states and tooltips based on connectivity and configuration"""
         has_network = self.check_network_connectivity()
+        has_token = bool(self.github_uploader.token)
+        has_repo_config = bool(self.github_uploader.owner and self.github_uploader.repo)
         
-        if has_network:
-            self.upload_btn.setEnabled(True)
-            # Set upload button tooltip with repository info
-            if hasattr(self.github_uploader, 'owner') and hasattr(self.github_uploader, 'repo'):
-                if self.github_uploader.owner and self.github_uploader.repo:
-                    repo_url = f"https://github.com/{self.github_uploader.owner}/{self.github_uploader.repo}"
-                    self.upload_btn.setToolTip(f"Upload your decision to:\n{repo_url}")
-                else:
-                    self.upload_btn.setToolTip("Upload destination not configured - use Configuration menu")
-            else:
-                self.upload_btn.setToolTip("Upload destination not configured - use Configuration menu")
-        else:
-            self.upload_btn.setEnabled(False)
-            self.upload_btn.setToolTip("No internet connection - use 'Export Evidence' to save your work locally")
+        # Always keep upload button enabled so users can click for helpful feedback
+        self.upload_btn.setEnabled(True)
+        
+        if has_network and has_token and has_repo_config:
+            # Full functionality available
+            repo_url = f"https://github.com/{self.github_uploader.owner}/{self.github_uploader.repo}"
+            self.upload_btn.setToolTip(f"✅ Ready to upload your decision to:\n{repo_url}")
+            self.upload_btn.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-weight: bold; }")
+        elif not has_token:
+            # Missing GitHub token
+            self.upload_btn.setToolTip("🔐 Click for GitHub token setup instructions")
+            self.upload_btn.setStyleSheet("QPushButton { background-color: #FFA500; color: white; font-weight: bold; }")
+        elif not has_network:
+            # No internet connection
+            self.upload_btn.setToolTip("🌐 No internet connection - click for more info")
             self.upload_btn.setStyleSheet("QPushButton { background-color: #888; color: #ccc; font-weight: bold; }")
+        elif not has_repo_config:
+            # Repository not configured
+            self.upload_btn.setToolTip("📂 Repository not configured - click for setup info")
+            self.upload_btn.setStyleSheet("QPushButton { background-color: #FF6B6B; color: white; font-weight: bold; }")
+        else:
+            # Default state
+            self.upload_btn.setToolTip("Click to upload your decision")
+            self.upload_btn.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-weight: bold; }")
+            
+    def check_ai_configuration_and_update_button(self):
+        """Update AI analysis button based on API key configuration"""
+        try:
+            from configuration_dialog import load_configuration
+            config = load_configuration()
+            api_key = config.get('openai_api_key', '').strip()
+            has_api_key = bool(api_key)
+        except Exception:
+            has_api_key = False
+        
+        if has_api_key:
+            # API key configured - ready to use
+            self.initial_analysis_btn.setToolTip("✅ Run AI analysis on current paper")
+            self.initial_analysis_btn.setStyleSheet("QPushButton { background-color: #333333; color: white; font-weight: bold; padding: 6px; font-family: 'Courier New', monospace; }")
+        else:
+            # No API key - show helpful styling
+            self.initial_analysis_btn.setToolTip("🔑 Click for OpenAI API key setup instructions")
+            self.initial_analysis_btn.setStyleSheet("QPushButton { background-color: #FFA500; color: white; font-weight: bold; padding: 6px; font-family: 'Courier New', monospace; }")
+    
+    def update_button_states(self):
+        """Update all button states based on current configuration"""
+        self.check_network_and_update_buttons()
+        self.check_ai_configuration_and_update_button()
             
     def export_evidence(self):
         """Export current evidence (AI + Human) to text file next to PDF"""
@@ -1786,6 +1820,38 @@ class EnhancedTrainingInterface(QMainWindow):
                 
     def upload_decision(self):
         """Upload final decision to GitHub (requires internet connection)"""
+        
+        # Check for GitHub token first and provide helpful feedback
+        if not self.github_uploader.token:
+            QMessageBox.information(self, "GitHub Setup Required", 
+                                  "🔐 GitHub token not found!\n\n"
+                                  "To upload decisions to GitHub, you need to:\n\n"
+                                  "1. Create a GitHub Personal Access Token:\n"
+                                  "   • Go to github.com → Settings → Developer settings → Personal access tokens\n"
+                                  "   • Generate new token (classic) with 'repo' scope\n\n"
+                                  "2. Set the environment variable:\n"
+                                  "   export RESEARCH_BUDDY_GITHUB_TOKEN=\"your_token_here\"\n\n"
+                                  "3. Restart the application\n\n"
+                                  "💡 For now, use 'Export Evidence' to save your work locally!")
+            return
+        
+        # Check network connectivity
+        if not self.check_network_connectivity():
+            QMessageBox.warning(self, "No Internet Connection", 
+                              "🌐 No internet connection detected!\n\n"
+                              "Upload to GitHub requires an internet connection.\n\n"
+                              "💡 Use 'Export Evidence' to save your work locally until connection is restored.")
+            return
+        
+        # Check GitHub repository configuration
+        if not (self.github_uploader.owner and self.github_uploader.repo):
+            QMessageBox.warning(self, "GitHub Repository Not Configured", 
+                              "📂 GitHub repository not configured!\n\n"
+                              "Please configure your GitHub repository settings:\n"
+                              "• Owner: Your GitHub username\n"
+                              "• Repository: Your repository name\n\n"
+                              "💡 Use 'Export Evidence' to save locally for now.")
+            return
         
         # First, try to save current state if there's an active paper
         if hasattr(self, 'current_paper_index') and self.current_paper_index < len(self.papers_list):
@@ -2007,6 +2073,28 @@ class EnhancedTrainingInterface(QMainWindow):
             QMessageBox.information(self, "No Paper", "No paper selected for analysis.")
             return
         
+        # Check for OpenAI API key first and provide helpful feedback
+        try:
+            from configuration_dialog import load_configuration
+            config = load_configuration()
+            api_key = config.get('openai_api_key', '').strip()
+            
+            if not api_key:
+                QMessageBox.information(self, "OpenAI Setup Required", 
+                                      "🔑 OpenAI API key not found!\n\n"
+                                      "To use AI-powered analysis, you need to:\n\n"
+                                      "1. Get an OpenAI API Key:\n"
+                                      "   • Visit platform.openai.com/account/api-keys\n"
+                                      "   • Create a new API key\n\n"
+                                      "2. Configure in Research Buddy:\n"
+                                      "   • Use menu: Configuration → Settings\n"
+                                      "   • Enter your API key\n\n"
+                                      "💡 You can still analyze papers manually using the PDF viewer!\n"
+                                      "Just select text and use the Human Input tab.")
+                return
+        except Exception as e:
+            print(f"Could not check API key configuration: {e}")
+        
         current_paper = self.papers_list[self.current_paper_index]
         pdf_path = Path(self.pdf_folder) / current_paper
         
@@ -2037,8 +2125,18 @@ class EnhancedTrainingInterface(QMainWindow):
         except Exception as e:
             error_msg = str(e)
             if "401" in error_msg or "invalid_api_key" in error_msg or "API key" in error_msg:
-                # Handle API key issues specifically
-                self.statusBar().showMessage("AI analysis requires OpenAI API key - use Configuration menu to set it up")
+                # Handle API key issues with a popup
+                QMessageBox.warning(self, "API Key Error", 
+                                  "🔑 OpenAI API Key Error!\n\n"
+                                  "Your API key appears to be invalid or expired.\n\n"
+                                  "Please check:\n"
+                                  "• API key is correctly entered in Configuration → Settings\n"
+                                  "• API key has sufficient credits\n"
+                                  "• API key is not expired\n\n"
+                                  "💡 You can still analyze papers manually!")
+                
+                # Also show in AI input area for reference
+                self.statusBar().showMessage("AI analysis requires valid OpenAI API key - use Configuration menu")
                 self.ai_input.setHtml("""
                 <b><font color="#FF9800">🔑 AI Analysis Requires Setup</font></b><br><br>
                 
