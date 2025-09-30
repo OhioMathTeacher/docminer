@@ -2,29 +2,93 @@
 """
 Configuration Dialog for Research Buddy
 
-Allows users to configure GitHub repository settings and API keys.
+Secure configuration with environment variables for sensitive data.
 """
 
 import os
 import json
 from pathlib import Path
-from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, 
-                              QLineEdit, QPushButton, QLabel, QGroupBox,
-                              QMessageBox, QCheckBox, QTextEdit)
+from PySide6.QtWidgets import (
+    QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
+    QLineEdit, QPushButton, QLabel, QMessageBox, QTextEdit, QGroupBox
+)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 
+
+def load_configuration():
+    """Load configuration from environment variables and JSON file.
+    
+    Sensitive data (API keys, tokens) comes from environment variables.
+    Non-sensitive data (repository settings) comes from config file.
+    """
+    config_path = Path.home() / ".research_buddy" / "interface_settings.json"
+    
+    # Load non-sensitive settings from file
+    default_file_config = {
+        "github_owner": "",
+        "github_repo": ""
+    }
+    
+    file_config = default_file_config.copy()
+    if config_path.exists():
+        try:
+            with open(config_path, 'r') as f:
+                loaded_config = json.load(f)
+                # Only load non-sensitive settings from file
+                for key in default_file_config:
+                    if key in loaded_config:
+                        file_config[key] = loaded_config[key]
+        except (json.JSONDecodeError, IOError) as e:
+            print(f"Error loading configuration file: {e}")
+    
+    # Get sensitive data from environment variables
+    config = {
+        "openai_api_key": os.environ.get("RESEARCH_BUDDY_OPENAI_API_KEY", ""),
+        "github_token": os.environ.get("RESEARCH_BUDDY_GITHUB_TOKEN", ""),
+        "github_owner": file_config["github_owner"],
+        "github_repo": file_config["github_repo"]
+    }
+    
+    return config
+
+
+def save_configuration(config):
+    """Save non-sensitive configuration to JSON file.
+    
+    Only saves repository settings to file. API keys and tokens
+    should be set as environment variables.
+    """
+    config_dir = Path.home() / ".research_buddy"
+    config_dir.mkdir(exist_ok=True)
+    
+    config_path = config_dir / "interface_settings.json"
+    
+    # Only save non-sensitive settings to file
+    file_config = {
+        "github_owner": config.get("github_owner", ""),
+        "github_repo": config.get("github_repo", "")
+    }
+    
+    try:
+        with open(config_path, 'w') as f:
+            json.dump(file_config, f, indent=2)
+        return True
+    except IOError as e:
+        print(f"Error saving configuration: {e}")
+        return False
+
+
 class ConfigurationDialog(QDialog):
-    """Dialog for configuring Research Buddy settings"""
+    """Secure configuration dialog for Research Buddy settings"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("🔧 Research Buddy Configuration")
-        self.setFixedSize(600, 500)
-        self.config_file = Path("interface_settings.json")
+        self.setFixedSize(650, 600)
         
         # Load existing configuration
-        self.config = self.load_config()
+        self.config = load_configuration()
         
         self.setup_ui()
         self.load_values()
@@ -42,62 +106,76 @@ class ConfigurationDialog(QDialog):
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        # API Configuration
-        api_group = QGroupBox("🔑 API Configuration")
-        api_layout = QFormLayout()
+        # Security notice
+        security_notice = QLabel(
+            "🔒 <b>Secure Configuration</b><br>"
+            "API keys and tokens are loaded from environment variables for security:<br>"
+            "• <code>RESEARCH_BUDDY_OPENAI_API_KEY</code> - Your OpenAI API key<br>"
+            "• <code>RESEARCH_BUDDY_GITHUB_TOKEN</code> - Your GitHub personal access token<br><br>"
+            "Repository settings below are saved to your local config file."
+        )
+        security_notice.setWordWrap(True)
+        security_notice.setStyleSheet(
+            "QLabel { "
+            "background-color: #f0f8ff; "
+            "border: 1px solid #cce7ff; "
+            "border-radius: 5px; "
+            "padding: 15px; "
+            "margin: 10px; "
+            "}"
+        )
+        layout.addWidget(security_notice)
         
-        self.openai_key_input = QLineEdit()
-        self.openai_key_input.setEchoMode(QLineEdit.Password)
-        self.openai_key_input.setPlaceholderText("sk-...")
-        api_layout.addRow("OpenAI API Key:", self.openai_key_input)
+        # Environment Variables Status
+        env_group = QGroupBox("🔑 Environment Variables Status")
+        env_layout = QFormLayout()
         
-        self.show_key_checkbox = QCheckBox("Show API key")
-        self.show_key_checkbox.toggled.connect(self.toggle_key_visibility)
-        api_layout.addRow("", self.show_key_checkbox)
+        self.openai_key_status = QLineEdit()
+        self.openai_key_status.setReadOnly(True)
+        self.openai_key_status.setPlaceholderText("Set via RESEARCH_BUDDY_OPENAI_API_KEY environment variable")
+        env_layout.addRow("OpenAI API Key:", self.openai_key_status)
         
-        api_help = QLabel("💡 Tip: You can also set OPENAI_API_KEY environment variable")
-        api_help.setWordWrap(True)
-        api_help.setStyleSheet("color: #666; font-size: 11px;")
-        api_layout.addRow("", api_help)
+        self.github_token_status = QLineEdit()
+        self.github_token_status.setReadOnly(True)
+        self.github_token_status.setPlaceholderText("Set via RESEARCH_BUDDY_GITHUB_TOKEN environment variable")
+        env_layout.addRow("GitHub Token:", self.github_token_status)
         
-        api_group.setLayout(api_layout)
-        layout.addWidget(api_group)
+        env_group.setLayout(env_layout)
+        layout.addWidget(env_group)
         
-        # GitHub Configuration
-        github_group = QGroupBox("📦 GitHub Upload Configuration")
-        github_layout = QFormLayout()
+        # Repository Configuration
+        repo_group = QGroupBox("📦 Repository Configuration")
+        repo_layout = QFormLayout()
         
         self.github_owner_input = QLineEdit()
         self.github_owner_input.setPlaceholderText("your-github-username")
-        github_layout.addRow("GitHub Username:", self.github_owner_input)
+        repo_layout.addRow("GitHub Owner:", self.github_owner_input)
         
         self.github_repo_input = QLineEdit()
         self.github_repo_input.setPlaceholderText("research-buddy")
-        github_layout.addRow("Repository Name:", self.github_repo_input)
+        repo_layout.addRow("GitHub Repository:", self.github_repo_input)
         
-        self.github_token_input = QLineEdit()
-        self.github_token_input.setEchoMode(QLineEdit.Password)
-        self.github_token_input.setPlaceholderText("ghp_...")
-        github_layout.addRow("GitHub Token:", self.github_token_input)
+        repo_group.setLayout(repo_layout)
+        layout.addWidget(repo_group)
         
-        self.show_token_checkbox = QCheckBox("Show GitHub token")
-        self.show_token_checkbox.toggled.connect(self.toggle_token_visibility)
-        github_layout.addRow("", self.show_token_checkbox)
-        
-        github_help = QTextEdit()
-        github_help.setPlainText(
-            "Instructions:\n"
-            "1. Create a GitHub repository for storing analysis results\n"
-            "2. Generate a Personal Access Token with 'repo' permissions\n"
-            "3. Enter your GitHub username and repository name above\n"
-            "4. Paste your GitHub token for upload authentication"
+        # Environment Setup Help
+        help_text = QTextEdit()
+        help_text.setPlainText(
+            "To set environment variables:\n\n"
+            "macOS/Linux (add to ~/.zshrc or ~/.bashrc):\n"
+            "export RESEARCH_BUDDY_OPENAI_API_KEY=\"sk-your-key-here\"\n"
+            "export RESEARCH_BUDDY_GITHUB_TOKEN=\"ghp_your-token-here\"\n\n"
+            "Windows (Command Prompt):\n"
+            "set RESEARCH_BUDDY_OPENAI_API_KEY=sk-your-key-here\n"
+            "set RESEARCH_BUDDY_GITHUB_TOKEN=ghp_your-token-here\n\n"
+            "Windows (PowerShell):\n"
+            "$env:RESEARCH_BUDDY_OPENAI_API_KEY=\"sk-your-key-here\"\n"
+            "$env:RESEARCH_BUDDY_GITHUB_TOKEN=\"ghp_your-token-here\""
         )
-        github_help.setMaximumHeight(80)
-        github_help.setStyleSheet("background-color: #f5f5f5; color: #666; font-size: 11px;")
-        github_layout.addRow("Setup Help:", github_help)
-        
-        github_group.setLayout(github_layout)
-        layout.addWidget(github_group)
+        help_text.setMaximumHeight(120)
+        help_text.setStyleSheet("background-color: #f5f5f5; color: #333; font-size: 11px; font-family: monospace;")
+        layout.addWidget(QLabel("💡 Environment Variable Setup:"))
+        layout.addWidget(help_text)
         
         # Buttons
         button_layout = QHBoxLayout()
@@ -106,18 +184,14 @@ class ConfigurationDialog(QDialog):
         test_btn.clicked.connect(self.test_configuration)
         button_layout.addWidget(test_btn)
         
-        reset_btn = QPushButton("🔄 Reset to Defaults")
-        reset_btn.clicked.connect(self.reset_to_defaults)
-        button_layout.addWidget(reset_btn)
-        
         button_layout.addStretch()
         
         cancel_btn = QPushButton("Cancel")
         cancel_btn.clicked.connect(self.reject)
         button_layout.addWidget(cancel_btn)
         
-        save_btn = QPushButton("💾 Save Configuration")
-        save_btn.clicked.connect(self.save_configuration)
+        save_btn = QPushButton("💾 Save Repository Settings")
+        save_btn.clicked.connect(self.save_configuration_data)
         save_btn.setDefault(True)
         save_btn.setStyleSheet("QPushButton { background-color: #0066cc; color: white; font-weight: bold; }")
         button_layout.addWidget(save_btn)
@@ -125,140 +199,118 @@ class ConfigurationDialog(QDialog):
         layout.addLayout(button_layout)
         self.setLayout(layout)
         
-    def toggle_key_visibility(self, checked):
-        """Toggle OpenAI API key visibility"""
-        if checked:
-            self.openai_key_input.setEchoMode(QLineEdit.Normal)
-        else:
-            self.openai_key_input.setEchoMode(QLineEdit.Password)
-            
-    def toggle_token_visibility(self, checked):
-        """Toggle GitHub token visibility"""
-        if checked:
-            self.github_token_input.setEchoMode(QLineEdit.Normal)
-        else:
-            self.github_token_input.setEchoMode(QLineEdit.Password)
-    
-    def load_config(self):
-        """Load configuration from file"""
-        default_config = {
-            "openai_api_key": "",
-            "github_owner": "",
-            "github_repo": "research-buddy",
-            "github_token": ""
-        }
-        
-        if self.config_file.exists():
-            try:
-                with open(self.config_file, 'r') as f:
-                    config = json.load(f)
-                    # Merge with defaults to handle missing keys
-                    default_config.update(config)
-                    return default_config
-            except Exception as e:
-                print(f"Error loading config: {e}")
-                
-        return default_config
-    
     def load_values(self):
         """Load values into the form"""
-        # Load API key from environment or config
-        env_key = os.getenv("OPENAI_API_KEY", "")
-        config_key = self.config.get("openai_api_key", "")
-        self.openai_key_input.setText(env_key or config_key)
+        # Show environment variable status
+        openai_key = self.config.get("openai_api_key", "")
+        if openai_key:
+            self.openai_key_status.setText(f"✅ Set ({openai_key[:8]}...)")
+            self.openai_key_status.setStyleSheet("color: green;")
+        else:
+            self.openai_key_status.setText("❌ Not set - export RESEARCH_BUDDY_OPENAI_API_KEY")
+            self.openai_key_status.setStyleSheet("color: red;")
+            
+        github_token = self.config.get("github_token", "")
+        if github_token:
+            self.github_token_status.setText(f"✅ Set ({github_token[:8]}...)")
+            self.github_token_status.setStyleSheet("color: green;")
+        else:
+            self.github_token_status.setText("❌ Not set - export RESEARCH_BUDDY_GITHUB_TOKEN")
+            self.github_token_status.setStyleSheet("color: red;")
         
-        # Load GitHub settings
+        # Load repository settings
         self.github_owner_input.setText(self.config.get("github_owner", ""))
         self.github_repo_input.setText(self.config.get("github_repo", "research-buddy"))
-        self.github_token_input.setText(self.config.get("github_token", ""))
         
-    def save_configuration(self):
-        """Save configuration and close dialog"""
+    def save_configuration_data(self):
+        """Save the current configuration."""
+        # Only save non-sensitive repository settings
         config = {
-            "openai_api_key": self.openai_key_input.text().strip(),
+            "openai_api_key": "",  # Not saved to file
+            "github_token": "",    # Not saved to file
             "github_owner": self.github_owner_input.text().strip(),
-            "github_repo": self.github_repo_input.text().strip(),
-            "github_token": self.github_token_input.text().strip()
+            "github_repo": self.github_repo_input.text().strip()
         }
         
-        # Validation
-        if not config["github_owner"]:
-            QMessageBox.warning(self, "Configuration Error", 
-                              "GitHub username is required for uploading results.")
-            return
+        if save_configuration(config):
+            QMessageBox.information(
+                self, 
+                "Configuration Saved", 
+                f"Repository settings saved successfully!\n\n"
+                f"Upload destination: https://github.com/{config['github_owner']}/{config['github_repo']}\n\n"
+                f"Remember to set your environment variables:\n"
+                f"• RESEARCH_BUDDY_OPENAI_API_KEY\n"
+                f"• RESEARCH_BUDDY_GITHUB_TOKEN"
+            )
+        else:
+            QMessageBox.critical(
+                self, 
+                "Save Error", 
+                "Failed to save configuration. Please check file permissions."
+            )
             
-        if not config["github_repo"]:
-            QMessageBox.warning(self, "Configuration Error", 
-                              "Repository name is required for uploading results.")
-            return
-        
-        try:
-            with open(self.config_file, 'w') as f:
-                json.dump(config, f, indent=2)
-                
-            QMessageBox.information(self, "Configuration Saved", 
-                                  "Configuration has been saved successfully!")
-            self.accept()
-            
-        except Exception as e:
-            QMessageBox.critical(self, "Save Error", f"Could not save configuration: {e}")
-    
     def test_configuration(self):
-        """Test the current configuration"""
-        # Test OpenAI API key
-        api_key = self.openai_key_input.text().strip()
-        if not api_key:
-            QMessageBox.warning(self, "Test Results", 
-                              "⚠️ No OpenAI API key provided.\n\nAI analysis will not work without an API key.")
-            return
-            
-        if not api_key.startswith("sk-"):
-            QMessageBox.warning(self, "Test Results", 
-                              "⚠️ OpenAI API key should start with 'sk-'.\n\nPlease check your API key.")
-            return
-            
-        # Test GitHub configuration
+        """Test the current configuration."""
+        # Get values from environment variables and form
+        openai_key = os.environ.get("RESEARCH_BUDDY_OPENAI_API_KEY", "").strip()
+        github_token = os.environ.get("RESEARCH_BUDDY_GITHUB_TOKEN", "").strip()
         github_owner = self.github_owner_input.text().strip()
         github_repo = self.github_repo_input.text().strip()
-        github_token = self.github_token_input.text().strip()
         
-        if not github_owner or not github_repo:
-            QMessageBox.warning(self, "Test Results", 
-                              "⚠️ GitHub username and repository name are required.\n\n"
-                              "Upload functionality will not work without these.")
-            return
-            
+        # Validate required fields
+        missing_fields = []
+        if not openai_key:
+            missing_fields.append("RESEARCH_BUDDY_OPENAI_API_KEY environment variable")
         if not github_token:
-            QMessageBox.warning(self, "Test Results", 
-                              "⚠️ GitHub token is required for uploads.\n\n"
-                              "You can generate one at: https://github.com/settings/tokens")
+            missing_fields.append("RESEARCH_BUDDY_GITHUB_TOKEN environment variable")
+        if not github_owner:
+            missing_fields.append("GitHub Owner")
+        if not github_repo:
+            missing_fields.append("GitHub Repository")
+        
+        if missing_fields:
+            QMessageBox.warning(
+                self,
+                "Missing Configuration",
+                f"Please provide the following required items:\n• {chr(10).join(missing_fields)}\n\n"
+                f"Set environment variables in your system or shell:"
+            )
             return
             
-        repo_url = f"https://github.com/{github_owner}/{github_repo}"
-        QMessageBox.information(self, "Test Results", 
-                              f"✅ Configuration looks good!\n\n"
-                              f"• OpenAI API key format is correct\n"
-                              f"• GitHub settings are provided\n\n"
-                              f"📦 Upload Destination:\n{repo_url}\n\n"
-                              f"Save configuration to use these settings.")
-    
-    def reset_to_defaults(self):
-        """Reset configuration to defaults"""
-        reply = QMessageBox.question(self, "Reset Configuration", 
-                                   "Are you sure you want to reset all settings to defaults?\n\n"
-                                   "This will clear all current values.")
-        
-        if reply == QMessageBox.Yes:
-            self.openai_key_input.clear()
-            self.github_owner_input.clear()
-            self.github_repo_input.setText("research-buddy")
-            self.github_token_input.clear()
+        # Basic validation
+        if not openai_key.startswith("sk-"):
+            QMessageBox.warning(
+                self, 
+                "Configuration Issue", 
+                "⚠️ OpenAI API key should start with 'sk-'. Please check your API key."
+            )
+            return
             
+        if not github_token.startswith(("ghp_", "github_pat_")):
+            QMessageBox.warning(
+                self, 
+                "Configuration Issue", 
+                "⚠️ GitHub token should start with 'ghp_' or 'github_pat_'. Please check your token."
+            )
+            return
+            
+        # Show success
+        repo_url = f"https://github.com/{github_owner}/{github_repo}"
+        QMessageBox.information(
+            self, 
+            "Configuration Test", 
+            f"✅ Configuration looks good!\n\n"
+            f"• OpenAI API key format is correct\n"
+            f"• GitHub token format is correct\n"
+            f"• Repository settings are provided\n\n"
+            f"📦 Upload Destination:\n{repo_url}"
+        )
+        
     def get_config(self):
         """Get the current configuration"""
         return {
-            "openai_api_key": self.openai_key_input.text().strip(),
+            "openai_api_key": os.environ.get("RESEARCH_BUDDY_OPENAI_API_KEY", ""),
+            "github_token": os.environ.get("RESEARCH_BUDDY_GITHUB_TOKEN", ""),
             "github_owner": self.github_owner_input.text().strip(),
-            "github_repo": self.github_repo_input.text().strip(),
-            "github_token": self.github_token_input.text().strip()
+            "github_repo": self.github_repo_input.text().strip()
         }

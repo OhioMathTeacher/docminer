@@ -30,6 +30,7 @@ import fitz  # PyMuPDF for PDF rendering
 from metadata_extractor import extract_positionality
 from github_report_uploader import GitHubReportUploader
 from configuration_dialog import ConfigurationDialog
+from first_run_setup import FirstRunSetupDialog, check_first_run
 
 def open_pdf_with_system_viewer(pdf_path):
     """
@@ -1055,6 +1056,20 @@ class EnhancedTrainingInterface(QMainWindow):
         # Settings file to remember state
         self.settings_file = Path(__file__).parent / "interface_settings.json"
         
+        # Check for first run and show setup dialog
+        if check_first_run():
+            setup_dialog = FirstRunSetupDialog(self)
+            if setup_dialog.exec() == QDialog.DialogCode.Rejected:
+                # User skipped setup, show a gentle reminder
+                QMessageBox.information(
+                    self,
+                    "Welcome to Research Buddy!",
+                    "🎉 Welcome to Research Buddy 3.1!\n\n"
+                    "You can configure API keys and GitHub settings anytime through:\n"
+                    "Configuration → Settings\n\n"
+                    "Research Buddy works great even without configuration!"
+                )
+        
         # Initialize without loading any local training data
         # Each session starts fresh - decisions go directly to GitHub
         self.training_data = []
@@ -1111,7 +1126,14 @@ class EnhancedTrainingInterface(QMainWindow):
             self.check_network_and_update_buttons()
             
             # Update status bar with new repository info
-            repo_info = f"📦 Uploads to: {self.github_uploader.repo_owner}/{self.github_uploader.repo_name}"
+            # Show upload destination in status bar if configured
+            if hasattr(self.github_uploader, 'owner') and hasattr(self.github_uploader, 'repo'):
+                if self.github_uploader.owner and self.github_uploader.repo:
+                    repo_info = f"📦 Uploads to: {self.github_uploader.owner}/{self.github_uploader.repo}"
+                else:
+                    repo_info = "📦 Upload destination not configured"
+            else:
+                repo_info = "📦 Upload destination not configured"
             current_status = self.statusBar().currentMessage()
             if "📦 Uploads to:" in current_status:
                 # Replace the repository part
@@ -1600,8 +1622,15 @@ class EnhancedTrainingInterface(QMainWindow):
         
         if has_network:
             self.upload_btn.setEnabled(True)
-            repo_url = f"https://github.com/{self.github_uploader.repo_owner}/{self.github_uploader.repo_name}"
-            self.upload_btn.setToolTip(f"Upload your decision to:\n{repo_url}")
+            # Set upload button tooltip with repository info
+            if hasattr(self.github_uploader, 'owner') and hasattr(self.github_uploader, 'repo'):
+                if self.github_uploader.owner and self.github_uploader.repo:
+                    repo_url = f"https://github.com/{self.github_uploader.owner}/{self.github_uploader.repo}"
+                    self.upload_btn.setToolTip(f"Upload your decision to:\n{repo_url}")
+                else:
+                    self.upload_btn.setToolTip("Upload destination not configured - use Configuration menu")
+            else:
+                self.upload_btn.setToolTip("Upload destination not configured - use Configuration menu")
         else:
             self.upload_btn.setEnabled(False)
             self.upload_btn.setToolTip("No internet connection - use 'Export Evidence' to save your work locally")
