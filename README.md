@@ -1,5 +1,4 @@
-# 📖 Research Buddy - Positionality Detection Training# 📖 Research Buddy - Positionality Detection Training# 📖 Research Buddy - Positionality Detection Training# 🚀 Research Buddy 4.0 - Secure Configuration & Modern Launcher
-
+# 📖 Research Buddy - Positionality Detection Training# 
 
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
