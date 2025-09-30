@@ -10,6 +10,8 @@ import sys
 import os
 import json
 import shutil
+import subprocess
+import platform
 from pathlib import Path
 from datetime import datetime
 
@@ -18,14 +20,85 @@ from PySide6.QtWidgets import (
     QLabel, QTextEdit, QPushButton, QButtonGroup, QRadioButton,
     QScrollArea, QProgressBar, QMessageBox, QFileDialog, QCheckBox,
     QComboBox, QSpinBox, QGroupBox, QGridLayout, QSplitter, QFrame,
-    QTabWidget, QSlider, QMenu, QPlainTextEdit, QLineEdit
+    QTabWidget, QSlider, QMenu, QPlainTextEdit, QLineEdit, QSizePolicy
 )
-from PySide6.QtCore import Qt, QTimer, Signal, QRect, QPoint
+from PySide6.QtCore import Qt, QTimer, Signal, QRect, QPoint, QUrl
 from PySide6.QtGui import QFont, QTextCursor, QPixmap, QPainter, QPen, QColor, QBrush, QAction, QClipboard
+from PySide6.QtWebEngineWidgets import QWebEngineView
 
 import fitz  # PyMuPDF for PDF rendering
 from metadata_extractor import extract_positionality
 from github_report_uploader import GitHubReportUploader
+
+def open_pdf_with_system_viewer(pdf_path):
+    """
+    Open PDF with the system's default PDF viewer (cross-platform)
+    
+    Args:
+        pdf_path (str): Path to the PDF file
+    
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        pdf_path = str(Path(pdf_path).resolve())  # Get absolute path
+        
+        # Cross-platform file opening
+        if platform.system() == "Darwin":  # macOS
+            subprocess.run(["open", pdf_path], check=True)
+        elif platform.system() == "Windows":  # Windows
+            os.startfile(pdf_path)
+        else:  # Linux and other Unix-like systems
+            subprocess.run(["xdg-open", pdf_path], check=True)
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error opening PDF with system viewer: {e}")
+        return False
+
+def get_pdf_page_info(pdf_path, page_num=0):
+    """
+    Utility function to get PDF page dimensions and metadata.
+    
+    Args:
+        pdf_path (str): Path to the PDF file
+        page_num (int): Page number (0-based)
+    
+    Returns:
+        dict: Page information including dimensions in points, pixels, inches, and aspect ratio
+        None: If PDF cannot be opened or page doesn't exist
+    """
+    try:
+        doc = fitz.open(pdf_path)
+        if page_num >= len(doc):
+            print(f"Page {page_num} doesn't exist in PDF (only {len(doc)} pages)")
+            doc.close()
+            return None
+            
+        page = doc[page_num]
+        rect = page.rect
+        
+        # Calculate various dimension formats
+        info = {
+            'total_pages': len(doc),
+            'page_number': page_num + 1,  # 1-based for display
+            'dimensions': {
+                'points': {'width': rect.width, 'height': rect.height},
+                'inches': {'width': rect.width / 72, 'height': rect.height / 72},
+                'pixels_72dpi': {'width': int(rect.width), 'height': int(rect.height)},
+                'pixels_150dpi': {'width': int(rect.width * 150/72), 'height': int(rect.height * 150/72)}
+            },
+            'aspect_ratio': rect.width / rect.height,
+            'orientation': 'portrait' if rect.height > rect.width else 'landscape'
+        }
+        
+        doc.close()
+        return info
+        
+    except Exception as e:
+        print(f"Error reading PDF {pdf_path}: {e}")
+        return None
 
 class SelectablePDFLabel(QLabel):
     """Custom QLabel with text editor-style line-based text selection"""
@@ -311,6 +384,122 @@ class SelectablePDFLabel(QLabel):
             clipboard = QApplication.clipboard()
             clipboard.setText(all_text)
 
+class EmbeddedPDFViewer(QWidget):
+    """Embedded PDF viewer with proper aspect ratio handling for portrait documents"""
+    
+    def __init__(self):
+        super().__init__()
+        self.current_pdf_path = None
+        self.pdf_width = 612  # Standard letter width
+        self.pdf_height = 792  # Standard letter height
+        self.setup_ui()
+        
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(2, 2, 2, 2)
+        
+        # Controls - make them smaller
+        controls = QHBoxLayout()
+        
+        self.pdf_info = QLabel("No PDF loaded")
+        self.pdf_info.setAlignment(Qt.AlignCenter)
+        self.pdf_info.setStyleSheet("QLabel { font-weight: bold; font-size: 10px; }")
+        self.pdf_info.setMaximumHeight(20)
+        controls.addWidget(self.pdf_info)
+        
+        layout.addLayout(controls)
+        
+        # Always use PyMuPDF for reliable aspect ratio control
+        self.setup_pdf_viewer(layout)
+        
+    def setup_pdf_viewer(self, layout):
+        """Setup PDF viewer using PyMuPDF with proper aspect ratio"""
+        # Scrollable area with better space utilization
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setAlignment(Qt.AlignCenter)
+        self.scroll_area.setStyleSheet("QScrollArea { border: 1px solid #ccc; background-color: #f0f0f0; }")
+        
+        # Remove restrictive width/height constraints - let it use available space
+        self.scroll_area.setMinimumWidth(400)   # Just minimum for readability
+        # No maximum width - use what's available
+        self.scroll_area.setMinimumHeight(500)  # Reasonable minimum height
+        
+        self.pdf_label = QLabel()
+        self.pdf_label.setAlignment(Qt.AlignCenter)
+        self.pdf_label.setStyleSheet("QLabel { background-color: white; border: 1px solid #ddd; margin: 5px; }")
+        self.pdf_label.setScaledContents(False)  # Don't auto-scale - we'll control this
+        
+        self.scroll_area.setWidget(self.pdf_label)
+        layout.addWidget(self.scroll_area)
+        
+    def load_pdf(self, pdf_path):
+        """Load PDF with proper aspect ratio calculation"""
+        self.current_pdf_path = pdf_path
+        filename = Path(pdf_path).name
+        self.pdf_info.setText(f"📄 {filename}")
+        
+        try:
+            import fitz
+            doc = fitz.open(pdf_path)
+            page = doc[0]
+            
+            # Get actual PDF dimensions
+            rect = page.rect
+            self.pdf_width = rect.width
+            self.pdf_height = rect.height
+            
+            print(f"DEBUG: PDF dimensions: {self.pdf_width} x {self.pdf_height}")
+            print(f"DEBUG: PDF aspect ratio: {self.pdf_width/self.pdf_height:.2f}")
+            print(f"DEBUG: Is portrait: {self.pdf_height > self.pdf_width}")
+            
+            # Calculate optimal display size for much narrower PDF pane
+            container_width = 480  # Much narrower available width
+            padding = 40  # Account for margins and scrollbars
+            available_width = container_width - padding
+            
+            # Calculate scale to fit width while maintaining aspect ratio
+            scale = available_width / self.pdf_width
+            
+            # For portrait documents, work with narrower space
+            if self.pdf_height > self.pdf_width:  # Portrait
+                # Ensure readable scale in narrow container
+                min_scale = 0.6  # Lower minimum for narrow space
+                max_scale = 0.8  # Keep it reasonable
+                scale = max(min_scale, min(scale, max_scale))
+                
+            display_width = int(self.pdf_width * scale)
+            display_height = int(self.pdf_height * scale)
+            
+            print(f"DEBUG: Calculated display size: {display_width} x {display_height} (scale: {scale:.2f})")
+            
+            # Render at calculated size
+            mat = fitz.Matrix(scale, scale)
+            pix = page.get_pixmap(matrix=mat)
+            img_data = pix.tobytes("ppm")
+            
+            from PySide6.QtGui import QPixmap
+            qimg = QPixmap()
+            qimg.loadFromData(img_data)
+            
+            # Set the pixmap and adjust label size
+            self.pdf_label.setPixmap(qimg)
+            self.pdf_label.resize(display_width, display_height)
+            self.pdf_label.setMinimumSize(display_width, display_height)
+            
+            doc.close()
+            print("DEBUG: PDF loaded with proper aspect ratio")
+            return True
+            
+        except Exception as e:
+            print(f"DEBUG: PDF loading failed: {e}")
+            self.pdf_label.setText(f"Error loading PDF: {e}")
+            return False
+        
+    def try_fallback_load(self, pdf_path):
+        """Removed - functionality integrated into load_pdf method"""
+        pass
+
 class PDFViewer(QWidget):
     """Enhanced PDF viewer widget with page navigation and text selection"""
     
@@ -368,19 +557,23 @@ class PDFViewer(QWidget):
         controls.addWidget(self.paper_ratio_combo)
         
         # Fit PDF button for optimal viewing
-        fit_pdf_btn = QPushButton("📏 Fit PDF")
+        fit_pdf_btn = QPushButton("Perfect Fit")
         fit_pdf_btn.clicked.connect(self.fit_pdf_to_window)
-        fit_pdf_btn.setMaximumWidth(80)
-        fit_pdf_btn.setToolTip("Automatically adjust zoom to fit PDF perfectly in window")
+        fit_pdf_btn.setMaximumWidth(100)
+        fit_pdf_btn.setToolTip("Snap viewing window to exact PDF page dimensions - no scrollbars needed!")
         controls.addWidget(fit_pdf_btn)
         
         layout.addLayout(controls)
         
         # PDF display area with text selection
         self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)  # Allow content to resize naturally
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        
         self.pdf_label = SelectablePDFLabel()
         self.pdf_label.setText("Load a PDF document to begin analysis...")
-        self.pdf_label.setAlignment(Qt.AlignCenter)  # Center the initial message
+        self.pdf_label.setAlignment(Qt.AlignCenter)
         self.pdf_label.setStyleSheet("""
             QLabel { 
                 background-color: white; 
@@ -391,44 +584,69 @@ class PDFViewer(QWidget):
                 padding: 20px;
             }
         """)
-        # Set a good initial size that will be updated when PDF loads
-        self.pdf_label.setMinimumSize(650, 850)  # Better initial readable size
-        # Remove maximum size constraints to let PDF display naturally
         
-        # Create a widget that constrains the PDF to Letter proportions
+        # Create a simple container for the PDF
         self.pdf_widget = QWidget()
-        self.pdf_widget.setMinimumWidth(400)  # Minimum readable width
-        
         pdf_layout = QVBoxLayout(self.pdf_widget)
-        pdf_layout.setContentsMargins(0, 0, 0, 0)
+        pdf_layout.setContentsMargins(10, 10, 10, 10)  # Small margins
+        pdf_layout.setAlignment(Qt.AlignCenter)  # Center the PDF
         pdf_layout.addWidget(self.pdf_label)
         
-        # Configure scroll area for proper scrolling with container
+        # Configure scroll area for proper display
         self.scroll_area.setWidget(self.pdf_widget)
         self.scroll_area.setWidgetResizable(True)  # Allow resizing initially
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         
-        # Create a container for Letter-proportioned viewing
-        viewer_container = QHBoxLayout()
-        viewer_container.addWidget(self.scroll_area)
-        viewer_container.addStretch()  # Push everything to the left
+        # Add scroll area directly without extra stretching containers
+        layout.addWidget(self.scroll_area)
         
-        layout.addLayout(viewer_container)
-        
+    def get_pdf_page_dimensions(self, page_num=0):
+        """Get the exact dimensions of a PDF page in points and pixels"""
+        if not self.pdf_document:
+            return None
+            
+        try:
+            page = self.pdf_document[page_num]
+            rect = page.rect
+            
+            # Calculate pixel dimensions at current zoom
+            pixel_width = rect.width * self.zoom_level
+            pixel_height = rect.height * self.zoom_level
+            
+            return {
+                'points': {'width': rect.width, 'height': rect.height},
+                'pixels': {'width': int(pixel_width), 'height': int(pixel_height)},
+                'aspect_ratio': rect.width / rect.height,
+                'inches': {'width': rect.width / 72, 'height': rect.height / 72}
+            }
+        except Exception as e:
+            print(f"Error getting PDF dimensions: {e}")
+            return None
+    
     def load_pdf(self, pdf_path):
-        """Load a PDF file for viewing"""
+        """Load a PDF file for viewing with proper initial sizing"""
         try:
             self.pdf_document = fitz.open(pdf_path)
             self.current_page = 0
+            
+            # Get page dimensions first
+            dims = self.get_pdf_page_dimensions(0)
+            if dims:
+                print(f"DEBUG: PDF page dimensions: {dims['points']['width']:.1f}x{dims['points']['height']:.1f} points")
+                print(f"DEBUG: Aspect ratio: {dims['aspect_ratio']:.3f}")
+            
+            # Start with a reasonable reading zoom (150%) instead of tiny 100%
+            self.zoom_level = 1.5
+            self.zoom_slider.setValue(150)
+            
             self.render_page()
             self.update_controls()
-            # Adjust container size for optimal viewing
-            print("DEBUG: Adjusting container size for PDF load")
-            QTimer.singleShot(100, self.adjust_pdf_container_size)
-            # Automatically fit PDF to window for optimal viewing with longer delay
-            print("DEBUG: Scheduling auto-fit for PDF load")
-            QTimer.singleShot(300, self.fit_pdf_to_window)  # Longer delay after container resize
+            
+            # Immediately apply perfect fit to optimize the display
+            print("DEBUG: Applying initial perfect fit for optimal viewing")
+            QTimer.singleShot(100, self.fit_pdf_to_window)  # Small delay for rendering
+            
             return True
         except Exception as e:
             QMessageBox.critical(self, "PDF Error", f"Could not load PDF: {e}")
@@ -465,34 +683,32 @@ class PDFViewer(QWidget):
         except Exception as e:
             print(f"Error rendering page: {e}")
             
-    def adjust_pdf_container_size(self):
-        """Adjust the PDF container to maintain reasonable viewing size"""
+    def remove_size_constraints(self):
+        """Remove any size constraints that prevent perfect PDF fitting"""
         if not hasattr(self, 'scroll_area') or not hasattr(self, 'pdf_widget'):
             print("DEBUG: Missing scroll_area or pdf_widget")
             return
             
         try:
-            # Set a reasonable maximum width that adapts to window size
-            available_width = self.scroll_area.width()
-            # Use 70% of available width but ensure it's sufficient for readability
-            max_reasonable_width = max(650, int(available_width * 0.7))  # At least 650px, or 70% of available
+            # Remove all size constraints to allow natural sizing
+            self.pdf_widget.setMaximumSize(16777215, 16777215)  # Qt's maximum size
+            self.pdf_widget.setMinimumSize(0, 0)
             
-            print(f"DEBUG: Setting PDF container max width to {max_reasonable_width}px (adaptive sizing)")
+            self.scroll_area.setMaximumSize(16777215, 16777215)
+            self.scroll_area.setMinimumSize(0, 0)
             
-            # Set adaptive width for good viewing
-            self.pdf_widget.setMaximumWidth(max_reasonable_width)
-            self.pdf_widget.setMinimumWidth(500)  # Ensure good minimum readability
+            print("DEBUG: Removed all size constraints - widgets can now size naturally")
             
         except Exception as e:
-            print(f"Error adjusting PDF container size: {e}")
+            print(f"Error removing size constraints: {e}")
             import traceback
             traceback.print_exc()
     
     def resizeEvent(self, event):
         """Handle window resize to maintain PDF proportions"""
         super().resizeEvent(event)
-        # Small delay to ensure layout is complete
-        QTimer.singleShot(50, self.adjust_pdf_container_size)
+        # Remove size constraints to allow natural resizing
+        QTimer.singleShot(50, self.remove_size_constraints)
         if not self.pdf_document:
             return
             
@@ -651,46 +867,60 @@ class PDFViewer(QWidget):
             self.render_page()
     
     def fit_pdf_to_window(self):
-        """Automatically adjust zoom to fit PDF perfectly based on selected paper ratio"""
+        """Make PDF fill the available space at a readable size with proper portrait aspect ratio"""
         if not self.pdf_document or not hasattr(self, 'scroll_area'):
             print("DEBUG: Cannot fit PDF - missing document or scroll area")
             return
             
         try:
-            # Get current page
+            # Get current page dimensions
             page = self.pdf_document[self.current_page]
             page_rect = page.rect
             
-            # Get available space in scroll area (accounting for scrollbars and margins)
-            available_width = self.scroll_area.viewport().width() - 40
-            available_height = self.scroll_area.viewport().height() - 40
+            print(f"DEBUG: PDF page size: {page_rect.width}x{page_rect.height} points")
+            print(f"DEBUG: PDF aspect ratio: {page_rect.width/page_rect.height:.3f} (should be < 1.0 for portrait)")
             
-            print(f"DEBUG: Available space: {available_width}x{available_height}")
-            print(f"DEBUG: PDF page size: {page_rect.width}x{page_rect.height}")
+            # Get available space in the scroll area
+            available_width = self.scroll_area.width() - 60  # More margin for scrollbars
+            available_height = self.scroll_area.height() - 60
             
-            # Ensure we have valid dimensions
-            if available_width <= 0 or available_height <= 0:
-                print("DEBUG: Invalid available dimensions")
-                return
+            print(f"DEBUG: Available space: {available_width}x{available_height} pixels")
             
-            # Calculate zoom to fit PDF in available space
+            # Calculate zoom to fit PDF properly - prioritize fitting width for portrait docs
             width_zoom = available_width / page_rect.width
             height_zoom = available_height / page_rect.height
             
-            # Use the smaller ratio to ensure both dimensions fit, with 95% margin
-            zoom_factor = min(width_zoom, height_zoom) * 0.95
+            # For portrait PDFs, usually width is the limiting factor
+            # Use width-based zoom but cap it to ensure height fits too
+            if page_rect.height > page_rect.width:  # Portrait PDF
+                zoom_factor = min(width_zoom, height_zoom)
+                print("DEBUG: Portrait PDF detected - using optimal fit")
+            else:  # Landscape or square PDF
+                zoom_factor = min(width_zoom, height_zoom)
+                print("DEBUG: Landscape/square PDF detected")
             
-            # Ensure reasonable zoom range
-            zoom_factor = max(0.3, min(2.0, zoom_factor))  # Between 30% and 200%
+            # Ensure reasonable zoom range for readability
+            zoom_factor = max(1.0, min(3.0, zoom_factor))  # Between 100% and 300%
             
-            # Convert to percentage and apply (with broader range)
+            print(f"DEBUG: Calculated zoom factor: {zoom_factor:.2f}")
+            
+            # Apply the zoom
+            self.zoom_level = zoom_factor
             zoom_percentage = int(zoom_factor * 100)
-            zoom_percentage = max(25, min(300, zoom_percentage))
-            
-            print(f"Auto-fitting PDF: {zoom_percentage}% zoom (fit to available space)")
-            
             self.zoom_slider.setValue(zoom_percentage)
-            # change_zoom will be called automatically via signal
+            
+            # Render at the new zoom level
+            self.render_page()
+            
+            # Remove any fixed sizing constraints that prevent natural fitting
+            self.scroll_area.setMaximumSize(16777215, 16777215)
+            self.pdf_widget.setMaximumSize(16777215, 16777215)
+            
+            # Let the PDF label size itself to its content
+            self.pdf_label.adjustSize()
+            
+            print(f"DEBUG: Perfect Fit applied at {zoom_percentage}% zoom")
+            print("DEBUG: PDF should now display with proper portrait aspect ratio!")
             
         except Exception as e:
             print(f"Error fitting PDF to window: {e}")
@@ -699,8 +929,8 @@ class PDFViewer(QWidget):
     
     def on_paper_ratio_changed(self):
         """Handle paper ratio selection change"""
-        # Adjust container size for new ratio
-        self.adjust_pdf_container_size()
+        # Remove size constraints for new ratio
+        self.remove_size_constraints()
         # Auto-fit when ratio changes
         if self.pdf_document:
             QTimer.singleShot(100, self.fit_pdf_to_window)
@@ -709,7 +939,8 @@ class EnhancedTrainingInterface(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Training Buddy - Professional Positionality Analysis Interface")
-        self.setGeometry(100, 100, 1600, 1000)  # Wider for better PDF fit
+        # Set reasonable default size but allow user to resize
+        self.resize(1200, 800)  # Default size - user can resize as needed
         
         # Training data storage
         self.training_data = []
@@ -772,34 +1003,41 @@ class EnhancedTrainingInterface(QMainWindow):
         # Main content area with splitter
         splitter = QSplitter(Qt.Horizontal)
         
-        # Left panel: PDF Viewer
+        # Left panel: PDF Viewer - prioritize PDF display
         pdf_panel = QGroupBox("PDF Document Viewer")
-        pdf_panel.setMinimumWidth(250)  # Ensure title is not truncated
-        pdf_panel.setMinimumWidth(600)
+        pdf_panel.setMinimumWidth(600)   # Wider for better PDF viewing
+        # Remove maximum width to let it expand naturally
         pdf_layout = QVBoxLayout(pdf_panel)
         
         # Paper info
         self.paper_info = QLabel("No paper selected")
         self.paper_info.setFont(QFont("Courier New", 11, QFont.Bold))
-        self.paper_info.setStyleSheet("QLabel { padding: 8px; background: white; border: 1px solid #666666; color: black; }")
+        self.paper_info.setStyleSheet("QLabel { padding: 4px; background: white; border: 1px solid #666666; color: black; }")
         pdf_layout.addWidget(self.paper_info)
         
-        # PDF viewer
-        self.pdf_viewer = PDFViewer()
+        # Note about PDF functionality
+        pdf_note = QLabel("� PDF displays with zoom and text selection built-in")
+        pdf_note.setStyleSheet("QLabel { color: #666; font-style: italic; padding: 5px; }")
+        pdf_layout.addWidget(pdf_note)
+        
+        # PDF viewer - use embedded system viewer
+        self.pdf_viewer = EmbeddedPDFViewer()
         pdf_layout.addWidget(self.pdf_viewer)
         
-        # Connect PDF text selection to text extraction area
-        self.pdf_viewer.pdf_label.text_selected.connect(self.on_text_selected)
+
         
         # Quick text extraction area
-        text_extract_group = QGroupBox("📝 Selected Text (for easy copying to Evidence)")
+        text_extract_group = QGroupBox("📝 Selected Text (for Evidence)")
         text_extract_layout = QVBoxLayout(text_extract_group)
-        text_extract_group.setMaximumHeight(120)
+        text_extract_layout.setContentsMargins(2, 2, 2, 2)  # Minimal margins
+        text_extract_layout.setSpacing(1)  # Very tight spacing
+        text_extract_group.setMaximumHeight(100)  # Smaller
         
         self.extracted_text = QPlainTextEdit()
-        self.extracted_text.setReadOnly(True)
-        self.extracted_text.setFont(QFont("Courier New", 10))
-        self.extracted_text.setPlaceholderText("Select text in PDF above to copy quotes for evidence...")
+        self.extracted_text.setReadOnly(False)  # Allow manual typing
+        self.extracted_text.setFont(QFont("Courier New", 12))  # Larger, more readable font
+        self.extracted_text.setStyleSheet("QPlainTextEdit { margin: 0px; padding: 1px; border: 1px solid #ddd; }")
+        self.extracted_text.setPlaceholderText("Select text in PDF above or type quotes for evidence...")
         text_extract_layout.addWidget(self.extracted_text)
         
         # Quick action buttons
@@ -822,33 +1060,43 @@ class EnhancedTrainingInterface(QMainWindow):
         # AI Detection Results (compact)
         ai_group = QGroupBox("🤖 Current AI Detection")
         ai_layout = QVBoxLayout(ai_group)
-        ai_group.setMaximumHeight(120)
+        ai_group.setMaximumHeight(100)  # More compact
         
         self.ai_results = QLabel("No detection results")
         self.ai_results.setWordWrap(True)
-        self.ai_results.setFont(QFont("Courier New", 10))
-        self.ai_results.setStyleSheet("QLabel { background: white; padding: 8px; border: 1px solid #666666; color: black; }")
+        self.ai_results.setFont(QFont("Courier New", 9))  # Smaller font
+        self.ai_results.setStyleSheet("QLabel { background: white; padding: 3px; border: 1px solid #666666; color: black; }")
         ai_layout.addWidget(self.ai_results)
         
         pdf_layout.addWidget(ai_group)
+        
+        # Set PDF panel to prefer smaller size
+        pdf_panel.setMaximumWidth(500)  # Limit PDF panel width
+        pdf_panel.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        
         splitter.addWidget(pdf_panel)
         
-        # Right panel: Training interface
+        # Right panel: Training interface - make it larger
         training_panel = QGroupBox("Human Expert Analysis and Labeling")
-        training_panel.setMinimumWidth(300)  # Ensure title is not truncated
-        training_panel.setMinimumWidth(400)
-        training_panel.setMaximumWidth(500)
+        training_panel.setMinimumWidth(400)  # Adequate minimum for usability
+        # No maximum width - let it expand as needed
+        # Remove maximum width constraint to let it use full available space
+        training_panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         right_layout = QVBoxLayout(training_panel)
+        right_layout.setContentsMargins(2, 2, 2, 2)  # Minimal margins
+        right_layout.setSpacing(1)  # Very tight spacing
         
         # AI Pre-screening section
         prescreening_group = QGroupBox("🔍 AI Pre-Screening (Speed Up Your Work!)")
         prescreening_layout = QVBoxLayout(prescreening_group)
+        prescreening_layout.setContentsMargins(2, 2, 2, 2)  # Minimal margins
+        prescreening_layout.setSpacing(1)  # Very tight spacing
         
         # Initial analysis button
         analysis_btn_layout = QHBoxLayout()
         self.initial_analysis_btn = QPushButton("🚀 Run Initial Analysis")
         self.initial_analysis_btn.clicked.connect(self.run_initial_analysis)
-        self.initial_analysis_btn.setStyleSheet("QPushButton { background-color: #333333; color: white; font-weight: bold; padding: 10px; font-family: 'Courier New', monospace; }")
+        self.initial_analysis_btn.setStyleSheet("QPushButton { background-color: #333333; color: white; font-weight: bold; padding: 6px; font-family: 'Courier New', monospace; }")
         analysis_btn_layout.addWidget(self.initial_analysis_btn)
         
         self.analysis_status = QLabel("Click to analyze this paper for positionality")
@@ -859,11 +1107,11 @@ class EnhancedTrainingInterface(QMainWindow):
         
         # AI findings display with scroll
         self.ai_findings = QTextEdit()
-        self.ai_findings.setMinimumHeight(200)  # Taller for more content
-        self.ai_findings.setMaximumHeight(300)  # Allow expansion
+        self.ai_findings.setMinimumHeight(150)  # Smaller
+        self.ai_findings.setMaximumHeight(200)  # More compact
         self.ai_findings.setReadOnly(True)
         self.ai_findings.setPlaceholderText("AI analysis results will appear here...\n\nClick 'Run Initial Analysis' to see:\n• Overall confidence score\n• Detected patterns\n• Evidence excerpts with locations\n• Recommended judgment")
-        self.ai_findings.setStyleSheet("QTextEdit { background: #f8f9fa; border: 1px solid #ddd; font-family: 'Segoe UI', Arial; }")
+        self.ai_findings.setStyleSheet("QTextEdit { background: #f8f9fa; border: 1px solid #ddd; font-family: 'Segoe UI', Arial; margin: 0px; padding: 2px; }")
         self.ai_findings.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         prescreening_layout.addWidget(self.ai_findings)
         
@@ -886,26 +1134,7 @@ class EnhancedTrainingInterface(QMainWindow):
         
         right_layout.addWidget(prescreening_group)
         
-        # Location dropdown for positionality findings
-        location_group = QGroupBox("📍 Location of Positionality Statements")
-        location_layout = QHBoxLayout(location_group)
-        location_label = QLabel("Primary Location:")
-        self.location_dropdown = QComboBox()
-        self.location_dropdown.addItems([
-            "Introduction/Background",
-            "Literature Review", 
-            "Methodology",
-            "Results/Findings",
-            "Discussion",
-            "Conclusion",
-            "Throughout Paper",
-            "Multiple Sections"
-        ])
-        self.location_dropdown.setStyleSheet("QComboBox { padding: 4px; }")
-        location_layout.addWidget(location_label)
-        location_layout.addWidget(self.location_dropdown)
-        location_layout.addStretch()
-        right_layout.addWidget(location_group)
+        # Simplified location - integrated into other controls below to save space
         
         # Positionality judgment
         judgment_group = QGroupBox("Does this paper contain positionality statements?")
@@ -940,7 +1169,7 @@ class EnhancedTrainingInterface(QMainWindow):
         evidence_layout.addWidget(QLabel("Quote specific text:"))
         self.evidence_text = QTextEdit()
         self.evidence_text.setMaximumHeight(80)
-        self.evidence_text.setFont(QFont("Arial", 9))
+        self.evidence_text.setFont(QFont("Arial", 12))
         evidence_layout.addWidget(self.evidence_text)
         
         # Location dropdown
@@ -997,7 +1226,7 @@ class EnhancedTrainingInterface(QMainWindow):
         notes_layout.addWidget(QLabel("Explanation:"))
         self.explanation_text = QTextEdit()
         self.explanation_text.setMaximumHeight(60)
-        self.explanation_text.setFont(QFont("Arial", 9))
+        self.explanation_text.setFont(QFont("Arial", 12))
         notes_layout.addWidget(self.explanation_text)
         
         # Pattern suggestions
@@ -1012,10 +1241,15 @@ class EnhancedTrainingInterface(QMainWindow):
         right_layout.addWidget(evidence_tabs)
         
         splitter.addWidget(training_panel)
+        
+        # Set stretch factors for reasonable proportions
+        splitter.setStretchFactor(0, 2)  # PDF panel gets 2 parts  
+        splitter.setStretchFactor(1, 1)  # Analysis panel gets 1 part
+        
         layout.addWidget(splitter)
         
-        # Set splitter proportions for optimal PDF viewing
-        splitter.setSizes([650, 650])  # More balanced layout for Letter portrait PDFs
+        # Set reasonable default proportions - user can adjust splitter
+        splitter.setSizes([700, 500])  # Give Analysis Pane adequate space
         
         # Bottom buttons
         button_layout = QHBoxLayout()
@@ -1098,6 +1332,25 @@ class EnhancedTrainingInterface(QMainWindow):
         self.progress_bar.setValue(current)
         self.papers_completed.setText(f"{completed} papers labeled")
         
+    def open_pdf_externally(self):
+        """Open the current PDF in the system's default PDF viewer"""
+        if not self.papers_list or self.current_paper_index >= len(self.papers_list):
+            QMessageBox.information(self, "No PDF", "No PDF is currently loaded.")
+            return
+            
+        filename = self.papers_list[self.current_paper_index]
+        filepath = os.path.join(self.pdf_folder, filename)
+        
+        if not os.path.exists(filepath):
+            QMessageBox.critical(self, "File Not Found", f"PDF file not found: {filepath}")
+            return
+            
+        success = open_pdf_with_system_viewer(filepath)
+        if success:
+            self.statusBar().showMessage(f"Opened {filename} in system PDF viewer", 3000)
+        else:
+            QMessageBox.critical(self, "Error", f"Could not open PDF with system viewer: {filename}")
+        
     def load_current_paper(self):
         """Load and display the current paper"""
         if not self.papers_list or self.current_paper_index >= len(self.papers_list):
@@ -1109,15 +1362,12 @@ class EnhancedTrainingInterface(QMainWindow):
         # Update paper info
         self.paper_info.setText(f"📄 {filename}")
         
-        # Load PDF in viewer
+        # Load PDF in embedded viewer
         success = self.pdf_viewer.load_pdf(filepath)
         if not success:
             return
-            
-        # Connect PDF text selection to extraction area
-        self.connect_pdf_selection()
         
-        # Run AI detection
+        # Run AI detection for the analysis panel
         try:
             ai_result = extract_positionality(filepath)
             score = ai_result.get("positionality_score", 0.0)
@@ -1139,7 +1389,7 @@ class EnhancedTrainingInterface(QMainWindow):
         # Load existing training data for this paper if available
         self.load_existing_label(filename)
         
-        self.statusBar().showMessage(f"Loaded: {filename}")
+        self.statusBar().showMessage(f"Loaded: {filename} - Text selection available in PDF viewer", 3000)
         
     def clear_inputs(self):
         """Clear all input fields"""
