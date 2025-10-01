@@ -63,22 +63,22 @@ jobs:
         
     - name: Build executable
       run: |
-        python -m PyInstaller build_files/ResearchBuddy5.1.spec --distpath ./dist --workpath ./build
+        python -m PyInstaller build_files/ResearchBuddy5.1.1.spec --distpath ./dist --workpath ./build
         
     - name: Verify build
       run: |
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          ls -la dist/ResearchBuddy5.1/
-          file dist/ResearchBuddy5.1/ResearchBuddy5.1.exe || echo "Windows executable created"
+          ls -la dist/ResearchBuddy5.1.1/
+          file dist/ResearchBuddy5.1.1/ResearchBuddy5.1.1.exe || echo "Windows executable created"
         else
-          ls -la dist/ResearchBuddy5.1/
-          file dist/ResearchBuddy5.1/ResearchBuddy5.1 || echo "Unix executable created"
+          ls -la dist/ResearchBuddy5.1.1/
+          file dist/ResearchBuddy5.1.1/ResearchBuddy5.1.1 || echo "Unix executable created"
         fi
         
     - name: Create distribution package
       run: |
         mkdir -p releases
-        cp -r dist/ResearchBuddy5.1 releases/${{ matrix.artifact-name }}
+        cp -r dist/ResearchBuddy5.1.1 releases/${{ matrix.artifact-name }}
         
         # Copy documentation
         cp README.md releases/${{ matrix.artifact-name }}/
