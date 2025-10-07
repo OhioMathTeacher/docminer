@@ -4,6 +4,16 @@
 
 Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.
 
+## 📥 **Download Ready-to-Use Executables**
+
+**No installation required - just download and run!**
+
+- **Windows:** [ResearchBuddy-windows.zip](https://github.com/OhioMathTeacher/research-buddy/releases/latest/download/ResearchBuddy-windows.zip)
+- **macOS:** [ResearchBuddy-macos.zip](https://github.com/OhioMathTeacher/research-buddy/releases/latest/download/ResearchBuddy-macos.zip)
+- **Linux:** [ResearchBuddy-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/latest/download/ResearchBuddy-linux.tar.gz)
+
+**📋 Instructions:** Download → Extract → Double-click to run → Start analyzing PDFs!
+
 ---
 
 ## Quick Start
@@ -11,10 +21,7 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 ### Step 1: Download the Latest Release
 
 **Production Ready (Recommended):**  
-Download from GitHub Releases:
-- Visit [Research Buddy Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
-- Download `ResearchBuddy5.0.app.zip` (macOS)
-- Extract and double-click to run
+Use the direct download links above, or visit [Research Buddy Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest) for more options.
 
 **For Developers:**
 ```bash
@@ -26,7 +33,7 @@ python run_research_buddy.py
 ### Step 2: Start Using
 
 1. **Extract** the downloaded zip file
-2. **Double-click** `ResearchBuddy5.0.app` to launch
+2. **Double-click** the executable to launch
 3. **Select** your PDF folder to analyze
 4. **Start analyzing!** (Works immediately for manual analysis)
 
