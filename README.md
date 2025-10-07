@@ -9,12 +9,10 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 **No installation required - just download and run!**
 
 - **Linux:** [ResearchBuddy5.1.1-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy5.1.1-linux.tar.gz) ✅ **278 MB**
-- **macOS (Current):** [ResearchBuddy5.0.app.zip](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.0/ResearchBuddy5.0.app.zip) ✅ **Available now**
-- **Windows:** Building new version - check [releases page](https://github.com/OhioMathTeacher/research-buddy/releases) for updates
+- **macOS:** [ResearchBuddy5.0-macos.zip](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.0/ResearchBuddy5.0-macos.zip) ✅ **259 MB**
+- **Windows:** Check [releases page](https://github.com/OhioMathTeacher/research-buddy/releases) - new version building
 
 **📋 Instructions:** Download → Extract → Double-click to run → Start analyzing PDFs!
-
-**🔄 Note:** We're building updated Windows/macOS versions with the latest features. The macOS version above works great in the meantime!
 
 ---
 
