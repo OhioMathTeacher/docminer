@@ -1,63 +1,54 @@
 # Research Buddy 3.1 - Professional Positionality Analysis Interface
 
-## 🚀 **Quick Start for Graduate Assistants**
-
-**Already have VS Code? Get running in 2 minutes!**
-
-### **Option 1: Clone and Run (if you have git)**
-**Step by step:**
-1. Open VS Code terminal (`View` → `Terminal`)
-2. Run: `git clone https://github.com/OhioMathTeacher/research-buddy.git`
-3. Run: `cd research-buddy`
-4. Run: `python3 run_research_buddy.py` (or `python run_research_buddy.py` on Windows)
-
-*If step 3 gives "no such file or directory", the git clone failed - try Option 2 instead!*
-
-### **Option 2: GitHub Codespaces (Works on ANY computer - RECOMMENDED)**
-1. Go to https://github.com/OhioMathTeacher/research-buddy
-2. Click green **"Code"** button → **"Codespaces"** tab → **"Create codespace"**
-3. When VS Code opens in browser, run: `python run_research_buddy.py`
-4. **Zero installation needed!**
-
-### **Option 3: Download ZIP (if git not available)**
-1. Go to https://github.com/OhioMathTeacher/research-buddy
-2. Click green **"Code"** button → **"Download ZIP"**
-3. Extract ZIP, open folder in VS Code
-4. Open terminal, run: `pip install -r requirements.txt` then `python run_research_buddy.py`tionality Detection Training
-
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
 Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.
 
-## � **Quick Start for Graduate Assistants**
+---
 
-**Already have VS Code? Get running in 2 minutes!**
+## 📥 **DOWNLOAD EXECUTABLES - Just Click and Run!**
 
-### **Option 1: Clone and Run (macOS/Windows)**
+**No Python, no setup, no terminal commands - just download and double-click!**
+
+### **macOS**
+🍎 [**ResearchBuddy-5.1.1.app.zip**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-macos.zip) 
+- Download → Extract → Double-click `ResearchBuddy.app`
+- If Mac says "unidentified developer": Right-click app → Open → Open
+
+### **Windows**  
+🪟 [**ResearchBuddy-5.1.1.exe**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-windows.zip)
+- Download → Extract → Double-click `ResearchBuddy.exe`
+- If Windows Defender blocks: Click "More info" → "Run anyway"
+
+### **Linux**
+🐧 [**ResearchBuddy-5.1.1.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-linux.tar.gz)
+- Download → Extract → Run `./ResearchBuddy`
+- Or: `chmod +x ResearchBuddy && ./ResearchBuddy`
+
+---
+
+## 🚀 **Alternative: GitHub Codespaces (Zero Installation!)**
+
+**Works on ANY computer with a web browser - perfect if downloads don't work:**
+
+1. Go to https://github.com/OhioMathTeacher/research-buddy
+2. Click green **"Code"** button → **"Codespaces"** tab → **"Create codespace"**
+3. When VS Code opens in browser, run: `python run_research_buddy.py`
+4. **That's it! No installation needed!**
+
+---
+
+## �️ **For Developers: Clone and Run**
+
+If you want to modify the code or have Python installed:
+
 ```bash
 git clone https://github.com/OhioMathTeacher/research-buddy.git
 cd research-buddy
 python3 run_research_buddy.py
 ```
-*If Windows gives errors, first run: `pip install -r requirements.txt`*
 
-### **Option 2: GitHub Codespaces (Works on ANY computer)**
-1. Go to https://github.com/OhioMathTeacher/research-buddy
-2. Click green **"Code"** button → **"Codespaces"** tab → **"Create codespace"**
-3. When VS Code opens in browser, run: `python run_research_buddy.py`
-4. **Zero installation needed!**
-
----
-
-## �📥 **Download Ready-to-Use Executables**
-
-**No installation required - just download and run!**
-
-- **Linux:** [ResearchBuddy5.1.1-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy5.1.1-linux.tar.gz) ✅ **278 MB** (Latest)
-- **macOS:** [ResearchBuddy5.0.zip](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.0/ResearchBuddy5.0.zip) ✅ **259 MB** (Latest) 
-- **Windows:** 🔄 **In Development** - Windows .exe version coming soon
-
-**📋 Instructions:** Download → Extract → Double-click to run → Start analyzing PDFs!
+*On Windows, use `python` instead of `python3`*
 
 **⚠️ Note:** We're working on Windows executable and improved cross-platform naming. Check [releases page](https://github.com/OhioMathTeacher/research-buddy/releases) for updates.
 
