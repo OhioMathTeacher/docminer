@@ -1,4 +1,29 @@
-# Research Buddy – Positionality Detection Training
+# Research Buddy 3.1 - Professional Positionality Analysis Interface
+
+## 🚀 **Quick Start for Graduate Assistants**
+
+**Already have VS Code? Get running in 2 minutes!**
+
+### **Option 1: Clone and Run (if you have git)**
+**Step by step:**
+1. Open VS Code terminal (`View` → `Terminal`)
+2. Run: `git clone https://github.com/OhioMathTeacher/research-buddy.git`
+3. Run: `cd research-buddy`
+4. Run: `python3 run_research_buddy.py` (or `python run_research_buddy.py` on Windows)
+
+*If step 3 gives "no such file or directory", the git clone failed - try Option 2 instead!*
+
+### **Option 2: GitHub Codespaces (Works on ANY computer - RECOMMENDED)**
+1. Go to https://github.com/OhioMathTeacher/research-buddy
+2. Click green **"Code"** button → **"Codespaces"** tab → **"Create codespace"**
+3. When VS Code opens in browser, run: `python run_research_buddy.py`
+4. **Zero installation needed!**
+
+### **Option 3: Download ZIP (if git not available)**
+1. Go to https://github.com/OhioMathTeacher/research-buddy
+2. Click green **"Code"** button → **"Download ZIP"**
+3. Extract ZIP, open folder in VS Code
+4. Open terminal, run: `pip install -r requirements.txt` then `python run_research_buddy.py`tionality Detection Training
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
