@@ -1,153 +1,78 @@
-# 📖 Research Buddy – Positionality Detection Training# 📖 Research Buddy – Pos### Step 2: Install & Run
-
-
-
-**Simple, professional software for analyzing academic papers and detecting positionality statements.****For Executables (Easy!):**
-
-1. Extract/unzip the downloaded file
-
-Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.2. **Windows**: Double-click `ResearchBuddy.exe`
-
-3. **macOS**: Double-click `ResearchBuddy.app` (right-click → Open if needed)
-
----4. **Linux**: Run `./ResearchBuddy` in terminal
-
-5. **Done!** No Python installation requiredality Detection Training
-
-## 🚀 Quick Start
+# Research Buddy – Positionality Detection Training
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
+Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.
+
+---
+
+## Quick Start
+
 ### Step 1: Download the Latest Release
 
-Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.  
-
 **Production Ready (Recommended):**  
-
-📦 **Download from GitHub Releases:**
-
-- Visit [Research Buddy Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest)---
-
+Download from GitHub Releases:
+- Visit [Research Buddy Releases](https://github.com/OhioMathTeacher/research-buddy/releases/latest)
 - Download `ResearchBuddy5.0.app.zip` (macOS)
+- Extract and double-click to run
 
-- Extract and double-click to run## 🚀 Quick Start
-
-
-
-**For Developers:**### Step 1: Download
-
+**For Developers:**
 ```bash
-
-git clone https://github.com/OhioMathTeacher/research-buddy.git**Clickable Executables (Recommended)**  
-
-cd research-buddy📦 **Direct Downloads:**
-
-python run_research_buddy.py- **Windows**: [ResearchBuddy-windows.zip](https://github.com/OhioMathTeacher/research-buddy/releases/latest/download/ResearchBuddy-windows.zip)
-
-```- **macOS**: [ResearchBuddy-macos.zip](https://github.com/OhioMathTeacher/research-buddy/releases/latest/download/ResearchBuddy-macos.zip)
-
-- **Linux**: [ResearchBuddy-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/latest/download/ResearchBuddy-linux.tar.gz)
+git clone https://github.com/OhioMathTeacher/research-buddy.git
+cd research-buddy
+python run_research_buddy.py
+```
 
 ### Step 2: Start Using
 
-**If download links don't work yet:** Visit [Releases](https://github.com/OhioMathTeacher/research-buddy/releases) page
-
 1. **Extract** the downloaded zip file
-
-2. **Double-click** `ResearchBuddy5.0.app` to launch### Step 2: Install
-
+2. **Double-click** `ResearchBuddy5.0.app` to launch
 3. **Select** your PDF folder to analyze
+4. **Start analyzing!** (Works immediately for manual analysis)
 
-4. **Start analyzing!** (Works immediately for manual analysis)1. Extract/unzip the downloaded file
+### Step 3: Optional Setup (for AI features)
 
-2. Double-click the application to run
-
-### Step 3: Optional Setup (for AI features)3. **That’s it!** No Python or technical setup required
-
-
-
-1. Go to **Configuration → Settings**### Step 3: Start Analyzing
-
+1. Go to **Configuration → Settings**
 2. Enter your **OpenAI API key** (for AI analysis)
+3. Enter your **GitHub token** (for uploading results)
+4. Click **Save Configuration**
 
-3. Enter your **GitHub token** (for uploading results)1. The software opens with a training document
+---
 
-4. Click **Save Configuration**2. Add your PDF papers to the `~/ExtractorPDFs` folder
+## What It Does
 
-3. Select text and mark positionality statements
-
----4. Export your training data when finished
-
-
-
-## 📋 What It Does---
-
-
-
-* **PDF Viewer** – Professional navigation for academic papers## 📋 What It Does
-
+* **PDF Viewer** – Professional navigation for academic papers
 * **Text Selection** – Highlight and extract quotes for evidence
-
-* **AI Assistant** – Optional AI pre-screening (requires OpenAI API key)* **PDF Viewer** – Professional navigation for academic papers
-
-* **Training Data** – Export reviewer decisions for analysis* **Text Selection** – Highlight and extract quotes for evidence
-
-* **Smart Buttons** – Color-coded status indicators for easy setup* **AI Assistant** – Optional AI pre-screening (requires OpenAI API key)
-
-* **Secure Configuration** – Password-protected API key entry* **Training Data** – Export reviewer decisions
-
-* **Manual Mode** – Works completely offline without AI
+* **AI Assistant** – Optional AI pre-screening (requires OpenAI API key)
+* **Training Data** – Export reviewer decisions for analysis
+* **Smart Buttons** – Color-coded status indicators for easy setup
+* **Secure Configuration** – Password-protected API key entry
 
 ---
 
----
-
-## 📁 Project Structure
-
-## 💡 Need Help?
+## Project Structure
 
 ```
-
-research-buddy/* **Getting Started**: See `QUICK_START_FOR_GAS.md`
-
-├── run_research_buddy.py          # Main entry point for developers* **Questions**: Open an [issue](https://github.com/OhioMathTeacher/research-buddy/issues)
-
-├── enhanced_training_interface.py # Core application* **Technical Support**: Contact your research supervisor or IT team
-
+research-buddy/
+├── run_research_buddy.py          # Main entry point for developers
+├── enhanced_training_interface.py # Core application
 ├── configuration_dialog.py        # Settings interface  
-
-├── github_report_uploader.py      # Upload functionality---
-
+├── github_report_uploader.py      # Upload functionality
 ├── launch_research_buddy.py       # Legacy launcher
-
-├── requirements.txt               # Python dependencies## 📄 License
-
+├── requirements.txt               # Python dependencies
 ├── docs/                          # Documentation
-
-│   ├── QUICK_START_FOR_GAS.md    # Quick start guide**Academic and Educational Use Only**
-
-│   ├── RELEASE_v5.0.md           # Latest release notesThis project is licensed under **Creative Commons Attribution-NonCommercial 4.0**:
-
+│   ├── QUICK_START_FOR_GAS.md    # Quick start guide
+│   ├── RELEASE_v5.0.md           # Latest release notes
 │   └── about_EVIDENCE.txt        # Evidence export info
-
-├── legal/                         # License files* ✅ Free for academic research and education
-
-│   ├── LICENSE                   # Main MIT license* ✅ Share and modify for research purposes
-
-│   ├── LICENSE-ACADEMIC          # Academic use terms* ❌ Commercial use requires separate licensing
-
+├── legal/                         # License files
+│   ├── LICENSE                   # Main MIT license
+│   ├── LICENSE-ACADEMIC          # Academic use terms
 │   └── LICENSE-NONCOMMERCIAL     # Non-commercial terms
-
-├── build_files/                   # Build and packagingFor commercial licensing, contact the project maintainer.
-
+├── build_files/                   # Build and packaging
 │   ├── build.py                  # Build script
-
-│   └── *.spec                    # PyInstaller configs---
-
+│   └── *.spec                    # PyInstaller configs
 ├── tests/                         # Test files
-
-├── utils/                         # Utility modules**Research Buddy** – Making contextual analysis accessible to everyone in academia.
-
+├── utils/                         # Utility modules
 ├── scripts/                       # Helper scripts
 ├── cli/                          # Command-line tools
 └── sample_pdfs/                  # Example documents
@@ -155,7 +80,7 @@ research-buddy/* **Getting Started**: See `QUICK_START_FOR_GAS.md`
 
 ---
 
-## 💡 Need Help?
+## Need Help?
 
 * **Getting Started**: See `docs/QUICK_START_FOR_GAS.md`
 * **Questions**: Open an [issue](https://github.com/OhioMathTeacher/research-buddy/issues)
@@ -163,7 +88,7 @@ research-buddy/* **Getting Started**: See `QUICK_START_FOR_GAS.md`
 
 ---
 
-## 🔧 For Developers
+## For Developers
 
 ### Running from Source
 
@@ -199,14 +124,14 @@ python -m pytest tests/
 
 ---
 
-## 📄 License
+## License
 
 **Academic and Educational Use Only**
 This project is licensed under **Creative Commons Attribution-NonCommercial 4.0**:
 
-* ✅ Free for academic research and education
-* ✅ Share and modify for research purposes
-* ❌ Commercial use requires separate licensing
+* Free for academic research and education
+* Share and modify for research purposes
+* Commercial use requires separate licensing
 
 See `legal/` directory for full license terms.
 
