@@ -1,0 +1,137 @@
+name: Manual Build All Platforms
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            name: ResearchBuddy-5.1.1-linux
+            archive: tar.gz
+          - os: windows-latest  
+            platform: windows
+            name: ResearchBuddy-5.1.1-windows
+            archive: zip
+          - os: macos-latest
+            platform: macos
+            name: ResearchBuddy-5.1.1-macos
+            archive: zip
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install system dependencies (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libgl1-mesa-glx \
+          libxrandr2 \
+          libxss1 \
+          libxcursor1 \
+          libxcomposite1 \
+          libasound2 \
+          libxi6 \
+          libxtst6 \
+          libfontconfig1 \
+          libxrender1 \
+          libdbus-1-3 \
+          libxkbcommon-x11-0 \
+          libxkbcommon0
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+        
+    - name: Build executable
+      run: |
+        python -m PyInstaller build_files/ResearchBuddy5.1.1.spec --distpath ./dist --workpath ./build --clean --noconfirm
+        
+    - name: Create distribution package
+      shell: bash
+      run: |
+        mkdir -p releases
+        
+        if [ "${{ matrix.os }}" = "macos-latest" ]; then
+          # macOS: Create .app bundle ZIP
+          cd dist
+          zip -r ../releases/${{ matrix.name }}.zip ResearchBuddy5.1.1.app
+        elif [ "${{ matrix.os }}" = "windows-latest" ]; then
+          # Windows: Create ZIP with exe
+          cd dist/ResearchBuddy5.1.1
+          7z a ../../releases/${{ matrix.name }}.zip *
+        else
+          # Linux: Create tar.gz
+          cd dist
+          tar -czf ../releases/${{ matrix.name }}.tar.gz ResearchBuddy5.1.1
+        fi
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.name }}
+        path: releases/${{ matrix.name }}.*
+        retention-days: 90
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+
+    - name: Display structure
+      run: ls -R artifacts
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v5.1.1
+        name: Research Buddy 5.1.1 - Full Cross-Platform Release
+        draft: false
+        prerelease: false
+        files: |
+          artifacts/**/*.zip
+          artifacts/**/*.tar.gz
+        body: |
+          # 🚀 Research Buddy 5.1.1 - Complete Cross-Platform Release
+          
+          **Download and run - no installation needed!**
+          
+          ## 📥 Downloads
+          
+          - **macOS**: Download `ResearchBuddy-5.1.1-macos.zip` → Extract → Double-click `.app`
+          - **Windows**: Download `ResearchBuddy-5.1.1-windows.zip` → Extract → Double-click `.exe`
+          - **Linux**: Download `ResearchBuddy-5.1.1-linux.tar.gz` → Extract → Run executable
+          
+          ## ✨ Features
+          
+          - Professional PDF viewer with text selection
+          - AI-assisted positionality detection
+          - Manual analysis mode
+          - Evidence collection and quote extraction
+          - GitHub integration for training reports
+          
+          ## 🎯 Perfect for Graduate Assistants
+          
+          No Python, no terminal, no setup - just download and analyze academic papers!
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
