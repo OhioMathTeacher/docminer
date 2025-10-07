@@ -37,12 +37,12 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          libgl1-mesa-glx \
+          libgl1 \
           libxrandr2 \
           libxss1 \
           libxcursor1 \
           libxcomposite1 \
-          libasound2 \
+          libasound2t64 \
           libxi6 \
           libxtst6 \
           libfontconfig1 \
