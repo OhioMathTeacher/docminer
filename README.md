@@ -1,4 +1,4 @@
-# Research Buddy 3.1 - Professional Positionality Analysis Interface
+# Research Buddy 5.1.1 - Professional Positionality Analysis Interface
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
@@ -11,19 +11,19 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 **No Python, no setup, no terminal commands - just download and double-click!**
 
 ### **macOS**
-🍎 [**ResearchBuddy-5.1.1.app.zip**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-macos.zip) 
-- Download → Extract → Double-click `ResearchBuddy.app`
-- If Mac says "unidentified developer": Right-click app → Open → Open
+🍎 [**Download ResearchBuddy-5.1.1-macos.tar.gz**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-macos.tar.gz) 
+- Download → Extract → Double-click `ResearchBuddy5.1.1`
+- If Mac says "unidentified developer": Right-click → Open → Open
 
 ### **Windows**  
-🪟 [**ResearchBuddy-5.1.1.exe**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-windows.zip)
-- Download → Extract → Double-click `ResearchBuddy.exe`
+🪟 [**Download ResearchBuddy-5.1.1-windows.zip**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-windows.zip)
+- Download → Extract → Double-click `ResearchBuddy5.1.1.exe`
 - If Windows Defender blocks: Click "More info" → "Run anyway"
 
 ### **Linux**
-🐧 [**ResearchBuddy-5.1.1.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-linux.tar.gz)
-- Download → Extract → Run `./ResearchBuddy`
-- Or: `chmod +x ResearchBuddy && ./ResearchBuddy`
+🐧 [**Download ResearchBuddy-5.1.1-linux.tar.gz**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-linux.tar.gz)
+- Download → Extract with: `tar -xzf ResearchBuddy-5.1.1-linux.tar.gz`
+- Run: `cd ResearchBuddy5.1.1 && ./ResearchBuddy5.1.1`
 
 ---
 
