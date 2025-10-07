@@ -66,16 +66,12 @@ jobs:
       run: |
         mkdir -p releases
         
-        if [ "${{ matrix.os }}" = "macos-latest" ]; then
-          # macOS: Create .app bundle ZIP
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          # Windows: Create ZIP
           cd dist
-          zip -r ../releases/${{ matrix.name }}.zip ResearchBuddy5.1.1.app
-        elif [ "${{ matrix.os }}" = "windows-latest" ]; then
-          # Windows: Create ZIP with exe
-          cd dist/ResearchBuddy5.1.1
-          7z a ../../releases/${{ matrix.name }}.zip *
+          powershell Compress-Archive -Path ResearchBuddy5.1.1 -DestinationPath ../releases/${{ matrix.name }}.zip
         else
-          # Linux: Create tar.gz
+          # Linux and macOS: Create tar.gz
           cd dist
           tar -czf ../releases/${{ matrix.name }}.tar.gz ResearchBuddy5.1.1
         fi
@@ -108,6 +104,7 @@ jobs:
         name: Research Buddy 5.1.1 - Full Cross-Platform Release
         draft: false
         prerelease: false
+        append_body: true
         files: |
           artifacts/**/*.zip
           artifacts/**/*.tar.gz
