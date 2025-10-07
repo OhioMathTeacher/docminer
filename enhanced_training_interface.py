@@ -32,10 +32,9 @@ from PySide6.QtGui import QFont, QTextCursor, QPixmap, QPainter, QPen, QColor, Q
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
 import fitz  # PyMuPDF for PDF rendering
-from metadata_extractor import extract_positionality
+from utils.metadata_extractor import extract_positionality
 from github_report_uploader import GitHubReportUploader
 from configuration_dialog import ConfigurationDialog
-from first_run_setup import FirstRunSetupDialog, check_first_run
 
 def open_pdf_with_system_viewer(pdf_path):
     """
@@ -1132,20 +1131,6 @@ class EnhancedTrainingInterface(QMainWindow):
         
         # Settings file to remember state
         self.settings_file = Path(__file__).parent / "interface_settings.json"
-        
-        # Check for first run and show setup dialog
-        if check_first_run():
-            setup_dialog = FirstRunSetupDialog(self)
-            if setup_dialog.exec() == QDialog.DialogCode.Rejected:
-                # User skipped setup, show a gentle reminder
-                QMessageBox.information(
-                    self,
-                    "Welcome to Research Buddy!",
-                    "🎉 Welcome to Research Buddy 3.1!\n\n"
-                    "You can configure API keys and GitHub settings anytime through:\n"
-                    "Configuration → Settings\n\n"
-                    "Research Buddy works great even without configuration!"
-                )
         
         # Initialize without loading any local training data
         # Each session starts fresh - decisions go directly to GitHub
