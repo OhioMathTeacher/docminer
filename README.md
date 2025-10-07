@@ -4,15 +4,37 @@
 
 Perfect for graduate assistants, researchers, and academic institutions conducting qualitative research analysis.
 
-## 📥 **Download Ready-to-Use Executables**
+## � **Quick Start for Graduate Assistants**
+
+**Already have VS Code? Get running in 2 minutes!**
+
+### **Option 1: Clone and Run (macOS/Windows)**
+```bash
+git clone https://github.com/OhioMathTeacher/research-buddy.git
+cd research-buddy
+python3 run_research_buddy.py
+```
+*If Windows gives errors, first run: `pip install -r requirements.txt`*
+
+### **Option 2: GitHub Codespaces (Works on ANY computer)**
+1. Go to https://github.com/OhioMathTeacher/research-buddy
+2. Click green **"Code"** button → **"Codespaces"** tab → **"Create codespace"**
+3. When VS Code opens in browser, run: `python run_research_buddy.py`
+4. **Zero installation needed!**
+
+---
+
+## �📥 **Download Ready-to-Use Executables**
 
 **No installation required - just download and run!**
 
-- **Linux:** [ResearchBuddy5.1.1-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy5.1.1-linux.tar.gz) ✅ **278 MB**
-- **macOS:** [ResearchBuddy5.0-macos.zip](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.0/ResearchBuddy5.0-macos.zip) ✅ **259 MB**
-- **Windows:** Check [releases page](https://github.com/OhioMathTeacher/research-buddy/releases) - new version building
+- **Linux:** [ResearchBuddy5.1.1-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy5.1.1-linux.tar.gz) ✅ **278 MB** (Latest)
+- **macOS:** [ResearchBuddy5.0.zip](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.0/ResearchBuddy5.0.zip) ✅ **259 MB** (Latest) 
+- **Windows:** 🔄 **In Development** - Windows .exe version coming soon
 
 **📋 Instructions:** Download → Extract → Double-click to run → Start analyzing PDFs!
+
+**⚠️ Note:** We're working on Windows executable and improved cross-platform naming. Check [releases page](https://github.com/OhioMathTeacher/research-buddy/releases) for updates.
 
 ---
 
