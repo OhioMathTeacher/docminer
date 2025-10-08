@@ -119,37 +119,10 @@ jobs:
           # Linux: Create tar.gz AND AppImage
           cd dist
           tar -czf ../releases/${{ matrix.name }}.tar.gz ResearchBuddy5.1.1
-          
-          # Create AppImage
           cd ..
           
-          # Install appimagetool
-          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod +x appimagetool-x86_64.AppImage
-          
-          # Create AppDir structure
-          mkdir -p ResearchBuddy.AppDir/usr/bin
-          cp -r dist/ResearchBuddy5.1.1/* ResearchBuddy.AppDir/usr/bin/
-          
-          # Create AppRun script
-          echo '#!/bin/bash' > ResearchBuddy.AppDir/AppRun
-          echo 'SELF=$(readlink -f "$0")' >> ResearchBuddy.AppDir/AppRun
-          echo 'HERE=${SELF%/*}' >> ResearchBuddy.AppDir/AppRun
-          echo 'export LD_LIBRARY_PATH="${HERE}/usr/bin:${LD_LIBRARY_PATH}"' >> ResearchBuddy.AppDir/AppRun
-          echo 'exec "${HERE}/usr/bin/ResearchBuddy5.1.1" "$@"' >> ResearchBuddy.AppDir/AppRun
-          chmod +x ResearchBuddy.AppDir/AppRun
-          
-          # Create desktop file
-          mkdir -p ResearchBuddy.AppDir/usr/share/applications
-          echo '[Desktop Entry]' > ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
-          echo 'Type=Application' >> ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
-          echo 'Name=Research Buddy' >> ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
-          echo 'Exec=ResearchBuddy5.1.1' >> ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
-          echo 'Icon=researchbuddy' >> ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
-          echo 'Categories=Education;' >> ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
-          
-          # Build AppImage
-          ARCH=x86_64 ./appimagetool-x86_64.AppImage ResearchBuddy.AppDir releases/ResearchBuddy-5.1.1-x86_64.AppImage || echo "AppImage creation failed, continuing with tar.gz only"
+          # Create AppImage using helper script
+          bash build_files/create_appimage.sh
         fi
         
     - name: Upload artifact
