@@ -118,29 +118,25 @@ jobs:
           mkdir -p ResearchBuddy.AppDir/usr/bin
           cp -r dist/ResearchBuddy5.1.1/* ResearchBuddy.AppDir/usr/bin/
           
-          # Create AppRun
-          cat > ResearchBuddy.AppDir/AppRun << 'EOF'
-          #!/bin/bash
-          SELF=$(readlink -f "$0")
-          HERE=${SELF%/*}
-          export LD_LIBRARY_PATH="${HERE}/usr/bin:${LD_LIBRARY_PATH}"
-          exec "${HERE}/usr/bin/ResearchBuddy5.1.1" "$@"
-          EOF
+          # Create AppRun script
+          echo '#!/bin/bash' > ResearchBuddy.AppDir/AppRun
+          echo 'SELF=$(readlink -f "$0")' >> ResearchBuddy.AppDir/AppRun
+          echo 'HERE=${SELF%/*}' >> ResearchBuddy.AppDir/AppRun
+          echo 'export LD_LIBRARY_PATH="${HERE}/usr/bin:${LD_LIBRARY_PATH}"' >> ResearchBuddy.AppDir/AppRun
+          echo 'exec "${HERE}/usr/bin/ResearchBuddy5.1.1" "$@"' >> ResearchBuddy.AppDir/AppRun
           chmod +x ResearchBuddy.AppDir/AppRun
           
           # Create desktop file
           mkdir -p ResearchBuddy.AppDir/usr/share/applications
-          cat > ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop << 'EOF'
-          [Desktop Entry]
-          Type=Application
-          Name=Research Buddy
-          Exec=ResearchBuddy5.1.1
-          Icon=researchbuddy
-          Categories=Education;
-          EOF
+          echo '[Desktop Entry]' > ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
+          echo 'Type=Application' >> ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
+          echo 'Name=Research Buddy' >> ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
+          echo 'Exec=ResearchBuddy5.1.1' >> ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
+          echo 'Icon=researchbuddy' >> ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
+          echo 'Categories=Education;' >> ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop
           
           # Build AppImage
-          ARCH=x86_64 ./appimagetool-x86_64.AppImage ResearchBuddy.AppDir releases/ResearchBuddy-5.1.1-x86_64.AppImage || echo "⚠️ AppImage creation failed, continuing with tar.gz only"
+          ARCH=x86_64 ./appimagetool-x86_64.AppImage ResearchBuddy.AppDir releases/ResearchBuddy-5.1.1-x86_64.AppImage || echo "AppImage creation failed, continuing with tar.gz only"
         fi
         
     - name: Upload artifact
