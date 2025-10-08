@@ -11,9 +11,10 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 **No Python, no setup, no terminal commands - just download and double-click!**
 
 ### **macOS**
-🍎 [**Download ResearchBuddy-5.1.1.dmg**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1.dmg) 
+🍎 [**Download ResearchBuddy-5.1.1-macos.dmg**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-macos.dmg) 
 - Download → Double-click the DMG → Drag `ResearchBuddy5.1.1.app` to Applications
 - Open from Applications folder → Done!
+- Works on both Apple Silicon and Intel Macs
 - If Mac says "unidentified developer": Right-click the .app → Open → Open (only needed first time)
 
 ### **Windows**  
@@ -22,15 +23,10 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 - If Windows Defender blocks: Click "More info" → "Run anyway"
 
 ### **Linux**
-🐧 **Option 1: AppImage (Recommended - works on all distros)**  
-[**Download ResearchBuddy-5.1.1-x86_64.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-x86_64.AppImage)
-- Download → Make executable: `chmod +x ResearchBuddy-5.1.1-x86_64.AppImage`
-- Run: `./ResearchBuddy-5.1.1-x86_64.AppImage`
-
-🐧 **Option 2: Traditional Archive**  
-[**Download ResearchBuddy-5.1.1-linux.tar.gz**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-linux.tar.gz)
+🐧 [**Download ResearchBuddy-5.1.1-linux.tar.gz**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-linux.tar.gz)
 - Extract: `tar -xzf ResearchBuddy-5.1.1-linux.tar.gz`
 - Run: `cd ResearchBuddy5.1.1 && ./ResearchBuddy5.1.1`
+- Tested on Ubuntu, Fedora, and Debian-based distributions
 
 ---
 
