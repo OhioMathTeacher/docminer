@@ -57,24 +57,47 @@ jobs:
         cp QUICK_START_FOR_GAS.md release/
         chmod +x release/ResearchBuddy
 
-    - name: 🔨 Build macOS Executable
+    - name: 🔨 Build macOS Executable (Apple Silicon)
       if: matrix.platform == 'macos'
       run: |
-        python -m PyInstaller --onedir --windowed --name "ResearchBuddy" enhanced_training_interface.py
-        mkdir release
-        cp -r dist/ResearchBuddy.app release/
-        cp README.md release/
-        cp QUICK_START_FOR_GAS.md release/
+        echo "Building for Apple Silicon/ARM64..."
+        python -m PyInstaller build_files/ResearchBuddy5.1.1.spec \
+          --distpath ./dist \
+          --workpath ./build \
+          --clean \
+          --noconfirm
+        
+        echo "Verifying architecture..."
+        file dist/ResearchBuddy5.1.1.app/Contents/MacOS/ResearchBuddy5.1.1
+        
+        echo "Creating DMG..."
+        mkdir -p dmg-temp
+        cp -R dist/ResearchBuddy5.1.1.app dmg-temp/
+        ln -s /Applications dmg-temp/Applications
+        
+        hdiutil create \
+          -volname "ResearchBuddy 5.1.1" \
+          -srcfolder dmg-temp \
+          -ov -format UDZO \
+          ResearchBuddy-5.1.1.dmg
+        
+        rm -rf dmg-temp
+        
+        echo "DMG created successfully!"
+        ls -lh ResearchBuddy-5.1.1.dmg
 
     - name: 📦 Create Package
       shell: bash
       run: |
-        cd release
         if [ "${{ matrix.platform }}" = "windows" ]; then
+          cd release
           7z a "../${{ matrix.name }}.zip" *
         elif [ "${{ matrix.platform }}" = "macos" ]; then
-          zip -r "../${{ matrix.name }}.zip" *
+          # DMG already created, just move it
+          mkdir -p release
+          mv ResearchBuddy-5.1.1.dmg release/${{ matrix.name }}.dmg
         else
+          cd release
           tar -czf "../${{ matrix.name }}.tar.gz" *
         fi
 
