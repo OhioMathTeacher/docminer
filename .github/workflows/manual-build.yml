@@ -164,6 +164,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
     
     steps:
     - name: Download all artifacts
@@ -205,9 +207,8 @@ jobs:
 
     - name: Create or Update Release
       uses: softprops/action-gh-release@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: v5.1.1
         name: Research Buddy 5.1.1 - Professional Cross-Platform Installers
         draft: false
