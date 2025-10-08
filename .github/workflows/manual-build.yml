@@ -167,6 +167,10 @@ jobs:
       contents: write
     
     steps:
+    - name: Check build status
+      run: |
+        echo "All build jobs completed. Proceeding with release..."
+        
     - name: Download all artifacts
       uses: actions/download-artifact@v4
       with:
@@ -174,17 +178,39 @@ jobs:
 
     - name: Display and flatten artifacts
       run: |
-        echo "📦 Downloaded artifacts:"
+        echo "📦 Downloaded artifacts structure:"
         ls -R artifacts
+        
+        echo ""
+        echo "📂 Searching for release files..."
+        find artifacts -type f
         
         echo ""
         echo "📂 Flattening structure..."
         mkdir -p release-files
-        find artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" -o -name "*.dmg" -o -name "*.AppImage" \) -exec cp {} release-files/ \;
+        
+        # Copy each artifact type with feedback
+        echo "Looking for .zip files..."
+        find artifacts -type f -name "*.zip" -exec cp -v {} release-files/ \;
+        
+        echo "Looking for .tar.gz files..."
+        find artifacts -type f -name "*.tar.gz" -exec cp -v {} release-files/ \;
+        
+        echo "Looking for .dmg files..."
+        find artifacts -type f -name "*.dmg" -exec cp -v {} release-files/ \;
+        
+        echo "Looking for .AppImage files..."
+        find artifacts -type f -name "*.AppImage" -exec cp -v {} release-files/ \;
         
         echo ""
         echo "✅ Files ready for release:"
         ls -lh release-files/
+        
+        # Verify we have files
+        if [ -z "$(ls -A release-files/)" ]; then
+          echo "❌ ERROR: No files found in release-files directory!"
+          exit 1
+        fi
 
     - name: Checkout code (for tagging)
       uses: actions/checkout@v4
