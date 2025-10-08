@@ -42,9 +42,10 @@ class GitHubReportUploader:
             "Accept": "application/vnd.github.v3+json"
         }
         
-        # Initialize reports directory
-        self.reports_dir = Path("training_reports")
-        self.reports_dir.mkdir(exist_ok=True)
+        # Initialize reports directory in user's home directory (writable location)
+        # This is critical for .app bundles which are read-only
+        self.reports_dir = Path.home() / ".research_buddy" / "training_reports"
+        self.reports_dir.mkdir(parents=True, exist_ok=True)
         
     def load_config(self):
         """Load configuration from interface_settings.json"""

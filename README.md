@@ -11,9 +11,10 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 **No Python, no setup, no terminal commands - just download and double-click!**
 
 ### **macOS**
-🍎 [**Download ResearchBuddy-5.1.1-macos.tar.gz**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-macos.tar.gz) 
-- Download → Extract → Double-click `ResearchBuddy5.1.1`
-- If Mac says "unidentified developer": Right-click → Open → Open
+🍎 [**Download ResearchBuddy-5.1.1.dmg**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.2/ResearchBuddy-5.1.1.dmg) 
+- Download → Double-click the DMG → Drag `ResearchBuddy5.1.1.app` to Applications
+- Open from Applications folder → Done!
+- If Mac says "unidentified developer": Right-click the .app → Open → Open (only needed first time)
 
 ### **Windows**  
 🪟 [**Download ResearchBuddy-5.1.1-windows.zip**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-windows.zip)

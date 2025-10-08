@@ -11,9 +11,9 @@ from pathlib import Path
 def create_local_training_report(training_data, ga_name="TestUser"):
     """Create a local training report without requiring GitHub upload"""
     
-    # Create reports directory
-    reports_dir = Path("training_reports")
-    reports_dir.mkdir(exist_ok=True)
+    # Create reports directory in user's home directory (writable location)
+    reports_dir = Path.home() / ".research_buddy" / "training_reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
     
     session_id = datetime.now().strftime("%Y%m%d_%H%M")
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

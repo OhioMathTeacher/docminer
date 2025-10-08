@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Research Buddy - Enhanced Training Interface for Positionality Detection
-Copyright (c) 2025 Todd Miller (OhioMathTeacher)
+Copyright (c) 2025 Michael Todd Edwards (OhioMathTeacher)
 
 Licensed under Creative Commons Attribution-NonCommercial 4.0 International License
 For commercial use, please contact the copyright holder.
@@ -1112,7 +1112,7 @@ class PDFViewer(QWidget):
 class EnhancedTrainingInterface(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Research Buddy 3.1 - Professional Positionality Analysis Interface")
+        self.setWindowTitle("Research Buddy 5.1.1 - Professional Positionality Analysis Interface")
         # Set reasonable default size but allow user to resize
         self.resize(1200, 800)  # Default size - user can resize as needed
         
@@ -1212,16 +1212,25 @@ class EnhancedTrainingInterface(QMainWindow):
     
     def show_about(self):
         """Show about dialog"""
-        QMessageBox.about(self, "About Research Buddy 3.1", 
-                         "🎓 Research Buddy 3.1\n\n"
-                         "Enhanced State Management Interface\n\n"
+        QMessageBox.about(self, "About Research Buddy 5.1.1", 
+                         "🎓 Research Buddy 5.1.1\n\n"
+                         "Professional Positionality Analysis Interface\n\n"
                          "Features:\n"
                          "• Paper state persistence\n"
                          "• Visual progress indicators\n"
                          "• Configurable GitHub uploads\n"
-                         "• Professional positionality analysis\n\n"
+                         "• Professional positionality analysis\n"
+                         "• PDF viewer with text selection\n"
+                         "• AI-assisted and manual analysis modes\n\n"
                          "Built for Graduate Assistants and Research Teams\n\n"
-                         "© 2025 Research Buddy Project")
+                         "📦 GitHub Repository:\n"
+                         "https://github.com/OhioMathTeacher/research-buddy\n\n"
+                         "📜 License:\n"
+                         "Creative Commons Attribution-NonCommercial 4.0\n"
+                         "Academic and educational use freely permitted.\n"
+                         "Contact copyright holder for commercial use.\n\n"
+                         "© 2025 Michael Todd Edwards (OhioMathTeacher)\n"
+                         "Research Buddy Project")
         
     def setup_ui(self):
         """Create the enhanced training interface"""
@@ -1964,17 +1973,34 @@ class EnhancedTrainingInterface(QMainWindow):
     def ensure_readme_exists(self):
         """Ensure the README PDF exists in the default folder"""
         if not self.readme_pdf_path.exists():
-            # Copy from documentation folder
-            source_readme = Path(__file__).parent / "archive" / "documentation" / "about.pdf"
-            if source_readme.exists():
+            # Try to find bundled about.pdf in multiple locations
+            possible_sources = [
+                # PyInstaller .app bundle location
+                Path(sys._MEIPASS) / "sample_pdfs" / "about.pdf" if getattr(sys, 'frozen', False) else None,
+                # Development location
+                Path(__file__).parent / "sample_pdfs" / "about.pdf",
+                # Archive location (legacy)
+                Path(__file__).parent / "archive" / "documentation" / "about.pdf",
+            ]
+            
+            source_readme = None
+            for source in possible_sources:
+                if source and source.exists():
+                    source_readme = source
+                    break
+            
+            if source_readme:
                 import shutil
                 shutil.copy2(source_readme, self.readme_pdf_path)
                 print(f"Copied professional training guide to {self.readme_pdf_path}")
             else:
                 # Create README if it doesn't exist
-                from utils.create_readme_pdf import create_readme_pdf
-                create_readme_pdf(self.readme_pdf_path)
-                print(f"Created README at {self.readme_pdf_path}")
+                try:
+                    from utils.create_readme_pdf import create_readme_pdf
+                    create_readme_pdf(self.readme_pdf_path)
+                    print(f"Created README at {self.readme_pdf_path}")
+                except:
+                    print(f"Could not create README - about.pdf not found in bundle")
     
     def find_readme_index(self):
         """Find the index of the about.pdf file in papers list"""
