@@ -162,7 +162,8 @@ jobs:
   create-release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
+    # Only run if all build jobs succeeded
+    if: ${{ github.event_name == 'workflow_dispatch' && success() }}
     permissions:
       contents: write
     
