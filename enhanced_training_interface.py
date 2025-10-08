@@ -29,7 +29,14 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QTimer, Signal, QRect, QPoint, QUrl
 from PySide6.QtGui import QFont, QTextCursor, QPixmap, QPainter, QPen, QColor, QBrush, QAction, QClipboard
-from PySide6.QtWebEngineWidgets import QWebEngineView
+
+# Try to import QtWebEngine, but it's optional
+try:
+    from PySide6.QtWebEngineWidgets import QWebEngineView
+    HAS_WEBENGINE = True
+except ImportError:
+    HAS_WEBENGINE = False
+    QWebEngineView = None  # Define as None so code doesn't break
 
 import fitz  # PyMuPDF for PDF rendering
 from utils.metadata_extractor import extract_positionality
