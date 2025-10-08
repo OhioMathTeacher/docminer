@@ -242,6 +242,7 @@ jobs:
         files: |
           release-files/ResearchBuddy-5.1.1-windows.zip
           release-files/ResearchBuddy-5.1.1-linux.tar.gz
+          release-files/ResearchBuddy-5.1.1-x86_64.AppImage
           release-files/ResearchBuddy-5.1.1-macos.dmg
         fail_on_unmatched_files: false
         generate_release_notes: false
