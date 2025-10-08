@@ -34,6 +34,15 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
+    
+    - name: Set up Python for Universal Binary (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        # Ensure we can build Universal Binaries
+        # The Python from actions/setup-python should support both architectures
+        python --version
+        python -c "import platform; print(f'Architecture: {platform.machine()}')"
+        echo "ARCHFLAGS=-arch arm64 -arch x86_64" >> $GITHUB_ENV
         
     - name: Install system dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
@@ -146,7 +155,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.name }}
-        path: releases/${{ matrix.name }}.*
+        path: releases/*
         retention-days: 90
 
   create-release:
@@ -160,8 +169,19 @@ jobs:
       with:
         path: artifacts
 
-    - name: Display structure
-      run: ls -R artifacts
+    - name: Display and flatten artifacts
+      run: |
+        echo "📦 Downloaded artifacts:"
+        ls -R artifacts
+        
+        echo ""
+        echo "📂 Flattening structure..."
+        mkdir -p release-files
+        find artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" -o -name "*.dmg" -o -name "*.AppImage" \) -exec cp {} release-files/ \;
+        
+        echo ""
+        echo "✅ Files ready for release:"
+        ls -lh release-files/
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -170,12 +190,7 @@ jobs:
         name: Research Buddy 5.1.1 - Professional Cross-Platform Installers
         draft: false
         prerelease: false
-        append_body: true
-        files: |
-          artifacts/**/*.zip
-          artifacts/**/*.tar.gz
-          artifacts/**/*.dmg
-          artifacts/**/*.AppImage
+        files: release-files/*
         body: |
           # 🚀 Research Buddy 5.1.1 - Professional Cross-Platform Release
           
