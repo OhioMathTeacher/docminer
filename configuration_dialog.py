@@ -108,19 +108,22 @@ class ConfigurationDialog(QDialog):
         
         # Security notice
         security_notice = QLabel(
-            "🔒 <b>Secure Configuration</b><br>"
-            "Enter your API keys and tokens below. They will be set as environment variables<br>"
-            "for this session and can optionally be saved to your shell profile for persistence.<br><br>"
-            "Repository settings below are saved to your local config file."
+            "🔒 Secure Configuration\n\n"
+            "Enter your API keys and tokens below. They will be set as environment variables "
+            "for this session and can optionally be saved to your shell profile for persistence.\n\n"
+            "Repository settings are saved to your local config file."
         )
         security_notice.setWordWrap(True)
+        security_notice.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         security_notice.setStyleSheet(
             "QLabel { "
             "background-color: #f0f8ff; "
-            "border: 1px solid #cce7ff; "
+            "border: 1px solid #5b9bd5; "
             "border-radius: 5px; "
             "padding: 15px; "
             "margin: 10px; "
+            "color: #2c3e50; "
+            "font-size: 12px; "
             "}"
         )
         layout.addWidget(security_notice)

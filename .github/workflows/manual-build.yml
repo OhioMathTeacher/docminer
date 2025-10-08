@@ -70,8 +70,17 @@ jobs:
           # Windows: Create ZIP
           cd dist
           powershell Compress-Archive -Path ResearchBuddy5.1.1 -DestinationPath ../releases/${{ matrix.name }}.zip
+        elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+          # macOS: Package the .app bundle
+          cd dist
+          if [ -d "ResearchBuddy5.1.1.app" ]; then
+            tar -czf ../releases/${{ matrix.name }}.tar.gz ResearchBuddy5.1.1.app
+          else
+            # Fallback if .app wasn't created
+            tar -czf ../releases/${{ matrix.name }}.tar.gz ResearchBuddy5.1.1
+          fi
         else
-          # Linux and macOS: Create tar.gz
+          # Linux: Create tar.gz
           cd dist
           tar -czf ../releases/${{ matrix.name }}.tar.gz ResearchBuddy5.1.1
         fi
@@ -115,9 +124,9 @@ jobs:
           
           ## 📥 Downloads
           
-          - **macOS**: Download `ResearchBuddy-5.1.1-macos.zip` → Extract → Double-click `.app`
+          - **macOS**: Download `ResearchBuddy-5.1.1-macos.tar.gz` → Extract → Double-click `ResearchBuddy5.1.1.app`
           - **Windows**: Download `ResearchBuddy-5.1.1-windows.zip` → Extract → Double-click `.exe`
-          - **Linux**: Download `ResearchBuddy-5.1.1-linux.tar.gz` → Extract → Run executable
+          - **Linux**: Download `ResearchBuddy-5.1.1-linux.tar.gz` → Extract → Run `./ResearchBuddy5.1.1`
           
           ## ✨ Features
           
