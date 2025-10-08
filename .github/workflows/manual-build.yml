@@ -5,6 +5,8 @@ on:
 
 permissions:
   contents: write
+  actions: read
+  packages: read
 
 jobs:
   build:
@@ -183,8 +185,26 @@ jobs:
         echo "✅ Files ready for release:"
         ls -lh release-files/
 
+    - name: Checkout code (for tagging)
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Create or verify tag
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        
+        if git rev-parse v5.1.1 >/dev/null 2>&1; then
+          echo "✅ Tag v5.1.1 already exists"
+        else
+          echo "📝 Creating tag v5.1.1"
+          git tag -a v5.1.1 -m "Release v5.1.1"
+          git push origin v5.1.1
+        fi
+
     - name: Create or Update Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -194,6 +214,8 @@ jobs:
         prerelease: false
         files: release-files/*
         fail_on_unmatched_files: true
+        generate_release_notes: false
+        make_latest: true
         body: |
           # 🚀 Research Buddy 5.1.1 - Professional Cross-Platform Release
           
