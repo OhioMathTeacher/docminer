@@ -28,7 +28,8 @@ a = Analysis(
         'PySide6.QtCore',
         'PySide6.QtWidgets', 
         'PySide6.QtGui',
-        'PySide6.QtWebEngineWidgets',
+        # Skip QtWebEngineWidgets - causing corrupted binary issues
+        # 'PySide6.QtWebEngineWidgets',
         # PDF processing
         'fitz',
         'PyPDF2',
@@ -57,6 +58,10 @@ a = Analysis(
         # Exclude the removed first_run_setup
         'first_run_setup',
         'utils.first_run_setup',
+        # Exclude QtWebEngine due to corrupted universal binary on Intel
+        'PySide6.QtWebEngineWidgets',
+        'PySide6.QtWebEngineCore',
+        'PySide6.QtWebChannel',
     ],
     noarchive=False,
     optimize=0,
