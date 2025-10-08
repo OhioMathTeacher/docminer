@@ -239,8 +239,12 @@ jobs:
         name: Research Buddy 5.1.1 - Professional Cross-Platform Installers
         draft: false
         prerelease: false
-        files: release-files/*
-        fail_on_unmatched_files: true
+        files: |
+          release-files/*.zip
+          release-files/*.tar.gz
+          release-files/*.dmg
+          release-files/*.AppImage
+        fail_on_unmatched_files: false
         generate_release_notes: false
         body: |
           # 🚀 Research Buddy 5.1.1 - Professional Cross-Platform Release
