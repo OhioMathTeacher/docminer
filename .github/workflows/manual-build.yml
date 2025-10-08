@@ -109,12 +109,12 @@ jobs:
             -volname "ResearchBuddy 5.1.1" \
             -srcfolder dmg-temp \
             -ov -format UDZO \
-            releases/ResearchBuddy-5.1.1.dmg
+            releases/${{ matrix.name }}.dmg
           
           # Clean up
           rm -rf dmg-temp
           
-          echo "✅ Created ResearchBuddy-5.1.1.dmg"
+          echo "✅ Created ${{ matrix.name }}.dmg"
           ls -lh releases/
         else
           # Linux: Create tar.gz AND AppImage
