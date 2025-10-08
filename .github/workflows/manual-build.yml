@@ -183,14 +183,17 @@ jobs:
         echo "✅ Files ready for release:"
         ls -lh release-files/
 
-    - name: Create Release
+    - name: Create or Update Release
       uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: v5.1.1
         name: Research Buddy 5.1.1 - Professional Cross-Platform Installers
         draft: false
         prerelease: false
         files: release-files/*
+        fail_on_unmatched_files: true
         body: |
           # 🚀 Research Buddy 5.1.1 - Professional Cross-Platform Release
           
@@ -246,5 +249,3 @@ jobs:
           ---
           
           **Perfect for Graduate Assistants - No Python, no terminal, no setup!**
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
