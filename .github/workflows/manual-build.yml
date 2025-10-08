@@ -37,14 +37,13 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Set up Python for Universal Binary (macOS)
+    - name: Set up Python for macOS
       if: matrix.os == 'macos-latest'
       run: |
-        # Ensure we can build Universal Binaries
-        # The Python from actions/setup-python should support both architectures
+        # Building for native architecture (ARM64)
+        # Will run on Intel Macs via Rosetta 2
         python --version
         python -c "import platform; print(f'Architecture: {platform.machine()}')"
-        echo "ARCHFLAGS=-arch arm64 -arch x86_64" >> $GITHUB_ENV
         
     - name: Install system dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
