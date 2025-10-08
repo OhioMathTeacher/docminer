@@ -71,18 +71,76 @@ jobs:
           cd dist
           powershell Compress-Archive -Path ResearchBuddy5.1.1 -DestinationPath ../releases/${{ matrix.name }}.zip
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-          # macOS: Package the .app bundle
-          cd dist
-          if [ -d "ResearchBuddy5.1.1.app" ]; then
-            tar -czf ../releases/${{ matrix.name }}.tar.gz ResearchBuddy5.1.1.app
-          else
-            # Fallback if .app wasn't created
-            tar -czf ../releases/${{ matrix.name }}.tar.gz ResearchBuddy5.1.1
+          # macOS: Create professional DMG installer
+          
+          # First verify .app was created
+          if [ ! -d "dist/ResearchBuddy5.1.1.app" ]; then
+            echo "❌ Error: .app bundle not found"
+            ls -la dist/
+            exit 1
           fi
+          
+          # Create DMG temp directory
+          mkdir -p dmg-temp
+          cp -R dist/ResearchBuddy5.1.1.app dmg-temp/
+          ln -s /Applications dmg-temp/Applications
+          
+          # Copy Quick Start guide if available
+          if [ -f "docs/QUICK_START_FOR_GAS.md" ]; then
+            cp docs/QUICK_START_FOR_GAS.md dmg-temp/"Quick Start Guide.md"
+          fi
+          
+          # Create the DMG
+          hdiutil create \
+            -volname "ResearchBuddy 5.1.1" \
+            -srcfolder dmg-temp \
+            -ov -format UDZO \
+            releases/ResearchBuddy-5.1.1.dmg
+          
+          # Clean up
+          rm -rf dmg-temp
+          
+          echo "✅ Created ResearchBuddy-5.1.1.dmg"
+          ls -lh releases/
         else
-          # Linux: Create tar.gz
+          # Linux: Create tar.gz AND AppImage
           cd dist
           tar -czf ../releases/${{ matrix.name }}.tar.gz ResearchBuddy5.1.1
+          
+          # Create AppImage
+          cd ..
+          
+          # Install appimagetool
+          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+          
+          # Create AppDir structure
+          mkdir -p ResearchBuddy.AppDir/usr/bin
+          cp -r dist/ResearchBuddy5.1.1/* ResearchBuddy.AppDir/usr/bin/
+          
+          # Create AppRun
+          cat > ResearchBuddy.AppDir/AppRun << 'APPRUN'
+          #!/bin/bash
+          SELF=$(readlink -f "$0")
+          HERE=${SELF%/*}
+          export LD_LIBRARY_PATH="${HERE}/usr/bin:${LD_LIBRARY_PATH}"
+          exec "${HERE}/usr/bin/ResearchBuddy5.1.1" "$@"
+          APPRUN
+          chmod +x ResearchBuddy.AppDir/AppRun
+          
+          # Create desktop file
+          mkdir -p ResearchBuddy.AppDir/usr/share/applications
+          cat > ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop << 'DESKTOP'
+          [Desktop Entry]
+          Type=Application
+          Name=Research Buddy
+          Exec=ResearchBuddy5.1.1
+          Icon=researchbuddy
+          Categories=Education;
+          DESKTOP
+          
+          # Build AppImage
+          ARCH=x86_64 ./appimagetool-x86_64.AppImage ResearchBuddy.AppDir releases/ResearchBuddy-5.1.1-x86_64.AppImage || echo "⚠️ AppImage creation failed, continuing with tar.gz only"
         fi
         
     - name: Upload artifact
@@ -110,34 +168,69 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: v5.1.1
-        name: Research Buddy 5.1.1 - Full Cross-Platform Release
+        name: Research Buddy 5.1.1 - Professional Cross-Platform Installers
         draft: false
         prerelease: false
         append_body: true
         files: |
           artifacts/**/*.zip
           artifacts/**/*.tar.gz
+          artifacts/**/*.dmg
+          artifacts/**/*.AppImage
         body: |
-          # 🚀 Research Buddy 5.1.1 - Complete Cross-Platform Release
+          # 🚀 Research Buddy 5.1.1 - Professional Cross-Platform Release
           
-          **Download and run - no installation needed!**
+          **Professional installers for all platforms - just download and run!**
           
           ## 📥 Downloads
           
-          - **macOS**: Download `ResearchBuddy-5.1.1-macos.tar.gz` → Extract → Double-click `ResearchBuddy5.1.1.app`
-          - **Windows**: Download `ResearchBuddy-5.1.1-windows.zip` → Extract → Double-click `.exe`
-          - **Linux**: Download `ResearchBuddy-5.1.1-linux.tar.gz` → Extract → Run `./ResearchBuddy5.1.1`
+          ### macOS 🍎
+          **ResearchBuddy-5.1.1.dmg** (Recommended)
+          - Double-click DMG → Drag app to Applications → Done!
+          - Professional installer with all fixes included
           
-          ## ✨ Features
+          ### Windows 🪟
+          **ResearchBuddy-5.1.1-windows.zip**
+          - Extract → Double-click `.exe` → Run!
+          - If Windows Defender warns: Click "More info" → "Run anyway"
+          
+          ### Linux 🐧
+          **ResearchBuddy-5.1.1-x86_64.AppImage** (Recommended)
+          - `chmod +x ResearchBuddy-5.1.1-x86_64.AppImage`
+          - `./ResearchBuddy-5.1.1-x86_64.AppImage`
+          - Works on all distros!
+          
+          **ResearchBuddy-5.1.1-linux.tar.gz** (Alternative)
+          - Extract → Run `./ResearchBuddy5.1.1`
+          
+          ---
+          
+          ## ✨ What's New in 5.1.1
+          
+          - ✅ **macOS DMG installer** - Professional drag-to-install experience
+          - ✅ **Linux AppImage** - Runs on any distro without dependencies  
+          - ✅ **Fixed read-only filesystem errors** on macOS
+          - ✅ **Updated copyright** to Michael Todd Edwards
+          - ✅ **Auto-loads Quick Start guide** on first run
+          - ✅ **Improved About dialog** with license and GitHub info
+          
+          ## 🎯 Features
           
           - Professional PDF viewer with text selection
-          - AI-assisted positionality detection
-          - Manual analysis mode
+          - AI-assisted positionality detection (optional - requires OpenAI API key)
+          - Manual analysis mode (works without any API keys)
           - Evidence collection and quote extraction
           - GitHub integration for training reports
+          - Secure configuration management
           
-          ## 🎯 Perfect for Graduate Assistants
+          ## 📜 License
           
-          No Python, no terminal, no setup - just download and analyze academic papers!
+          Creative Commons Attribution-NonCommercial 4.0  
+          © 2025 Michael Todd Edwards (OhioMathTeacher)  
+          Academic and educational use freely permitted.
+          
+          ---
+          
+          **Perfect for Graduate Assistants - No Python, no terminal, no setup!**
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
