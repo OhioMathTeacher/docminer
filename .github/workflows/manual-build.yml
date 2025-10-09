@@ -80,9 +80,12 @@ jobs:
         mkdir -p releases
         
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          # Windows: Create ZIP
+          # Windows: Create ZIP using PowerShell
           cd dist
-          powershell Compress-Archive -Path ResearchBuddy5.1.1 -DestinationPath ../releases/${{ matrix.name }}.zip
+          powershell -Command "Compress-Archive -Path ResearchBuddy5.1.1 -DestinationPath ../releases/${{ matrix.name }}.zip -Force"
+          cd ..
+          echo "✅ Created ${{ matrix.name }}.zip"
+          ls -lh releases/
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
           # macOS: Create professional DMG installer
           
@@ -175,11 +178,15 @@ jobs:
         echo "✅ Files ready for release:"
         ls -lh release-files/
         
-        # Verify we have files
+        # Verify we have files and list exactly what we found
         if [ -z "$(ls -A release-files/)" ]; then
           echo "❌ ERROR: No files found in release-files directory!"
           exit 1
         fi
+        
+        echo ""
+        echo "📋 Exact files to upload:"
+        find release-files -type f -exec basename {} \;
 
     - name: Checkout code (for tagging)
       uses: actions/checkout@v4
@@ -215,10 +222,7 @@ jobs:
         draft: false
         prerelease: false
         make_latest: true
-        files: |
-          release-files/ResearchBuddy-5.1.1-windows.zip
-          release-files/ResearchBuddy-5.1.1-x86_64.AppImage
-          release-files/ResearchBuddy-5.1.1-macos.dmg
+        files: release-files/*
         fail_on_unmatched_files: true
         generate_release_notes: false
         body: |
