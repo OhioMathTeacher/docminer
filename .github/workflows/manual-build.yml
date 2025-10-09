@@ -193,9 +193,11 @@ jobs:
       with:
         fetch-depth: 0
         token: ${{ github.token }}
+        path: repo  # Checkout to subdirectory to avoid overwriting release-files!
 
     - name: Create or verify tag
       run: |
+        cd repo
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
         
@@ -213,6 +215,20 @@ jobs:
         gh release delete v5.1.1 --yes || echo "No existing release to delete"
       env:
         GH_TOKEN: ${{ github.token }}
+
+    - name: Final verification before upload
+      run: |
+        echo "🔍 Current working directory:"
+        pwd
+        echo ""
+        echo "📂 Contents of current directory:"
+        ls -la
+        echo ""
+        echo "📦 Contents of release-files directory:"
+        ls -la release-files/ || echo "❌ release-files directory not found!"
+        echo ""
+        echo "📋 File count in release-files:"
+        find release-files -type f 2>/dev/null | wc -l
 
     - name: Create or Update Release
       uses: softprops/action-gh-release@v2
