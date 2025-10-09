@@ -23,10 +23,17 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 - If Windows Defender blocks: Click "More info" → "Run anyway"
 
 ### **Linux**
-🐧 [**Download ResearchBuddy-5.1.1-linux.tar.gz**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-linux.tar.gz)
+🐧 [**Download ResearchBuddy-5.1.1-x86_64.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-x86_64.AppImage) **(Recommended)**
+- Download → Make executable → Run:
+  ```bash
+  chmod +x ResearchBuddy-5.1.1-x86_64.AppImage
+  ./ResearchBuddy-5.1.1-x86_64.AppImage
+  ```
+- **Works on all Linux distros** - no installation needed!
+
+**Alternative:** [Download ResearchBuddy-5.1.1-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-linux.tar.gz)
 - Extract: `tar -xzf ResearchBuddy-5.1.1-linux.tar.gz`
 - Run: `cd ResearchBuddy5.1.1 && ./ResearchBuddy5.1.1`
-- Tested on Ubuntu, Fedora, and Debian-based distributions
 
 ---
 
