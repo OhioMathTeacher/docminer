@@ -24,7 +24,13 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ### **Linux**
 🐧 [**Download ResearchBuddy-5.1.1-x86_64.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-x86_64.AppImage)
-- Download → Make executable → Run:
+
+**Option 1 - Double-click (recommended):**
+- Download the file
+- Right-click → Properties → Permissions → Check "Allow executing file as program"
+- Double-click to run!
+
+**Option 2 - Terminal:**
   ```bash
   chmod +x ResearchBuddy-5.1.1-x86_64.AppImage
   ./ResearchBuddy-5.1.1-x86_64.AppImage
