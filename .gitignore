@@ -194,3 +194,12 @@ Fraction_Match_Shapes.png
 test-downloads/
 squashfs-root/
 *.AppImage
+
+# Testing and helper scripts
+demo_project/
+downloads/
+download_windows_exe.sh
+trigger_build.sh
+
+# User configuration (should only be in ~/.research_buddy/)
+interface_settings.json
