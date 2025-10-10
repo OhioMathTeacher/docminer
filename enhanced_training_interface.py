@@ -1136,8 +1136,10 @@ class EnhancedTrainingInterface(QMainWindow):
         self.default_pdf_folder = Path.home() / "ExtractorPDFs" 
         self.readme_pdf_path = self.default_pdf_folder / "about.pdf"
         
-        # Settings file to remember state
-        self.settings_file = Path(__file__).parent / "interface_settings.json"
+        # Settings file in user's config directory (works with AppImage)
+        config_dir = Path.home() / ".research_buddy"
+        config_dir.mkdir(parents=True, exist_ok=True)
+        self.settings_file = config_dir / "interface_settings.json"
         
         # Initialize without loading any local training data
         # Each session starts fresh - decisions go directly to GitHub
