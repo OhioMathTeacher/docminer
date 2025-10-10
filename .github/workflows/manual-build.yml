@@ -119,9 +119,8 @@ jobs:
           echo "✅ Created ${{ matrix.name }}.dmg"
           ls -lh releases/
         else
-          # Linux: Create AppImage and desktop launcher
+          # Linux: Create AppImage (universal Linux distribution)
           bash build_files/create_appimage.sh
-          bash build_files/create_desktop_launcher.sh
         fi
         
     - name: Upload artifact
@@ -174,9 +173,6 @@ jobs:
         
         echo "Looking for .AppImage files..."
         find artifacts -type f -name "*.AppImage" -exec cp -v {} release-files/ \;
-        
-        echo "Looking for .desktop files..."
-        find artifacts -type f -name "*.desktop" -exec cp -v {} release-files/ \;
         
         echo ""
         echo "✅ Files ready for release:"
