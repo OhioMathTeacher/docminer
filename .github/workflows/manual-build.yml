@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04  # Use older Ubuntu for wider GLIBC compatibility (2.35 vs 2.38)
             platform: linux
             name: ResearchBuddy-5.1.1-linux
             archive: tar.gz
