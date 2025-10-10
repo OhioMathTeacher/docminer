@@ -1224,11 +1224,7 @@ class EnhancedTrainingInterface(QMainWindow):
             else:
                 self.statusBar().showMessage(f"{current_status} {repo_info}")
             
-            repo_url = f"https://github.com/{self.github_uploader.owner}/{self.github_uploader.repo}"
-            QMessageBox.information(self, "Configuration Updated", 
-                                  f"Configuration has been updated successfully!\n\n"
-                                  f"📦 Upload Destination:\n{repo_url}\n\n"
-                                  f"New settings will be used for future uploads.")
+            # Success dialog is already shown by ConfigurationDialog, no need for duplicate
     
     def show_about(self):
         """Show about dialog"""
@@ -1317,7 +1313,7 @@ class EnhancedTrainingInterface(QMainWindow):
 
         
         # Quick text extraction area
-        text_extract_group = QGroupBox("📝 Selected Text (for Evidence)")
+        text_extract_group = QGroupBox("📝 Selected Text for Evidence")
         text_extract_layout = QVBoxLayout(text_extract_group)
         text_extract_layout.setContentsMargins(2, 2, 2, 2)  # Minimal margins
         text_extract_layout.setSpacing(1)  # Very tight spacing
@@ -1364,7 +1360,7 @@ class EnhancedTrainingInterface(QMainWindow):
         right_layout.setSpacing(1)  # Very tight spacing
         
         # AI Pre-screening section
-        prescreening_group = QGroupBox("🔍 AI Analysis")
+        prescreening_group = QGroupBox("🔍 AI Pre-screening Analysis")
         prescreening_layout = QVBoxLayout(prescreening_group)
         prescreening_layout.setContentsMargins(2, 2, 2, 2)  # Minimal margins
         prescreening_layout.setSpacing(1)  # Very tight spacing

@@ -8,6 +8,7 @@ and generates markdown reports for batch analysis.
 
 import json
 import os
+import shutil
 import subprocess
 import requests
 from datetime import datetime
