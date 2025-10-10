@@ -1160,6 +1160,10 @@ class EnhancedTrainingInterface(QMainWindow):
         # Initialize with default folder and README
         self.initialize_with_readme()
         
+        # Use QTimer to check for first-time setup after window is shown
+        # This ensures the dialog appears on top of the main window
+        QTimer.singleShot(100, self.check_first_time_setup)
+        
     def create_menu_bar(self):
         """Create the application menu bar"""
         menubar = self.menuBar()
@@ -1186,6 +1190,13 @@ class EnhancedTrainingInterface(QMainWindow):
         about_action.triggered.connect(self.show_about)
         about_action.setStatusTip('About Research Buddy')
         
+    def check_first_time_setup(self):
+        """Check if this is first-time setup and prompt for configuration if needed"""
+        # Only show if GitHub repository is not configured
+        if not (self.github_uploader.owner and self.github_uploader.repo):
+            # Show the configuration dialog directly - user must configure before proceeding
+            self.show_configuration()
+    
     def show_configuration(self):
         """Show the configuration dialog"""
         dialog = ConfigurationDialog(self)
