@@ -119,8 +119,9 @@ jobs:
           echo "✅ Created ${{ matrix.name }}.dmg"
           ls -lh releases/
         else
-          # Linux: Create AppImage only (universal Linux distribution)
+          # Linux: Create AppImage and desktop launcher
           bash build_files/create_appimage.sh
+          bash build_files/create_desktop_launcher.sh
         fi
         
     - name: Upload artifact
