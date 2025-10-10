@@ -175,6 +175,9 @@ jobs:
         echo "Looking for .AppImage files..."
         find artifacts -type f -name "*.AppImage" -exec cp -v {} release-files/ \;
         
+        echo "Looking for .desktop files..."
+        find artifacts -type f -name "*.desktop" -exec cp -v {} release-files/ \;
+        
         echo ""
         echo "✅ Files ready for release:"
         ls -lh release-files/
