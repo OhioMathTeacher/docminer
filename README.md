@@ -23,14 +23,14 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 - If Windows Defender blocks: Click "More info" → "Run anyway"
 
 ### **Linux**
-🐧 [**Download ResearchBuddy-5.1.1-x86_64.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-x86_64.AppImage)
+🐧 **Download both files:**
+- [**ResearchBuddy-5.1.1-x86_64.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-x86_64.AppImage)
+- [**ResearchBuddy-5.1.1.desktop**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1.desktop) (launcher)
 
 **Easy Double-Click Method:**
-1. Download both files from the release:
-   - `ResearchBuddy-5.1.1-x86_64.AppImage` 
-   - `ResearchBuddy-5.1.1.desktop`
-2. Keep both files in the same folder
-3. Double-click the `.desktop` file to launch!
+1. Download both files (click links above)
+2. Keep both files in the same folder (e.g., Downloads)
+3. **Double-click the `.desktop` file to launch!**
 
 **Or run from terminal:**
 ```bash
