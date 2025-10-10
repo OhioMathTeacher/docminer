@@ -148,13 +148,62 @@ class GitHubReportUploader:
         
         return report_content
     
+    def sanitize_name(self, name):
+        """Clean name for use in filename (remove spaces, special chars)"""
+        import re
+        # Remove spaces and special characters, keep only alphanumeric and hyphens
+        clean = re.sub(r'[^\w\-]', '', name.replace(' ', ''))
+        return clean[:50]  # Limit length
+    
+    def extract_author_from_filename(self, filename):
+        """Extract author name from PDF filename (assumes Author-Title format)"""
+        # Remove .pdf extension
+        name = filename.replace('.pdf', '').replace('.PDF', '')
+        # If hyphen exists, take first part as author
+        if '-' in name:
+            author = name.split('-')[0]
+        else:
+            # Otherwise use the whole filename
+            author = name
+        return self.sanitize_name(author)
+    
+    def get_primary_judgment(self, training_data):
+        """Get the most common judgment from training data"""
+        if not training_data:
+            return "unknown"
+        judgments = [entry.get("judgment", "unknown") for entry in training_data]
+        from collections import Counter
+        most_common = Counter(judgments).most_common(1)
+        if most_common:
+            judgment = most_common[0][0]
+            # Simplify judgment names: "positive_subtle" -> "positive"
+            return judgment.split('_')[0] if '_' in judgment else judgment
+        return "unknown"
+    
     def save_local_report(self, training_data, ga_name, session_id):
-        """Save report locally first"""
+        """Save report locally first with improved filenames"""
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
+        # Clean GA name for filename
+        clean_ga_name = self.sanitize_name(ga_name)
+        
+        # Extract paper info if available
+        if training_data and len(training_data) > 0:
+            # Get the first paper's filename as representative
+            paper_filename = training_data[0].get("filename", "unknown")
+            paper_author = self.extract_author_from_filename(paper_filename)
+            primary_judgment = self.get_primary_judgment(training_data)
+        else:
+            paper_author = "unknown"
+            primary_judgment = "unknown"
+        
+        # New filename format: reviewer_author_judgment_timestamp.ext
+        # Example: ToddEdwards_Armstrong_positive_20251010_144437.json
+        base_filename = f"{clean_ga_name}_{paper_author}_{primary_judgment}_{timestamp}"
+        
         # Save JSON data
-        json_filename = f"training_session_{ga_name}_{session_id}_{timestamp}.json"
+        json_filename = f"{base_filename}.json"
         json_path = self.reports_dir / json_filename
         
         with open(json_path, 'w') as f:
@@ -162,7 +211,7 @@ class GitHubReportUploader:
         
         # Save markdown report
         md_content = self.create_training_report(training_data, ga_name, session_id)
-        md_filename = f"training_report_{ga_name}_{session_id}_{timestamp}.md"
+        md_filename = f"{base_filename}.md"
         md_path = self.reports_dir / md_filename
         
         with open(md_path, 'w') as f:
@@ -171,36 +220,49 @@ class GitHubReportUploader:
         return json_path, md_path
     
     def upload_to_github(self, json_path, md_path, ga_name, session_id):
-        """Upload reports to GitHub repository"""
+        """Upload reports to GitHub repository by copying to repo directory first"""
         
         try:
+            # Find the git repository root
+            # Assume the script is running from the repository or can find it
+            repo_path = Path(__file__).parent  # research-buddy directory
+            repo_training_dir = repo_path / "training_reports"
+            repo_training_dir.mkdir(exist_ok=True)
+            
+            # Copy files from ~/.research_buddy/training_reports to repo/training_reports
+            repo_json_path = repo_training_dir / json_path.name
+            repo_md_path = repo_training_dir / md_path.name
+            
+            shutil.copy2(json_path, repo_json_path)
+            shutil.copy2(md_path, repo_md_path)
+            
             # Check if git is configured
             result = subprocess.run(['git', 'status'], 
-                                  capture_output=True, text=True, cwd='.')
+                                  capture_output=True, text=True, cwd=repo_path)
             
             if result.returncode != 0:
                 return False, "Not in a git repository"
             
-            # Add files to git
-            subprocess.run(['git', 'add', str(json_path)], cwd='.')
-            subprocess.run(['git', 'add', str(md_path)], cwd='.')
+            # Add files to git (relative to repo)
+            subprocess.run(['git', 'add', str(repo_json_path)], cwd=repo_path)
+            subprocess.run(['git', 'add', str(repo_md_path)], cwd=repo_path)
             
-            # Commit with descriptive message
-            commit_msg = f"Training session: {ga_name} - {session_id}"
+            # Commit with descriptive message including reviewer, paper, and judgment
+            commit_msg = f"Training: {ga_name} reviewed {repo_json_path.stem}"
             result = subprocess.run(['git', 'commit', '-m', commit_msg], 
-                                  capture_output=True, text=True, cwd='.')
+                                  capture_output=True, text=True, cwd=repo_path)
             
             if result.returncode != 0:
                 return False, f"Git commit failed: {result.stderr}"
             
             # Push to remote
             result = subprocess.run(['git', 'push'], 
-                                  capture_output=True, text=True, cwd='.')
+                                  capture_output=True, text=True, cwd=repo_path)
             
             if result.returncode != 0:
                 return False, f"Git push failed: {result.stderr}"
             
-            return True, "Successfully uploaded to GitHub"
+            return True, f"Successfully uploaded to GitHub: {repo_json_path.name}"
             
         except Exception as e:
             return False, f"Upload error: {str(e)}"
