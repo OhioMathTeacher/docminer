@@ -30,7 +30,8 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 **Easy Double-Click Method:**
 1. Download both files (click links above)
 2. Keep both files in the same folder (e.g., Downloads)
-3. **Double-click the `.desktop` file to launch!**
+3. Right-click the **AppImage** file → Properties → Permissions → Check "Allow executing file as program"
+4. **Double-click the `.desktop` file to launch!**
 
 **Or run from terminal:**
 ```bash
