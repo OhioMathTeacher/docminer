@@ -48,8 +48,9 @@ class GitHubReportUploader:
         self.reports_dir.mkdir(parents=True, exist_ok=True)
         
     def load_config(self):
-        """Load configuration from interface_settings.json"""
-        config_file = Path("interface_settings.json")
+        """Load configuration from user's config directory"""
+        config_dir = Path.home() / ".research_buddy"
+        config_file = config_dir / "interface_settings.json"
         default_config = {
             "github_owner": "OhioMathTeacher",
             "github_repo": "research-buddy", 
