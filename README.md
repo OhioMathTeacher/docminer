@@ -23,21 +23,18 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 - If Windows Defender blocks: Click "More info" → "Run anyway"
 
 ### **Linux**
-🐧 **Download both files:**
-- [**ResearchBuddy-5.1.1-x86_64.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-x86_64.AppImage)
-- [**ResearchBuddy-5.1.1.desktop**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1.desktop) (launcher)
+🐧 [**Download ResearchBuddy-5.1.1-x86_64.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-x86_64.AppImage)
 
-**Easy Double-Click Method:**
-1. Download both files (click links above)
-2. Keep both files in the same folder (e.g., Downloads)
-3. Right-click the **AppImage** file → Properties → Permissions → Check "Allow executing file as program"
-4. **Double-click the `.desktop` file to launch!**
-
-**Or run from terminal:**
+**Simple 3-step install:**
+1. Download the AppImage file
+2. Open terminal in your Downloads folder
+3. Run these two commands:
 ```bash
 chmod +x ResearchBuddy-5.1.1-x86_64.AppImage
 ./ResearchBuddy-5.1.1-x86_64.AppImage
 ```
+
+**That's it!** The app will launch. To run it again later, just double-click the AppImage file (or run the second command again).
 
 - **Universal Linux executable - works on all distros** (Ubuntu, Fedora, Arch, Debian, etc.)
 
