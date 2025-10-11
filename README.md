@@ -49,6 +49,22 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ---
 
+## 🎥 **Video Tutorial - Quick Start Guide**
+
+**New to Research Buddy? Watch this 8-minute walkthrough:**
+
+[**📺 Watch Video Tutorial**](docs/video_tutorial/ResearchBuddyVideoTutorial.mp4)
+
+Learn how to:
+- ✅ Configure your first project
+- ✅ Load and analyze PDF documents  
+- ✅ Mark evidence and make judgments
+- ✅ Export your research findings
+
+*Video shows the complete workflow from setup to exporting results.*
+
+---
+
 ## ✨ **What It Does**
 
 * **PDF Viewer** – Professional navigation for academic papers
