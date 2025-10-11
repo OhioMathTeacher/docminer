@@ -60,97 +60,6 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ---
 
-## ⚙️ **Configuration Guide**
-
-### **First-Time Setup**
-
-When you first launch Research Buddy, you'll need to configure two things:
-
-#### **1. GitHub Repository Settings** (One-time setup)
-
-When prompted with "GitHub Repository Not Configured", enter:
-- **Owner**: `OhioMathTeacher`
-- **Repository**: `research-buddy`
-
-This tells the app where to upload training reports. Click **OK** to save.
-
-> **Note**: These settings are saved to `~/.research_buddy/interface_settings.json` on your computer.
-
-#### **2. Environment Variables** (Required for upload features)
-
-The app needs two secure tokens to work with external services. These are set as **environment variables** (NOT saved in files for security).
-
-##### **Setup Steps:**
-
-**On macOS/Linux:**
-1. Open Terminal
-2. Edit your shell profile:
-   ```bash
-   nano ~/.bashrc    # or ~/.zshrc on macOS
-   ```
-3. Add these lines (replace with your actual tokens):
-   ```bash
-   export RESEARCH_BUDDY_OPENAI_API_KEY="sk-your-key-here"
-   export RESEARCH_BUDDY_GITHUB_TOKEN="ghp_your-token-here"
-   ```
-4. Save (Ctrl+O, Enter, Ctrl+X) and reload:
-   ```bash
-   source ~/.bashrc   # or source ~/.zshrc
-   ```
-
-**Quick Start Script (macOS/Linux):**
-
-After setting up your environment variables, you can use the provided startup script:
-```bash
-./start_research_buddy.sh
-```
-
-This script automatically loads your environment and launches the app - no need to remember commands!
-
-**On Windows:**
-1. Search for "Environment Variables" in Start Menu
-2. Click "Edit system environment variables"
-3. Click "Environment Variables" button
-4. Under "User variables", click "New"
-5. Add each variable:
-   - Variable name: `RESEARCH_BUDDY_OPENAI_API_KEY`
-   - Variable value: `sk-your-key-here`
-   - Click OK
-   - Repeat for `RESEARCH_BUDDY_GITHUB_TOKEN`
-
-##### **Getting Your Tokens:**
-
-**OpenAI API Key** (for AI-assisted analysis):
-- Go to https://platform.openai.com/api-keys
-- Create a new API key
-- Copy and use in the environment variable above
-
-**GitHub Token** (for uploading training reports):
-- Go to https://github.com/settings/tokens
-- Click "Generate new token (classic)"
-- Give it a name: "Research Buddy - Training Reports"
-- Select scope: ✅ `repo` (full control of private repositories)
-- Set expiration: "No expiration" (or your preference)
-- Generate and copy the token
-- **Share this same token with all your GAs** - everyone can use the same one!
-
-> **Security Note**: Tokens are stored as environment variables, NOT in config files. This keeps them secure and separate from your code.
-
-### **Working Without Tokens**
-
-**The app works perfectly in manual mode without any API keys!**
-- Manual PDF review and analysis works immediately
-- You can export training data locally
-- Only AI features and GitHub upload require tokens
-
-### **Important Notes**
-
-- **Environment variables are loaded once per terminal session** - if you update your tokens in `.bashrc`, run `source ~/.bashrc` to reload them
-- **Use `run_research_buddy.py` or `start_research_buddy.sh`** - avoid `launch_research_buddy.py` which prompts for credentials every time
-- **The GitHub repository dialog only shows once** - after you enter Owner/Repo settings, they're saved to `~/.research_buddy/interface_settings.json`
-
----
-
 ## 🛠️ **For Developers**
 
 ### Running from Source
@@ -191,15 +100,6 @@ research-buddy/
 ├── utils/                         # Utility modules
 └── sample_pdfs/                   # Example documents
 ```
-
----
-
-## ℹ️ **Need Help?**
-
-* **Questions**: Open an [issue](https://github.com/OhioMathTeacher/research-buddy/issues)
-* **Latest Release**: Check [releases page](https://github.com/OhioMathTeacher/research-buddy/releases)
-* **Technical Support**: Contact your research supervisor or IT team
-
 ---
 
 ## 📜 **License**
