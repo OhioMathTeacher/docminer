@@ -123,12 +123,17 @@ Categories=Education;Office;
 Terminal=false
 EOF
 
-# Copy icon (use existing or create placeholder)
+# Copy icon (use robot icon)
 if [ -f "docs/icon.png" ]; then
     cp docs/icon.png "AppDir/usr/share/icons/hicolor/256x256/apps/${APP_NAME}.png"
     cp docs/icon.png "AppDir/${APP_NAME}.png"
+    echo "Using robot icon from docs/icon.png"
+elif [ -f "build_files/robot_icon_256x256.png" ]; then
+    cp build_files/robot_icon_256x256.png "AppDir/usr/share/icons/hicolor/256x256/apps/${APP_NAME}.png"
+    cp build_files/robot_icon_256x256.png "AppDir/${APP_NAME}.png"
+    echo "Using robot icon from build_files/robot_icon_256x256.png"
 else
-    echo "Warning: No icon found at docs/icon.png, AppImage will have default icon"
+    echo "Warning: No icon found, AppImage will have default icon"
 fi
 
 # Create AppRun script
