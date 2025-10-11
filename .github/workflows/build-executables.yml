@@ -6,6 +6,11 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  actions: read
+  packages: read
+
 jobs:
   build:
     strategy:
@@ -112,89 +117,90 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     
     steps:
-    - name: 📥 Download Artifacts
+    - name: 📥 Checkout (for release notes)
+      uses: actions/checkout@v4
+    
+    - name: 📥 Download All Artifacts
       uses: actions/download-artifact@v4
       with:
         path: artifacts
 
+    - name: 📋 Prepare Release Files
+      run: |
+        mkdir -p release-files
+        # Find all actual files (not directories) in artifacts and copy them
+        find artifacts -type f -name "*.dmg" -exec cp {} release-files/ \;
+        find artifacts -type f -name "*.zip" -exec cp {} release-files/ \;
+        find artifacts -type f -name "*.tar.gz" -exec cp {} release-files/ \;
+        echo "📋 Release files prepared:"
+        ls -lh release-files/
+
     - name: 🏷️ Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
-        files: artifacts/**/*
         draft: false
         prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: 📋 Prepare Release Assets
-      run: |
-        mkdir -p release-assets
-        find artifacts -name "*.zip" -exec cp {} release-assets/ \;
-        find artifacts -name "*.tar.gz" -exec cp {} release-assets/ \;
-        ls -la release-assets/
-
-    - name: 📝 Generate Release Notes
-      run: |
-        cat > release-notes.md << EOF
-        # 🚀 Research Buddy 3.1 Release
-        
-        ## Enhanced Training Interface with Standalone Executables
-        
-        **Perfect for Graduate Assistants - No technical setup required!**
-        
-        ### 📥 Downloads
-        - **macOS**: ResearchBuddy3.1-macos.zip (Universal Binary)
-        - **Windows**: ResearchBuddy3.1-windows.zip (64-bit)
-        - **Linux**: ResearchBuddy3.1-linux.tar.gz (64-bit)
-        
-        ### ✨ What's New in 3.1
-        - **📄 Page Navigation**: Navigate multi-page PDFs with ◀ ▶ buttons
-        - **🔧 API Key Management**: Configure OpenAI keys directly in the GUI
-        - **🛡️ Better Error Handling**: Helpful instructions when setup needed
-        - **📦 Standalone Executables**: Just download, extract, and run!
-        
-        ### 🎯 Key Features
-        - **Professional PDF Viewer**: Built-in viewer with text selection
-        - **AI-Assisted Analysis**: Optional OpenAI integration for pre-screening
-        - **Manual Analysis Mode**: Works great without AI for complete independence
-        - **Evidence Collection**: Easy text selection and quote extraction
-        - **GitHub Integration**: Direct upload of training decisions
-        
-        ### 🚀 Quick Start
-        1. Download the file for your operating system
-        2. Extract/unzip the files  
-        3. Double-click the executable to run
-        4. See QUICK_START_FOR_GAS.md for detailed instructions
-        
-        ### 📊 Perfect for Research Teams
-        - No Python installation required
-        - No command line knowledge needed
-        - Professional interface for academic paper analysis
-        - Scales from individual researchers to large institutions
-        
-        ### 📚 Documentation Included
-        - Quick Start Guide for Graduate Assistants
-        - Complete setup and usage instructions
-        - Troubleshooting and FAQ
-        
-        For technical support or questions, please open an issue in this repository.
-        EOF
-
-    - name: 🏷️ Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        body_path: release-notes.md
-        files: release-assets/*
-        draft: false
-        prerelease: false
-        generate_release_notes: true
+        make_latest: true
+        files: release-files/*
+        fail_on_unmatched_files: true
+        generate_release_notes: false
+        body: |
+          # 🚀 Research Buddy 5.2 - Critical Upload Fix
+          
+          **Professional installers for all platforms with fixed GitHub upload functionality!**
+          
+          ## 📥 Downloads
+          
+          ### macOS 🍎
+          **ResearchBuddy-macos.dmg**
+          - Double-click DMG → Drag app to Applications → Done!
+          - Works on both Intel and Apple Silicon Macs
+          
+          ### Windows 🪟
+          **ResearchBuddy-windows.zip**
+          - Extract → Double-click `.exe` → Run!
+          - If Windows Defender warns: Click "More info" → "Run anyway"
+          
+          ### Linux 🐧
+          **ResearchBuddy-linux.tar.gz**
+          - Extract and run the executable
+          - Universal Linux executable - works on all distros!
+          
+          ---
+          
+          ## ✨ What's New in 5.2
+          
+          - 🔧 **CRITICAL FIX**: Upload now works in AppImage/executables (uses GitHub REST API instead of git commands)
+          - 📝 **Better filenames**: Training reports now named `Reviewer_Author_Decision_Timestamp`
+          - 🎨 **UI improvements**: Fixed truncated labels, removed duplicate dialogs
+          - ⚙️ **First-time setup**: Configuration dialog appears automatically on first launch
+          - 📚 **Better documentation**: Comprehensive setup guides for all platforms
+          
+          ## 🎯 Features
+          
+          - Professional PDF viewer with text selection
+          - AI-assisted positionality detection (optional - requires OpenAI API key)
+          - Manual analysis mode (works without any API keys)
+          - Evidence collection and quote extraction  
+          - GitHub integration for training reports (NOW WORKING IN EXECUTABLES!)
+          - Secure configuration management
+          
+          ## 📜 License
+          
+          Creative Commons Attribution-NonCommercial 4.0  
+          © 2025 Michael Todd Edwards (OhioMathTeacher)  
+          Academic and educational use freely permitted.
+          
+          ---
+          
+          **Perfect for Graduate Assistants - No Python, no terminal, no setup!**
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: 📊 Release Summary
       run: |
         echo "🎉 Release Created Successfully!"
-        echo "📦 Assets included:"
-        ls -la release-assets/
+        echo "📦 Files included:"
+        ls -lh release-files/
         echo ""
         echo "🔗 View release at: ${{ github.server_url }}/${{ github.repository }}/releases"
