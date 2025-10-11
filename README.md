@@ -29,18 +29,23 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 - If Windows Defender blocks: Click "More info" → "Run anyway"
 
 ### **Linux**
-🐧 [**Download ResearchBuddy-linux.tar.gz**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-linux.tar.gz)
+🐧 [**Download ResearchBuddy-5.2-x86_64.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-5.2-x86_64.AppImage) **(Recommended)**
 
-**Simple 3-step install:**
-1. Download the tar.gz file
-2. Extract it: `tar -xzf ResearchBuddy-linux.tar.gz`
-3. Run the executable: `cd release && ./ResearchBuddy`
+**Easiest way - just 2 steps:**
+1. Download the AppImage file
+2. Make it executable and run:
+   ```bash
+   chmod +x ResearchBuddy-5.2-x86_64.AppImage
+   ./ResearchBuddy-5.2-x86_64.AppImage
+   ```
 
-**Note:** AppImage version coming soon in next build for easier installation!
+**Alternative:** [Download ResearchBuddy-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-linux.tar.gz)
+- Extract: `tar -xzf ResearchBuddy-linux.tar.gz`
+- Run: `cd release && ./ResearchBuddy`
 
-**That's it!** The app will launch. To run it again later, just run `./ResearchBuddy` from the release folder.
+**That's it!** The app will launch. AppImage is portable - just move the file anywhere and double-click to run.
 
-- **Universal Linux executable - works on all distros** (Ubuntu, Fedora, Arch, Debian, etc.)
+- **Universal Linux executable - works on all distros** (Ubuntu, Fedora, Arch, Debian, Linux Mint, etc.)
 
 ---
 
