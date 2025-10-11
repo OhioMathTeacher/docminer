@@ -3,6 +3,7 @@
 # Updated to include utils directory and handle recent changes
 
 import os
+import sys
 from pathlib import Path
 
 # Get the project root directory
