@@ -6,8 +6,8 @@ import os
 import sys
 from pathlib import Path
 
-# Get the project root directory
-project_root = os.path.dirname(os.path.abspath(SPEC))
+# Get the project root directory (parent of build_files)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(SPEC)))
 
 a = Analysis(
     ['../enhanced_training_interface.py'],
