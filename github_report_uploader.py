@@ -221,52 +221,55 @@ class GitHubReportUploader:
         return json_path, md_path
     
     def upload_to_github(self, json_path, md_path, ga_name, session_id):
-        """Upload reports to GitHub repository by copying to repo directory first"""
+        """Upload reports to GitHub repository using GitHub API"""
         
         try:
-            # Find the git repository root
-            # Assume the script is running from the repository or can find it
-            repo_path = Path(__file__).parent  # research-buddy directory
-            repo_training_dir = repo_path / "training_reports"
-            repo_training_dir.mkdir(exist_ok=True)
+            # Check if we have the necessary credentials
+            if not self.token or not self.owner or not self.repo:
+                return False, "GitHub credentials not configured. Please check Settings."
             
-            # Copy files from ~/.research_buddy/training_reports to repo/training_reports
-            repo_json_path = repo_training_dir / json_path.name
-            repo_md_path = repo_training_dir / md_path.name
+            # Read the file contents
+            with open(json_path, 'r') as f:
+                json_content = f.read()
             
-            shutil.copy2(json_path, repo_json_path)
-            shutil.copy2(md_path, repo_md_path)
+            with open(md_path, 'r') as f:
+                md_content = f.read()
             
-            # Check if git is configured
-            result = subprocess.run(['git', 'status'], 
-                                  capture_output=True, text=True, cwd=repo_path)
+            # Upload JSON file via GitHub API
+            json_upload_url = f"{self.base_url}/contents/training_reports/{json_path.name}"
+            json_data = {
+                "message": f"Training: {ga_name} reviewed {json_path.stem}",
+                "content": self._encode_content(json_content),
+                "branch": "main"
+            }
             
-            if result.returncode != 0:
-                return False, "Not in a git repository"
+            json_response = requests.put(json_upload_url, headers=self.headers, json=json_data)
             
-            # Add files to git (relative to repo)
-            subprocess.run(['git', 'add', str(repo_json_path)], cwd=repo_path)
-            subprocess.run(['git', 'add', str(repo_md_path)], cwd=repo_path)
+            if json_response.status_code not in [200, 201]:
+                return False, f"Failed to upload JSON: {json_response.status_code} - {json_response.text}"
             
-            # Commit with descriptive message including reviewer, paper, and judgment
-            commit_msg = f"Training: {ga_name} reviewed {repo_json_path.stem}"
-            result = subprocess.run(['git', 'commit', '-m', commit_msg], 
-                                  capture_output=True, text=True, cwd=repo_path)
+            # Upload MD file via GitHub API
+            md_upload_url = f"{self.base_url}/contents/training_reports/{md_path.name}"
+            md_data = {
+                "message": f"Training report: {ga_name} - {md_path.stem}",
+                "content": self._encode_content(md_content),
+                "branch": "main"
+            }
             
-            if result.returncode != 0:
-                return False, f"Git commit failed: {result.stderr}"
+            md_response = requests.put(md_upload_url, headers=self.headers, json=md_data)
             
-            # Push to remote
-            result = subprocess.run(['git', 'push'], 
-                                  capture_output=True, text=True, cwd=repo_path)
+            if md_response.status_code not in [200, 201]:
+                return False, f"Failed to upload MD: {md_response.status_code} - {md_response.text}"
             
-            if result.returncode != 0:
-                return False, f"Git push failed: {result.stderr}"
-            
-            return True, f"Successfully uploaded to GitHub: {repo_json_path.name}"
+            return True, f"Successfully uploaded to GitHub: {json_path.name}"
             
         except Exception as e:
             return False, f"Upload error: {str(e)}"
+    
+    def _encode_content(self, content):
+        """Encode content to base64 for GitHub API"""
+        import base64
+        return base64.b64encode(content.encode('utf-8')).decode('utf-8')
     
     def process_training_session(self, training_data, ga_name):
         """Complete processing pipeline for a training session"""
