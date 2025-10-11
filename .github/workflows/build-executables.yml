@@ -93,9 +93,8 @@ jobs:
           cd release
           7z a "../${{ matrix.name }}.zip" *
         elif [ "${{ matrix.platform }}" = "macos" ]; then
-          # DMG already created, just move it
-          mkdir -p release
-          mv ResearchBuddy-5.2.dmg release/${{ matrix.name }}.dmg
+          # DMG already created, just rename it
+          mv ResearchBuddy-5.2.dmg ${{ matrix.name }}.dmg
         else
           cd release
           tar -czf "../${{ matrix.name }}.tar.gz" *
