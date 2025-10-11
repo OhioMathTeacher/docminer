@@ -16,15 +16,15 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
-            artifact-name: ResearchBuddy5.1.1-linux
+            artifact-name: ResearchBuddy5.2-linux
             executable-ext: ""
           - os: windows-latest  
             platform: windows
-            artifact-name: ResearchBuddy5.1.1-windows
+            artifact-name: ResearchBuddy5.2-windows
             executable-ext: ".exe"
           - os: macos-latest
             platform: macos
-            artifact-name: ResearchBuddy5.1.1-macos
+            artifact-name: ResearchBuddy5.2-macos
             executable-ext: ""
 
     steps:
@@ -63,22 +63,22 @@ jobs:
         
     - name: Build executable
       run: |
-        python -m PyInstaller build_files/ResearchBuddy5.1.1.spec --distpath ./dist --workpath ./build
+        python -m PyInstaller build_files/ResearchBuddy5.2.spec --distpath ./dist --workpath ./build
         
     - name: Verify build
       run: |
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          ls -la dist/ResearchBuddy5.1.1/
-          file dist/ResearchBuddy5.1.1/ResearchBuddy5.1.1.exe || echo "Windows executable created"
+          ls -la dist/ResearchBuddy5.2/
+          file dist/ResearchBuddy5.2/ResearchBuddy5.2.exe || echo "Windows executable created"
         else
-          ls -la dist/ResearchBuddy5.1.1/
-          file dist/ResearchBuddy5.1.1/ResearchBuddy5.1.1 || echo "Unix executable created"
+          ls -la dist/ResearchBuddy5.2/
+          file dist/ResearchBuddy5.2/ResearchBuddy5.2 || echo "Unix executable created"
         fi
         
     - name: Create distribution package
       run: |
         mkdir -p releases
-        cp -r dist/ResearchBuddy5.1.1 releases/${{ matrix.artifact-name }}
+        cp -r dist/ResearchBuddy5.2 releases/${{ matrix.artifact-name }}
         
         # Copy documentation
         cp README.md releases/${{ matrix.artifact-name }}/
@@ -166,8 +166,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./artifacts/ResearchBuddy5.1.1-linux/ResearchBuddy5.1.1-linux.tar.gz
-        asset_name: ResearchBuddy5.1.1-linux.tar.gz
+        asset_path: ./artifacts/ResearchBuddy5.2-linux/ResearchBuddy5.2-linux.tar.gz
+        asset_name: ResearchBuddy5.2-linux.tar.gz
         asset_content_type: application/gzip
         
     - name: Upload Windows Release Asset
@@ -176,8 +176,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./artifacts/ResearchBuddy5.1.1-windows/ResearchBuddy5.1.1-windows.zip
-        asset_name: ResearchBuddy5.1.1-windows.zip
+        asset_path: ./artifacts/ResearchBuddy5.2-windows/ResearchBuddy5.2-windows.zip
+        asset_name: ResearchBuddy5.2-windows.zip
         asset_content_type: application/zip
         
     - name: Upload macOS Release Asset
@@ -186,6 +186,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./artifacts/ResearchBuddy5.1.1-macos/ResearchBuddy5.1.1-macos.tar.gz
-        asset_name: ResearchBuddy5.1.1-macos.tar.gz
+        asset_path: ./artifacts/ResearchBuddy5.2-macos/ResearchBuddy5.2-macos.tar.gz
+        asset_name: ResearchBuddy5.2-macos.tar.gz
         asset_content_type: application/gzip
