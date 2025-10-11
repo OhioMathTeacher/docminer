@@ -2049,6 +2049,15 @@ class EnhancedTrainingInterface(QMainWindow):
     def save_settings(self):
         """Save interface settings to file"""
         try:
+            # Load existing settings to preserve ALL configuration
+            existing_settings = {}
+            if os.path.exists(self.settings_file):
+                try:
+                    with open(self.settings_file, 'r') as f:
+                        existing_settings = json.load(f)
+                except (json.JSONDecodeError, IOError):
+                    pass
+            
             # Get current window geometry
             geometry = self.geometry()
             settings = {
@@ -2061,8 +2070,17 @@ class EnhancedTrainingInterface(QMainWindow):
                 },
                 "last_updated": datetime.now().isoformat()
             }
+            
+            # Preserve all other configuration (github, API keys, etc.)
+            for key in existing_settings:
+                if key not in settings:
+                    settings[key] = existing_settings[key]
+            
             with open(self.settings_file, 'w') as f:
                 json.dump(settings, f, indent=2)
+            
+            # Set file permissions to user-only (600) for security
+            os.chmod(self.settings_file, 0o600)
         except Exception as e:
             print(f"Could not save settings: {e}")
     
