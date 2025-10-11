@@ -11,30 +11,26 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 **No Python, no setup, no terminal commands - just download and double-click!**
 
 ### **macOS**
-🍎 [**Download ResearchBuddy-5.2-macos.dmg**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-5.2-macos.dmg) 
+🍎 [**Download ResearchBuddy-macos.dmg**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-macos.dmg) 
 - Download → Double-click the DMG → Drag `ResearchBuddy5.2.app` to Applications
 - Open from Applications folder → Done!
 - **Works on both Intel and Apple Silicon Macs**
 - If Mac says "unidentified developer": Right-click the .app → Open → Open (only needed first time)
 
 ### **Windows**  
-🪟 [**Download ResearchBuddy-5.2-windows.zip**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-5.2-windows.zip)
+🪟 [**Download ResearchBuddy-windows.zip**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-windows.zip)
 - Download → Extract → Double-click `ResearchBuddy5.2.exe`
 - If Windows Defender blocks: Click "More info" → "Run anyway"
 
 ### **Linux**
-🐧 [**Download ResearchBuddy-5.2-x86_64.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-5.2-x86_64.AppImage)
+🐧 [**Download ResearchBuddy-linux.tar.gz**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-linux.tar.gz)
 
 **Simple 3-step install:**
-1. Download the AppImage file
-2. Open terminal in your Downloads folder
-3. Run these two commands:
-```bash
-chmod +x ResearchBuddy-5.2-x86_64.AppImage
-./ResearchBuddy-5.2-x86_64.AppImage
-```
+1. Download the tar.gz file
+2. Extract it: `tar -xzf ResearchBuddy-linux.tar.gz`
+3. Run the executable: `cd release && ./ResearchBuddy`
 
-**That's it!** The app will launch. To run it again later, just double-click the AppImage file (or run the second command again).
+**That's it!** The app will launch. To run it again later, just run `./ResearchBuddy` from the release folder.
 
 - **Universal Linux executable - works on all distros** (Ubuntu, Fedora, Arch, Debian, etc.)
 
