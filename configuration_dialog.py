@@ -17,55 +17,61 @@ from PySide6.QtGui import QFont
 
 
 def load_configuration():
-    """Load configuration from environment variables and JSON file.
+    """Load configuration from config file.
     
-    Sensitive data (API keys, tokens) comes from environment variables.
-    Non-sensitive data (repository settings) comes from config file.
+    All settings (including API keys and tokens) are stored in the local config file.
+    The file is stored in ~/.research_buddy/ which is user-specific and secure.
+    Environment variables are checked as fallback for backward compatibility.
     """
     config_path = Path.home() / ".research_buddy" / "interface_settings.json"
     
-    # Load non-sensitive settings from file
-    default_file_config = {
+    # Default configuration
+    default_config = {
+        "openai_api_key": "",
+        "github_token": "",
         "github_owner": "",
         "github_repo": ""
     }
     
-    file_config = default_file_config.copy()
+    config = default_config.copy()
+    
+    # Load from config file
     if config_path.exists():
         try:
             with open(config_path, 'r') as f:
                 loaded_config = json.load(f)
-                # Only load non-sensitive settings from file
-                for key in default_file_config:
+                # Load all settings from file
+                for key in default_config:
                     if key in loaded_config:
-                        file_config[key] = loaded_config[key]
+                        config[key] = loaded_config[key]
         except (json.JSONDecodeError, IOError) as e:
             print(f"Error loading configuration file: {e}")
     
-    # Get sensitive data from environment variables
-    config = {
-        "openai_api_key": os.environ.get("RESEARCH_BUDDY_OPENAI_API_KEY", ""),
-        "github_token": os.environ.get("RESEARCH_BUDDY_GITHUB_TOKEN", ""),
-        "github_owner": file_config["github_owner"],
-        "github_repo": file_config["github_repo"]
-    }
+    # Fallback to environment variables if not in config file (backward compatibility)
+    if not config["openai_api_key"]:
+        config["openai_api_key"] = os.environ.get("RESEARCH_BUDDY_OPENAI_API_KEY", "")
+    if not config["github_token"]:
+        config["github_token"] = os.environ.get("RESEARCH_BUDDY_GITHUB_TOKEN", "")
     
     return config
 
 
 def save_configuration(config):
-    """Save non-sensitive configuration to JSON file.
+    """Save configuration to JSON file.
     
-    Only saves repository settings to file. API keys and tokens
-    should be set as environment variables.
+    Saves all settings including API keys and tokens to the local config file.
+    The file is stored in ~/.research_buddy/ with user-only permissions (600).
+    This allows users to configure once and not re-enter credentials every time.
     """
     config_dir = Path.home() / ".research_buddy"
     config_dir.mkdir(exist_ok=True)
     
     config_path = config_dir / "interface_settings.json"
     
-    # Only save non-sensitive settings to file
+    # Save all settings to file
     file_config = {
+        "openai_api_key": config.get("openai_api_key", ""),
+        "github_token": config.get("github_token", ""),
         "github_owner": config.get("github_owner", ""),
         "github_repo": config.get("github_repo", "")
     }
@@ -73,6 +79,9 @@ def save_configuration(config):
     try:
         with open(config_path, 'w') as f:
             json.dump(file_config, f, indent=2)
+        
+        # Set file permissions to user-only (600) for security
+        os.chmod(config_path, 0o600)
         return True
     except IOError as e:
         print(f"Error saving configuration: {e}")
