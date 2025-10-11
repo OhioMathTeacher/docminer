@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-20.04  # Use older Ubuntu for maximum compatibility
             platform: linux
             name: ResearchBuddy-linux
           - os: windows-latest
@@ -55,12 +55,60 @@ jobs:
     - name: 🔨 Build Linux Executable
       if: matrix.platform == 'linux'
       run: |
+        # Build standard executable
         python -m PyInstaller --onefile --name "ResearchBuddy" enhanced_training_interface.py
+        
+        # Create release folder with tar.gz
         mkdir release
         cp dist/ResearchBuddy release/
         cp README.md release/
         cp docs/QUICK_START_FOR_GAS.md release/
         chmod +x release/ResearchBuddy
+        
+        # Create AppImage
+        echo "Creating AppImage..."
+        
+        # Download appimagetool
+        wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+        chmod +x appimagetool-x86_64.AppImage
+        
+        # Create AppDir structure
+        mkdir -p ResearchBuddy.AppDir/usr/bin
+        cp dist/ResearchBuddy ResearchBuddy.AppDir/usr/bin/
+        
+        # Create AppRun script
+        cat > ResearchBuddy.AppDir/AppRun << 'EOF'
+        #!/bin/bash
+        SELF=$(readlink -f "$0")
+        HERE=${SELF%/*}
+        export LD_LIBRARY_PATH="${HERE}/usr/bin:${LD_LIBRARY_PATH}"
+        exec "${HERE}/usr/bin/ResearchBuddy" "$@"
+        EOF
+        chmod +x ResearchBuddy.AppDir/AppRun
+        
+        # Create desktop file
+        mkdir -p ResearchBuddy.AppDir/usr/share/applications
+        cat > ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop << 'EOF'
+        [Desktop Entry]
+        Type=Application
+        Name=Research Buddy
+        Exec=ResearchBuddy
+        Icon=researchbuddy
+        Categories=Education;Office;
+        Terminal=false
+        EOF
+        
+        # Create simple icon (placeholder - you can replace with real icon later)
+        mkdir -p ResearchBuddy.AppDir/usr/share/icons/hicolor/256x256/apps
+        # Note: AppImage will work without icon, just won't show custom icon
+        
+        # Build AppImage
+        ARCH=x86_64 ./appimagetool-x86_64.AppImage ResearchBuddy.AppDir ResearchBuddy-x86_64.AppImage
+        
+        chmod +x ResearchBuddy-x86_64.AppImage
+        
+        echo "AppImage created successfully!"
+        ls -lh ResearchBuddy-x86_64.AppImage
 
     - name: 🔨 Build macOS Executable (Apple Silicon)
       if: matrix.platform == 'macos'
@@ -101,15 +149,21 @@ jobs:
           # DMG already created, just rename it
           mv ResearchBuddy-5.2.dmg ${{ matrix.name }}.dmg
         else
+          # Linux: Create both tar.gz and keep AppImage
           cd release
           tar -czf "../${{ matrix.name }}.tar.gz" *
+          cd ..
+          # AppImage is already created as ResearchBuddy-x86_64.AppImage
+          mv ResearchBuddy-x86_64.AppImage ${{ matrix.name }}.AppImage
         fi
 
     - name: 📤 Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.name }}
-        path: ${{ matrix.name }}.*
+        path: |
+          ${{ matrix.name }}.*
+          **/*.AppImage
 
   release:
     needs: build
@@ -132,6 +186,7 @@ jobs:
         find artifacts -type f -name "*.dmg" -exec cp {} release-files/ \;
         find artifacts -type f -name "*.zip" -exec cp {} release-files/ \;
         find artifacts -type f -name "*.tar.gz" -exec cp {} release-files/ \;
+        find artifacts -type f -name "*.AppImage" -exec cp {} release-files/ \;
         echo "📋 Release files prepared:"
         ls -lh release-files/
 

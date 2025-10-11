@@ -13,9 +13,15 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 ### **macOS**
 🍎 [**Download ResearchBuddy-macos.dmg**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-macos.dmg) 
 - Download → Double-click the DMG → Drag `ResearchBuddy5.2.app` to Applications
-- Open from Applications folder → Done!
 - **Works on both Intel and Apple Silicon Macs**
-- If Mac says "unidentified developer": Right-click the .app → Open → Open (only needed first time)
+
+**First-time setup (security bypass):**
+1. Try to open the app (it will show security warning)
+2. Open Terminal and run: `xattr -cr /Applications/ResearchBuddy5.2.app`
+3. Now double-click the app - it will open!
+
+**Alternative (no Terminal):**
+- Right-click the .app → Open → Open (may need to do this twice)
 
 ### **Windows**  
 🪟 [**Download ResearchBuddy-windows.zip**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-windows.zip)
@@ -29,6 +35,8 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 1. Download the tar.gz file
 2. Extract it: `tar -xzf ResearchBuddy-linux.tar.gz`
 3. Run the executable: `cd release && ./ResearchBuddy`
+
+**Note:** AppImage version coming soon in next build for easier installation!
 
 **That's it!** The app will launch. To run it again later, just run `./ResearchBuddy` from the release folder.
 
