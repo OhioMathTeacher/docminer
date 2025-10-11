@@ -45,7 +45,7 @@ jobs:
         mkdir release
         copy dist\ResearchBuddy.exe release\
         copy README.md release\
-        copy QUICK_START_FOR_GAS.md release\
+        copy docs\QUICK_START_FOR_GAS.md release\
 
     - name: 🔨 Build Linux Executable
       if: matrix.platform == 'linux'
@@ -54,7 +54,7 @@ jobs:
         mkdir release
         cp dist/ResearchBuddy release/
         cp README.md release/
-        cp QUICK_START_FOR_GAS.md release/
+        cp docs/QUICK_START_FOR_GAS.md release/
         chmod +x release/ResearchBuddy
 
     - name: 🔨 Build macOS Executable (Apple Silicon)
