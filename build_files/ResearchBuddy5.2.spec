@@ -85,7 +85,7 @@ exe = EXE(
     target_arch=None,  # Native architecture (ARM64 on GH Actions, works on Intel via Rosetta 2)
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # Add icon path when available
+    icon='build_files/icon.ico' if sys.platform == 'win32' else 'build_files/icon.icns' if sys.platform == 'darwin' else None,
 )
 
 coll = COLLECT(
@@ -102,7 +102,7 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name='ResearchBuddy5.2.app',
-    icon=None,
+    icon='build_files/icon.icns',
     bundle_identifier='edu.university.researchbuddy',
     info_plist={
         'NSHighResolutionCapable': 'True',
