@@ -53,7 +53,7 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 **New to Research Buddy? Watch this 8-minute walkthrough:**
 
-[**📺 Watch Video Tutorial**](docs/video_tutorial/ResearchBuddyVideoTutorial.mp4)
+[**📺 Watch Video Tutorial**](https://youtu.be/Y3nX3kSQsXU)
 
 Learn how to:
 - ✅ Configure your first project
