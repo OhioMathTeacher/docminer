@@ -61,30 +61,30 @@ jobs:
       if: matrix.platform == 'macos'
       run: |
         echo "Building for Apple Silicon/ARM64..."
-        python -m PyInstaller build_files/ResearchBuddy5.1.1.spec \
+        python -m PyInstaller build_files/ResearchBuddy5.2.spec \
           --distpath ./dist \
           --workpath ./build \
           --clean \
           --noconfirm
         
         echo "Verifying architecture..."
-        file dist/ResearchBuddy5.1.1.app/Contents/MacOS/ResearchBuddy5.1.1
+        file dist/ResearchBuddy5.2.app/Contents/MacOS/ResearchBuddy5.2
         
         echo "Creating DMG..."
         mkdir -p dmg-temp
-        cp -R dist/ResearchBuddy5.1.1.app dmg-temp/
+        cp -R dist/ResearchBuddy5.2.app dmg-temp/
         ln -s /Applications dmg-temp/Applications
         
         hdiutil create \
-          -volname "ResearchBuddy 5.1.1" \
+          -volname "ResearchBuddy 5.2" \
           -srcfolder dmg-temp \
           -ov -format UDZO \
-          ResearchBuddy-5.1.1.dmg
+          ResearchBuddy-5.2.dmg
         
         rm -rf dmg-temp
         
         echo "DMG created successfully!"
-        ls -lh ResearchBuddy-5.1.1.dmg
+        ls -lh ResearchBuddy-5.2.dmg
 
     - name: 📦 Create Package
       shell: bash
@@ -95,7 +95,7 @@ jobs:
         elif [ "${{ matrix.platform }}" = "macos" ]; then
           # DMG already created, just move it
           mkdir -p release
-          mv ResearchBuddy-5.1.1.dmg release/${{ matrix.name }}.dmg
+          mv ResearchBuddy-5.2.dmg release/${{ matrix.name }}.dmg
         else
           cd release
           tar -czf "../${{ matrix.name }}.tar.gz" *

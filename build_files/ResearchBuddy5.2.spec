@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-# PyInstaller spec file for Research Buddy 5.1.1
+# PyInstaller spec file for Research Buddy 5.2
 # Updated to include utils directory and handle recent changes
 
 import os
@@ -74,7 +74,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='ResearchBuddy5.1.1',
+    name='ResearchBuddy5.2',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -95,13 +95,13 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='ResearchBuddy5.1.1',
+    name='ResearchBuddy5.2',
 )
 
 # macOS App Bundle (only created on macOS)
 app = BUNDLE(
     coll,
-    name='ResearchBuddy5.1.1.app',
+    name='ResearchBuddy5.2.app',
     icon=None,
     bundle_identifier='edu.university.researchbuddy',
     info_plist={

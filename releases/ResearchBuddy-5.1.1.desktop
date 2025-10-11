@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Research Buddy
+Comment=Professional Positionality Analysis Interface
+Exec=/home/todd/research-buddy/releases/ResearchBuddy-5.1.1-x86_64.AppImage
+Icon=research-buddy
+Terminal=false
+Categories=Education;Science;
+StartupNotify=true

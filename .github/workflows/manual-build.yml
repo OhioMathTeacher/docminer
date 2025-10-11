@@ -17,15 +17,15 @@ jobs:
         include:
           - os: ubuntu-22.04  # Use older Ubuntu for wider GLIBC compatibility (2.35 vs 2.38)
             platform: linux
-            name: ResearchBuddy-5.1.1-linux
+            name: ResearchBuddy-5.2-linux
             archive: tar.gz
           - os: windows-latest  
             platform: windows
-            name: ResearchBuddy-5.1.1-windows
+            name: ResearchBuddy-5.2-windows
             archive: zip
           - os: macos-latest
             platform: macos
-            name: ResearchBuddy-5.1.1-macos
+            name: ResearchBuddy-5.2-macos
             archive: zip
 
     steps:
@@ -72,7 +72,7 @@ jobs:
         
     - name: Build executable
       run: |
-        python -m PyInstaller build_files/ResearchBuddy5.1.1.spec --distpath ./dist --workpath ./build --clean --noconfirm
+        python -m PyInstaller build_files/ResearchBuddy5.2.spec --distpath ./dist --workpath ./build --clean --noconfirm
         
     - name: Create distribution package
       shell: bash
@@ -82,7 +82,7 @@ jobs:
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
           # Windows: Create ZIP using PowerShell
           cd dist
-          powershell -Command "Compress-Archive -Path ResearchBuddy5.1.1 -DestinationPath ../releases/${{ matrix.name }}.zip -Force"
+          powershell -Command "Compress-Archive -Path ResearchBuddy5.2 -DestinationPath ../releases/${{ matrix.name }}.zip -Force"
           cd ..
           echo "✅ Created ${{ matrix.name }}.zip"
           ls -lh releases/
@@ -90,7 +90,7 @@ jobs:
           # macOS: Create professional DMG installer
           
           # First verify .app was created
-          if [ ! -d "dist/ResearchBuddy5.1.1.app" ]; then
+          if [ ! -d "dist/ResearchBuddy5.2.app" ]; then
             echo "❌ Error: .app bundle not found"
             ls -la dist/
             exit 1
@@ -98,7 +98,7 @@ jobs:
           
           # Create DMG temp directory
           mkdir -p dmg-temp
-          cp -R dist/ResearchBuddy5.1.1.app dmg-temp/
+          cp -R dist/ResearchBuddy5.2.app dmg-temp/
           ln -s /Applications dmg-temp/Applications
           
           # Copy Quick Start guide if available
@@ -108,7 +108,7 @@ jobs:
           
           # Create the DMG
           hdiutil create \
-            -volname "ResearchBuddy 5.1.1" \
+            -volname "ResearchBuddy 5.2" \
             -srcfolder dmg-temp \
             -ov -format UDZO \
             releases/${{ matrix.name }}.dmg
@@ -201,18 +201,18 @@ jobs:
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
         
-        if git rev-parse v5.1.1 >/dev/null 2>&1; then
-          echo "✅ Tag v5.1.1 already exists"
+        if git rev-parse v5.2 >/dev/null 2>&1; then
+          echo "✅ Tag v5.2 already exists"
         else
-          echo "📝 Creating tag v5.1.1"
-          git tag -a v5.1.1 -m "Release v5.1.1"
-          git push origin v5.1.1
+          echo "📝 Creating tag v5.2"
+          git tag -a v5.2 -m "Release v5.2"
+          git push origin v5.2
         fi
     
     - name: Delete existing release (to refresh files)
       continue-on-error: true
       run: |
-        gh release delete v5.1.1 --yes || echo "No existing release to delete"
+        gh release delete v5.2 --yes || echo "No existing release to delete"
       env:
         GH_TOKEN: ${{ github.token }}
 
@@ -233,8 +233,8 @@ jobs:
     - name: Create or Update Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v5.1.1
-        name: Research Buddy 5.1.1 - Professional Cross-Platform Installers
+        tag_name: v5.2
+        name: Research Buddy 5.2 - Professional Cross-Platform Installers
         draft: false
         prerelease: false
         make_latest: true
@@ -242,31 +242,31 @@ jobs:
         fail_on_unmatched_files: true
         generate_release_notes: false
         body: |
-          # 🚀 Research Buddy 5.1.1 - Professional Cross-Platform Release
+          # 🚀 Research Buddy 5.2 - Professional Cross-Platform Release
           
           **Professional installers for all platforms - just download and run!**
           
           ## 📥 Downloads
           
           ### macOS 🍎
-          **ResearchBuddy-5.1.1-macos.dmg**
+          **ResearchBuddy-5.2-macos.dmg**
           - Double-click DMG → Drag app to Applications → Done!
           - Works on both Intel and Apple Silicon Macs
           
           ### Windows 🪟
-          **ResearchBuddy-5.1.1-windows.zip**
+          **ResearchBuddy-5.2-windows.zip**
           - Extract → Double-click `.exe` → Run!
           - If Windows Defender warns: Click "More info" → "Run anyway"
           
           ### Linux 🐧
-          **ResearchBuddy-5.1.1-x86_64.AppImage**
-          - `chmod +x ResearchBuddy-5.1.1-x86_64.AppImage`
-          - `./ResearchBuddy-5.1.1-x86_64.AppImage`
+          **ResearchBuddy-5.2-x86_64.AppImage**
+          - `chmod +x ResearchBuddy-5.2-x86_64.AppImage`
+          - `./ResearchBuddy-5.2-x86_64.AppImage`
           - Universal Linux executable - works on all distros!
           
           ---
           
-          ## ✨ What's New in 5.1.1
+          ## ✨ What's New in 5.2
           
           - ✅ **Universal macOS installer** - Works on Intel and Apple Silicon
           - ✅ **Linux AppImage** - Single-file Linux executable for all distros

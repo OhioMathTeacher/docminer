@@ -1119,7 +1119,7 @@ class PDFViewer(QWidget):
 class EnhancedTrainingInterface(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Research Buddy 5.1.1 - Professional Positionality Analysis Interface")
+        self.setWindowTitle("Research Buddy 5.2 - Professional Positionality Analysis Interface")
         # Set reasonable default size but allow user to resize
         self.resize(1200, 800)  # Default size - user can resize as needed
         
@@ -1228,8 +1228,8 @@ class EnhancedTrainingInterface(QMainWindow):
     
     def show_about(self):
         """Show about dialog"""
-        QMessageBox.about(self, "About Research Buddy 5.1.1", 
-                         "🎓 Research Buddy 5.1.1\n\n"
+        QMessageBox.about(self, "About Research Buddy 5.2", 
+                         "🎓 Research Buddy 5.2\n\n"
                          "Professional Positionality Analysis Interface\n\n"
                          "Features:\n"
                          "• Paper state persistence\n"
