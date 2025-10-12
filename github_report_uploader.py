@@ -185,10 +185,13 @@ class GitHubReportUploader:
     def save_local_report(self, training_data, ga_name, session_id):
         """Save report locally first with improved filenames"""
         
+        print(f"DEBUG save_local_report: ga_name='{ga_name}'")  # Debug logging
+        
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
         # Clean GA name for filename
         clean_ga_name = self.sanitize_name(ga_name)
+        print(f"DEBUG save_local_report: clean_ga_name='{clean_ga_name}'")  # Debug logging
         
         # Extract paper info if available
         if training_data and len(training_data) > 0:

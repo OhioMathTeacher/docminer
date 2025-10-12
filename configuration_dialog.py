@@ -289,10 +289,7 @@ class ConfigurationDialog(QDialog):
             
             QMessageBox.information(self, "Configuration Saved", message)
             
-            # Update the environment status display
-            self.update_environment_status()
-            
-            # Accept the dialog to signal success
+            # Accept the dialog to signal success and close it
             self.accept()
             
         else:

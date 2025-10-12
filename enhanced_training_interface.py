@@ -27,7 +27,7 @@ from PySide6.QtWidgets import (
     QComboBox, QSpinBox, QGroupBox, QGridLayout, QSplitter, QFrame,
     QTabWidget, QSlider, QMenu, QPlainTextEdit, QLineEdit, QSizePolicy, QDialog
 )
-from PySide6.QtCore import Qt, QTimer, Signal, QRect, QPoint, QUrl
+from PySide6.QtCore import Qt, QTimer, Signal, QRect, QPoint, QUrl, QThread, QObject
 from PySide6.QtGui import QFont, QTextCursor, QPixmap, QPainter, QPen, QColor, QBrush, QAction, QClipboard
 
 # Try to import QtWebEngine, but it's optional
@@ -42,6 +42,52 @@ import fitz  # PyMuPDF for PDF rendering
 from utils.metadata_extractor import extract_positionality
 from github_report_uploader import GitHubReportUploader
 from configuration_dialog import ConfigurationDialog
+
+def clean_extracted_text(text):
+    """
+    Clean up text extracted from PDFs or AI responses.
+    Removes excessive whitespace, fixes line breaks, and removes redundant quotes.
+    
+    Args:
+        text: Raw text string
+        
+    Returns:
+        Cleaned text string
+    """
+    if not text:
+        return ""
+    
+    import re
+    
+    # Remove AI quotation marks that wrap entire passages
+    # (AI often returns: "This is the quote" when we just want: This is the quote)
+    text = text.strip()
+    if text.startswith('"') and text.endswith('"') and text.count('"') == 2:
+        text = text[1:-1].strip()
+    if text.startswith("'") and text.endswith("'") and text.count("'") == 2:
+        text = text[1:-1].strip()
+    
+    # Fix PDF extraction issues:
+    # 1. Remove excessive spaces (2+ spaces → single space) - PRESERVE 1 space between words!
+    text = re.sub(r' {2,}', ' ', text)
+    
+    # 2. Fix broken line breaks (remove hyphenation at line ends)
+    text = re.sub(r'-\n', '', text)
+    
+    # 3. Normalize line breaks (multiple blank lines → double line break)
+    text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)
+    
+    # 4. Remove spaces before punctuation
+    text = re.sub(r' +([.,;:!?])', r'\1', text)
+    
+    # 5. Fix spacing after punctuation (ensure single space)
+    text = re.sub(r'([.,;:!?])([A-Za-z])', r'\1 \2', text)
+    
+    # 6. Remove leading/trailing whitespace on each line (but preserve line structure)
+    lines = [line.strip() for line in text.split('\n')]
+    text = '\n'.join(lines)
+    
+    return text.strip()
 
 def open_pdf_with_system_viewer(pdf_path):
     """
@@ -1346,12 +1392,20 @@ class EnhancedTrainingInterface(QMainWindow):
         folder_btn.setStyleSheet("QPushButton { font-weight: bold; padding: 8px; }")
         header_layout.addWidget(folder_btn)
         
-        # Progress tracking
-        self.progress_label = QLabel("No papers loaded")
-        self.progress_label.setFont(QFont("Courier New", 10, QFont.Bold))
-        self.progress_bar = QProgressBar()
-        header_layout.addWidget(self.progress_label)
-        header_layout.addWidget(self.progress_bar)
+        # Animated processing indicator (hidden by default, shown during AI analysis)
+        self.processing_indicator = QLabel("")
+        self.processing_indicator.setFont(QFont("Arial", 14))
+        self.processing_indicator.setStyleSheet("QLabel { color: #2196F3; padding: 8px; }")
+        self.processing_indicator.setVisible(False)
+        header_layout.addWidget(self.processing_indicator)
+        
+        # Animation timer for processing indicator
+        self.processing_timer = QTimer()
+        self.processing_timer.timeout.connect(self.update_processing_animation)
+        self.animation_frame = 0
+        
+        # Spacer to keep elements balanced
+        header_layout.addStretch()
         
         layout.addLayout(header_layout)
         
@@ -1388,7 +1442,7 @@ class EnhancedTrainingInterface(QMainWindow):
 
         
         # Quick text extraction area
-        text_extract_group = QGroupBox("📝 Selected Text for Evidence")
+        text_extract_group = QGroupBox("Selected Text for Evidence")
         text_extract_layout = QVBoxLayout(text_extract_group)
         text_extract_layout.setContentsMargins(2, 2, 2, 2)  # Minimal margins
         text_extract_layout.setSpacing(1)  # Very tight spacing
@@ -1435,7 +1489,7 @@ class EnhancedTrainingInterface(QMainWindow):
         right_layout.setSpacing(1)  # Very tight spacing
         
         # AI Pre-screening section
-        prescreening_group = QGroupBox("🔍 AI Pre-screening Analysis")
+        prescreening_group = QGroupBox("AI Pre-screening Analysis")
         prescreening_layout = QVBoxLayout(prescreening_group)
         prescreening_layout.setContentsMargins(2, 2, 2, 2)  # Minimal margins
         prescreening_layout.setSpacing(1)  # Very tight spacing
@@ -1447,6 +1501,13 @@ class EnhancedTrainingInterface(QMainWindow):
         analysis_btn_layout.addWidget(self.initial_analysis_btn)
         analysis_btn_layout.addStretch()  # Make button wider by removing text and adding stretch
         prescreening_layout.addLayout(analysis_btn_layout)
+        
+        # Progress bar for AI analysis
+        self.analysis_progress = QProgressBar()
+        self.analysis_progress.setMaximum(100)
+        self.analysis_progress.setVisible(False)  # Hidden by default
+        self.analysis_progress.setTextVisible(True)
+        prescreening_layout.addWidget(self.analysis_progress)
         
         right_layout.addWidget(prescreening_group)
         
@@ -1479,6 +1540,10 @@ class EnhancedTrainingInterface(QMainWindow):
         
         # Evidence collection (simplified to two tabs)
         self.evidence_tabs = QTabWidget()
+        # Fix tab label truncation - ensure tabs expand to fit text
+        self.evidence_tabs.tabBar().setExpanding(True)
+        self.evidence_tabs.setTabBarAutoHide(False)
+        self.evidence_tabs.tabBar().setUsesScrollButtons(False)
         
         # Human Input tab (editable)
         human_tab = QWidget()
@@ -1677,38 +1742,35 @@ class EnhancedTrainingInterface(QMainWindow):
             self.statusBar().showMessage(f"Error loading folder: {e}")
             
     def update_progress(self):
-        """Update progress indicators"""
+        """Update the processed papers counter at bottom of window"""
         if not self.papers_list:
-            self.progress_label.setText("No papers loaded")
-            self.progress_bar.setValue(0)
             self.papers_completed.setText("0 papers labeled")
             return
             
-        current = self.current_paper_index + 1
-        total = len(self.papers_list)
-        
-        # Count processed papers with status indicators
+        # Count processed papers
         processed_count = 0
-        current_filename = self.papers_list[self.current_paper_index] if self.papers_list else ""
-        status_indicator = "🔴"  # Red dot for unprocessed
-        
         for filename in self.papers_list:
             if filename in self.paper_states and self.paper_states[filename].get('uploaded', False):
                 processed_count += 1
         
-        # Determine current paper status
-        if current_filename in self.paper_states:
-            if self.paper_states[current_filename].get('uploaded', False):
-                status_indicator = "🟢"  # Green dot for uploaded/completed
-            elif (self.paper_states[current_filename].get('human_text') or 
-                  self.paper_states[current_filename].get('ai_text') or
-                  self.paper_states[current_filename].get('decision')):
-                status_indicator = "🟡"  # Yellow dot for in progress
+        total = len(self.papers_list)
+        self.papers_completed.setText(f"{processed_count} of {total} papers processed")
         
-        self.progress_label.setText(f"{status_indicator} Paper {current} of {total} | Processed: {processed_count}")
-        self.progress_bar.setMaximum(total)
-        self.progress_bar.setValue(current)
-        self.papers_completed.setText(f"{processed_count} papers processed")
+    def update_processing_animation(self):
+        """Update the animated processing indicator"""
+        # Cycle through different spinner animations
+        spinners = [
+            "⚙️ ⚙️ ⚙️",
+            " ⚙️ ⚙️",
+            "  ⚙️",
+            "   ⚙️",
+            "    ⚙️",
+            "   ⚙️",
+            "  ⚙️",
+            " ⚙️ ⚙️",
+        ]
+        self.processing_indicator.setText(spinners[self.animation_frame % len(spinners)])
+        self.animation_frame += 1
         
     def open_pdf_externally(self):
         """Open the current PDF in the system's default PDF viewer"""
@@ -1745,22 +1807,8 @@ class EnhancedTrainingInterface(QMainWindow):
         if not success:
             return
         
-        # Run AI detection for the analysis panel
-        try:
-            ai_result = extract_positionality(filepath)
-            score = ai_result.get("positionality_score", 0.0)
-            tests = ai_result.get("positionality_tests", [])
-            
-            ai_summary = f"🤖 AI Analysis:\n"
-            ai_summary += f"Score: {score:.3f} | "
-            ai_summary += f"Prediction: {'POSITIVE' if score > 0.2 else 'NEGATIVE'}\n"
-            ai_summary += f"Patterns: {', '.join(tests) if tests else 'None detected'}"
-            
-            # AI results are now shown in the AI Input tab instead
-            
-        except Exception as e:
-            # AI detection error handling - no longer showing in separate widget
-            pass
+        # NOTE: Removed automatic AI analysis here - it blocks the UI thread!
+        # Users should click "Run AI Analysis" button to run analysis asynchronously
         
         # Clear previous inputs
         self.clear_inputs()
@@ -2062,10 +2110,13 @@ class EnhancedTrainingInterface(QMainWindow):
             QMessageBox.warning(self, "GA Name Required", "Please enter your name before recording your decision.")
             self.ga_name_input.setFocus()
             return
+        
+        print(f"DEBUG: GA Name from input field: '{ga_name}'")  # Debug logging
             
         try:
             # Process training session (save locally + upload to GitHub)
             result = self.github_uploader.process_training_session(self.training_data, ga_name)
+            print(f"DEBUG: Uploader result: {result}")  # Debug logging
             
             if result['success']:
                 # Mark current paper as uploaded
@@ -2104,7 +2155,9 @@ class EnhancedTrainingInterface(QMainWindow):
             original_mouse_release(event)
             # Update extracted text area when selection is made
             if self.pdf_viewer.pdf_label.selected_text:
-                self.extracted_text.setPlainText(self.pdf_viewer.pdf_label.selected_text)
+                # Clean the text before displaying
+                cleaned = clean_extracted_text(self.pdf_viewer.pdf_label.selected_text)
+                self.extracted_text.setPlainText(cleaned)
                 
         self.pdf_viewer.pdf_label.mouseReleaseEvent = enhanced_mouse_release
         
@@ -2114,11 +2167,13 @@ class EnhancedTrainingInterface(QMainWindow):
         def enhanced_copy():
             original_copy()
             if self.pdf_viewer.pdf_label.selected_text:
+                # Clean the text before adding
+                cleaned = clean_extracted_text(self.pdf_viewer.pdf_label.selected_text)
                 current_text = self.extracted_text.toPlainText()
-                if current_text and current_text != self.pdf_viewer.pdf_label.selected_text:
-                    new_text = current_text + "\n\n" + self.pdf_viewer.pdf_label.selected_text
+                if current_text and current_text != cleaned:
+                    new_text = current_text + "\n\n" + cleaned
                 else:
-                    new_text = self.pdf_viewer.pdf_label.selected_text
+                    new_text = cleaned
                 self.extracted_text.setPlainText(new_text)
                 
         self.pdf_viewer.pdf_label.copy_selected_text = enhanced_copy
@@ -2265,6 +2320,9 @@ class EnhancedTrainingInterface(QMainWindow):
         """Copy extracted text to Human Input tab and switch focus"""
         text = self.extracted_text.toPlainText().strip()
         if text:
+            # Clean up the text before copying
+            text = clean_extracted_text(text)
+            
             current_evidence = self.human_input.toPlainText().strip()
             if current_evidence:
                 new_evidence = current_evidence + "\n\n" + text
@@ -2279,17 +2337,17 @@ class EnhancedTrainingInterface(QMainWindow):
             self.statusBar().showMessage("Text copied to Human Input", 2000)
     
     def run_initial_analysis(self):
-        """Run AI analysis on current paper and display findings"""
+        """Run AI analysis on current paper and display findings asynchronously"""
         if not self.papers_list or self.current_paper_index >= len(self.papers_list):
             QMessageBox.information(self, "No Paper", "No paper selected for analysis.")
             return
-        
+
         # Check for OpenAI API key first and provide helpful feedback
         try:
             from configuration_dialog import load_configuration
             config = load_configuration()
             api_key = config.get('openai_api_key', '').strip()
-            
+
             if not api_key:
                 QMessageBox.information(self, "OpenAI Setup Required", 
                                       "🔑 OpenAI API key not found!\n\n"
@@ -2305,43 +2363,83 @@ class EnhancedTrainingInterface(QMainWindow):
                 return
         except Exception as e:
             print(f"Could not check API key configuration: {e}")
-        
+
         current_paper = self.papers_list[self.current_paper_index]
         pdf_path = Path(self.pdf_folder) / current_paper
+
+        # Show progress bar and update status
+        self.analysis_progress.setVisible(True)
+        self.analysis_progress.setValue(0)
         
-        self.statusBar().showMessage("🔄 Analyzing...")
+        # Start animated processing indicator
+        self.processing_indicator.setVisible(True)
+        self.animation_frame = 0
+        self.processing_timer.start(200)  # Update every 200ms
+        
+        self.statusBar().showMessage("🔄 Starting analysis...")
         self.initial_analysis_btn.setEnabled(False)
         QApplication.processEvents()  # Update UI
-        
-        try:
-            # Run our enhanced detection
-            result = extract_positionality(str(pdf_path))
+
+        # Run analysis in a background thread using QThread
+        class AnalysisWorker(QThread):
+            finished_signal = Signal(dict, str)
+            error_signal = Signal(Exception)
+            progress_signal = Signal(int, str)  # progress value, status message
+
+            def __init__(self, pdf_path, paper_name):
+                super().__init__()
+                self.pdf_path = pdf_path
+                self.paper_name = paper_name
+
+            def run(self):
+                try:
+                    self.progress_signal.emit(10, "📄 Loading PDF file...")
+                    
+                    # Define progress callback
+                    def progress_cb(pct, msg):
+                        self.progress_signal.emit(pct, msg)
+                    
+                    # Call with progress callback
+                    result = extract_positionality(str(self.pdf_path), progress_callback=progress_cb)
+                    
+                    self.progress_signal.emit(100, "✅ Analysis complete!")
+                    self.finished_signal.emit(result, self.paper_name)
+                except Exception as e:
+                    self.error_signal.emit(e)
+
+        def on_progress_update(value, message):
+            self.analysis_progress.setValue(value)
+            self.statusBar().showMessage(message)
+            QApplication.processEvents()
+
+        def on_analysis_finished(result, paper_name):
+            # Stop animation
+            self.processing_timer.stop()
+            self.processing_indicator.setVisible(False)
             
-            # Format findings for display
-            findings_text = self.format_ai_findings(result, current_paper)
+            self.analysis_progress.setVisible(False)
+            findings_text = self.format_ai_findings(result, paper_name)
             self.ai_input.setHtml(findings_text)
-            
-            # Switch to AI Input tab
-            self.evidence_tabs.setCurrentIndex(1)  # AI Input is index 1
-            
-            # Update status 
+            self.evidence_tabs.setCurrentIndex(1)
             if result['positionality_score'] > 0.3:
-                self.statusBar().showMessage(f"Found {len(result['positionality_snippets'])} potential evidence excerpts")
-                # Store findings for reference
+                self.statusBar().showMessage(f"✅ Found {len(result['positionality_snippets'])} potential evidence excerpts", 5000)
                 self.current_ai_findings = result
             else:
-                self.statusBar().showMessage("No strong positionality indicators found")
+                self.statusBar().showMessage("✅ No strong positionality indicators found", 5000)
                 self.current_ai_findings = None
-                
-        except Exception as e:
+            self.initial_analysis_btn.setEnabled(True)
+
+        def on_analysis_error(e):
+            # Stop animation
+            self.processing_timer.stop()
+            self.processing_indicator.setVisible(False)
+            
+            self.analysis_progress.setVisible(False)
             error_msg = str(e).lower()
-            # Only show API key error for actual authentication failures
-            # Don't trigger on generic mentions of "API key" in other errors
             if ("401" in error_msg and "unauthorized" in error_msg) or \
                "invalid_api_key" in error_msg or \
                "authentication" in error_msg or \
                "incorrect api key" in error_msg:
-                # Handle API key issues with a popup
                 QMessageBox.warning(self, "API Key Error", 
                                   "🔑 OpenAI API Key Error!\n\n"
                                   "Your API key appears to be invalid or expired.\n\n"
@@ -2350,34 +2448,33 @@ class EnhancedTrainingInterface(QMainWindow):
                                   "• API key has sufficient credits\n"
                                   "• API key is not expired\n\n"
                                   "💡 You can still analyze papers manually!")
-                
-                # Also show in AI input area for reference
                 self.statusBar().showMessage("AI analysis requires valid OpenAI API key - use Configuration menu")
                 self.ai_input.setHtml("""
                 <b><font color="#FF9800">🔑 AI Analysis Requires Setup</font></b><br><br>
-                
                 <p>To use AI-powered analysis, you need to configure an OpenAI API key:</p>
-                
                 <ol>
-                <li><b>Get an API Key:</b> Visit <a href="https://platform.openai.com/account/api-keys">platform.openai.com/account/api-keys</a></li>
+                <li><b>Get an API Key:</b> Visit <a href=\"https://platform.openai.com/account/api-keys\">platform.openai.com/account/api-keys</a></li>
                 <li><b>Configure in Research Buddy:</b> Use the menu: <b>Configuration → Settings</b></li>
                 <li><b>Alternative:</b> You can still analyze papers manually using the PDF viewer and Human Input tab</li>
                 </ol>
-                
                 <p><b>Manual Analysis:</b><br>
                 • Read the PDF carefully<br>
                 • Look for first-person statements about the author's background, position, or bias<br>
                 • Select text in the PDF to copy quotes as evidence<br>
                 • Make your judgment using the radio buttons</p>
-                
                 <p><i>Research Buddy works great for manual analysis even without AI!</i></p>
                 """)
             else:
-                self.statusBar().showMessage(f"Analysis failed: {str(e)}")
+                self.statusBar().showMessage(f"❌ Analysis failed: {str(e)}")
                 self.ai_input.setPlainText(f"Error running analysis: {e}")
-            
-        finally:
             self.initial_analysis_btn.setEnabled(True)
+
+        # Create and start worker thread
+        self.analysis_worker = AnalysisWorker(pdf_path, current_paper)
+        self.analysis_worker.finished_signal.connect(on_analysis_finished)
+        self.analysis_worker.error_signal.connect(on_analysis_error)
+        self.analysis_worker.progress_signal.connect(on_progress_update)
+        self.analysis_worker.start()
     
     def format_ai_findings(self, result, paper_name):
         """Format AI detection results as clean, professional plain text"""
@@ -2409,8 +2506,10 @@ class EnhancedTrainingInterface(QMainWindow):
         if snippets:
             text += "<b><font color=\"#4CAF50\">Evidence Excerpts Found:</font></b>\n\n"
             for i, (pattern, excerpt) in enumerate(snippets.items(), 1):
-                # Clean up and intelligently truncate text
-                clean_text = excerpt.strip()
+                # Clean up text: remove extra spaces, quotes, and format properly
+                clean_text = clean_extracted_text(excerpt)
+                
+                # Intelligently truncate if too long
                 if len(clean_text) > 300:
                     # Find a good breaking point (sentence end)
                     truncate_pos = clean_text.find('.', 250)
@@ -2421,9 +2520,10 @@ class EnhancedTrainingInterface(QMainWindow):
                 # Estimate location based on content
                 location = self.estimate_location_from_text(clean_text)
                 
+                # Display without redundant quotes (text is already clearly shown as a quote)
                 text += f"""<b>#{i} - {pattern.replace('_', ' ').title()}</b><br>
 <i>Likely Location: {location}</i><br>
-"{clean_text}"<br><br><br>"""
+{clean_text}<br><br><br>"""
         else:
             text += "<i><font color=\"#856404\">No specific evidence excerpts extracted. Consider manual review of the full paper.</font></i><br><br>"
         

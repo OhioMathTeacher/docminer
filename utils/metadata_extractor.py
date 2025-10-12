@@ -1,30 +1,45 @@
 import os
-import openai
+from openai import OpenAI, AuthenticationError, APIError
 
-# Try multiple environment variable names for API key
-api_key = (os.getenv("RESEARCH_BUDDY_OPENAI_API_KEY") or 
-          os.getenv("OPENAI_API_KEY") or "")
+# Initialize global client variable (will be configured on first use)
+_openai_client = None
 
-if api_key:
-    openai.api_key = api_key
+def get_openai_client():
+    """Get configured OpenAI client with correct API endpoint."""
+    global _openai_client
     
-    # Auto-detect API provider based on key prefix and configure endpoint
+    # Always reload from environment in case config changed
+    api_key = (os.getenv("RESEARCH_BUDDY_OPENAI_API_KEY") or 
+              os.getenv("OPENAI_API_KEY") or "")
+    
+    if not api_key:
+        print(" No OpenAI API key found. AI analysis will be disabled.")
+        return None
+    
+    # Auto-detect API provider based on key prefix
     if api_key.startswith("sk-or-"):
         # OpenRouter key detected
-        openai.api_base = "https://openrouter.ai/api/v1"
-        print("✅ Detected OpenRouter API key - using OpenRouter endpoint")
-    elif api_key.startswith(("sk-", "sk-proj-")):
+        base_url = "https://openrouter.ai/api/v1"
+        provider = "OpenRouter"
+    elif api_key.startswith("sk-proj-"):
+        # OpenAI project key
+        base_url = "https://api.openai.com/v1"
+        provider = "OpenAI (project key)"
+    elif api_key.startswith("sk-"):
         # Standard OpenAI key
-        openai.api_base = "https://api.openai.com/v1"
-        print("✅ Detected OpenAI API key - using OpenAI endpoint")
+        base_url = "https://api.openai.com/v1"
+        provider = "OpenAI"
     else:
-        # Unknown key format - try OpenAI as default
-        openai.api_base = "https://api.openai.com/v1"
-        print(f"⚠️  Unknown API key format (starts with {api_key[:10]}...) - defaulting to OpenAI endpoint")
-else:
-    print("⚠️  No OpenAI API key found. AI analysis will be disabled.")
-    openai.api_key = None
-    openai.api_key = None
+        # Unknown key format - default to OpenAI
+        base_url = "https://api.openai.com/v1"
+        provider = f"Unknown (defaulting to OpenAI)"
+    
+    # Create new client with correct endpoint
+    _openai_client = OpenAI(api_key=api_key, base_url=base_url)
+    print(f"Configured OpenAI client for {provider} - endpoint: {base_url}")
+    
+    return _openai_client
+
 import fitz  # PyMuPDF
 import re
 import pdfplumber
@@ -146,208 +161,394 @@ def datacite_lookup(doi):
         print(f"DataCite lookup returned invalid JSON for {doi}")
     return {}
 
-import re
-import pdfplumber
-import openai  # make sure your key is configured
-
-def extract_positionality(pdf_path):
+def extract_positionality(pdf_path, progress_callback=None):
     """
-    Extract positionality/reflexivity statements via enhanced regex + AI fallbacks.
-    Uses comprehensive pattern matching with AI enhancement when available.
+    Deep contextual AI analysis of positionality in academic papers.
+    Uses multi-pass semantic analysis for thorough understanding.
     Returns dict with keys: positionality_tests (list), positionality_snippets (dict), positionality_score (float).
+    
+    This analysis is designed to take 30-60 seconds for thorough semantic understanding
+    that goes beyond simple pattern matching. It provides value students can't easily replicate.
+    
+    Args:
+        pdf_path: Path to the PDF file
+        progress_callback: Optional callable(progress_pct, message) for progress updates
     """
     
-    # Refresh API key in case it was set by configuration dialog
-    api_key = (os.getenv("RESEARCH_BUDDY_OPENAI_API_KEY") or 
-              os.getenv("OPENAI_API_KEY") or "")
+    def report_progress(pct, msg):
+        if progress_callback:
+            progress_callback(pct, msg)
     
-    if api_key and api_key != openai.api_key:
-        openai.api_key = api_key
-        
-        # Auto-detect API provider and configure endpoint
-        if api_key.startswith("sk-or-"):
-            openai.api_base = "https://openrouter.ai/api/v1"
-            print(f"✅ Updated API key from environment - using OpenRouter")
-        elif api_key.startswith(("sk-", "sk-proj-")):
-            openai.api_base = "https://api.openai.com/v1"
-            print(f"✅ Updated API key from environment - using OpenAI")
-        else:
-            openai.api_base = "https://api.openai.com/v1"
-            print(f"✅ Updated API key from environment - defaulting to OpenAI")
+    # Get configured OpenAI client (will reload from environment)
+    report_progress(5, "Initializing AI analysis system...")
+    client = get_openai_client()
+    
+    if not client:
+        # Fallback to basic regex if no AI available
+        return _fallback_regex_analysis(pdf_path, report_progress)
     
     matched = []
     snippets = {}
     score = 0.0
-
-    # 1) Header regex tests (first page)
+    
+    # Extract full PDF text for comprehensive analysis
+    report_progress(10, "Reading entire document...")
     try:
         with pdfplumber.open(pdf_path) as pdf:
-            pages = pdf.pages
-            header_text = pages[0].extract_text() or ""
-    except Exception:
-        header_text = ""
-
-    tests = {
-        # Core positionality patterns
-        "explicit_positionality":   re.compile(r"\b(?:My|Our) positionality\b", re.IGNORECASE),
-        "positionality_term":       re.compile(r"\bpositionalit\w*\b", re.IGNORECASE),
-        
-        # First-person reflexive statements
-        "first_person_reflexivity": re.compile(r"\bI\s+(?:reflect|acknowledge|consider|recognize|admit|confess|must acknowledge|should note)\b", re.IGNORECASE),
-        "researcher_positioning":   re.compile(r"\bI,?\s*as (?:a |the )?(?:researcher|scholar|author),", re.IGNORECASE),
-        "identity_disclosure":      re.compile(r"\bAs a (?:woman|man|Black|White|Latina?|Asian|Indigenous|queer|trans|disabled|working.class)[^.]{0,50}(?:researcher|scholar|I)\b", re.IGNORECASE),
-        
-        # Reflexive awareness patterns  
-        "reflexive_awareness":      re.compile(r"\b(?:acknowledge|recognize|aware|conscious) (?:that )?(?:my|our) [^.]{10,60}(?:influence|affect|shape|bias|perspective|position)", re.IGNORECASE),
-        "background_influence":     re.compile(r"\b(?:My|Our) (?:background|experience|identity|perspective) [^.]{10,80}(?:influence|shape|inform|affect)", re.IGNORECASE),
-        
-        # Positioning language
-        "positioned_researcher":    re.compile(r"\b(?:positioned|situated) as [^.]{10,60}(?:researcher|scholar)", re.IGNORECASE),
-        "social_location":          re.compile(r"\bsocial location[^.]{0,50}", re.IGNORECASE),
-        "standpoint_perspective":   re.compile(r"\b(?:standpoint|situated knowledge|insider perspective|outsider status)[^.]{0,30}", re.IGNORECASE),
-        
-        # Methodological reflexivity
-        "methodological_reflexivity": re.compile(r"\b(?:reflexiv|positional)[^.]{0,30}(?:methodology|approach|stance)", re.IGNORECASE),
-        "disclosure_statement":     re.compile(r"\b(?:I|We) (?:bring|carry|hold) [^.]{10,60}(?:perspective|lens|experience|bias)", re.IGNORECASE),
-        
-        # Bias acknowledgment
-        "bias_acknowledgment":      re.compile(r"\b(?:my|our) (?:own )?(?:bias|biases|assumptions|preconceptions)[^.]{0,50}", re.IGNORECASE),
-        "subjective_awareness":     re.compile(r"\b(?:subjective|partial|limited) (?:perspective|view|understanding)[^.]{0,30}", re.IGNORECASE),
-
-        # Enhanced academic reflexivity patterns (Research Buddy 2.0)
-        "authorial_positioning":    re.compile(r"\b(?:we|I)\s+(?:articulate|position|locate|situate)\s+(?:our|my)\s+(?:own\s+)?(?:cultural\s+)?(?:location|position|positionality|perspective)", re.IGNORECASE),
-        "research_context":         re.compile(r"\b(?:this\s+paper|this\s+research|my\s+fieldwork|our\s+study)\s+(?:has\s+)?(?:developed|emerged|stems|arises)\s+(?:out\s+of|from)\s+(?:my|our)\s+(?:experiences?|background|work)", re.IGNORECASE),
-        "positional_influence":     re.compile(r"\b(?:our|my)\s+(?:position|positionality|background|experience)\s+(?:may\s+|might\s+|could\s+|will\s+)?(?:influence|affect|shape|inform)\s+(?:curriculum|research|interpretation|analysis)", re.IGNORECASE),
-        "fieldwork_reflexivity":    re.compile(r"\b(?:I|we)\s+(?:became\s+aware|observed|recognized|realized)\s+that\s+(?:my|our)\s+(?:position|presence|background|identity)", re.IGNORECASE),
-        "assumption_acknowledgment": re.compile(r"\b(?:we|I)\s+(?:make|hold|carry|bring)\s+(?:assumptions|presuppositions|biases)\s+(?:based\s+on|about|regarding)\s+(?:our|my)\s+(?:position|background|experience)", re.IGNORECASE),
-        "contextual_positioning":   re.compile(r"\b(?:it\s+is\s+)?from\s+this\s+(?:context|position|perspective|standpoint)\s+that\s+(?:we|I)\s+(?:position|approach|understand|view)", re.IGNORECASE),
-        "political_positioning":    re.compile(r"\b(?:our|my)\s+position\s+is\s+(?:a\s+)?(?:political|critical|theoretical)\s+(?:point\s+of\s+departure|stance|perspective)", re.IGNORECASE),
-        "experiential_grounding":   re.compile(r"\bthrough\s+(?:discussion\s+of\s+)?(?:my|our)\s+(?:fieldwork\s+|research\s+|personal\s+)?experiences?\s+(?:in|with|conducting|as)", re.IGNORECASE),
-        "reflexive_observation":    re.compile(r"\b(?:as\s+I|while\s+I|when\s+I|however,?\s+I)\s+(?:got\s+to\s+know|spent\s+time|interacted|worked)\s+.{0,30}\s+(?:I\s+observed|I\s+became\s+aware|I\s+realized)", re.IGNORECASE),
-        "researcher_identity":      re.compile(r"\b(?:as\s+individuals|as\s+researchers|as\s+authors),?\s+(?:we|I)\s+(?:make|hold|carry|bring|acknowledge)", re.IGNORECASE),
-
-    }
-
-    for name, pat in tests.items():
-        m = pat.search(header_text)
-        if m:
-            matched.append(name)
-            snippets[name] = m.group(0).strip()
-            break
-
-    # 2) GPT-fallback on header if no regex hit
-    if not matched and header_text and openai.api_key:
-        try:
-            snippet = header_text[:500]
-            resp = openai.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a specialist in academic research methods. "
-                            "Find sentences where the author explicitly uses first‑person language "
-                            "to reflect on their own positionality or biases. "
-                            "If none exists in the passage, reply 'NONE'."
-                        )
-                    },
-                    {
-                        "role": "user",
-                        "content": (
-                            "Passage:\n\n" + header_text[:500]
-                        )
-                    }
-                ],
-                temperature=0.0
-            )
-
-            answer = resp.choices[0].message.content.strip()
-            if answer.upper() != "NONE":
-                matched.append("gpt_header")
-                snippets["gpt_header"] = answer
-        except (openai.AuthenticationError, openai.APIError) as e:
-            print(f"OpenAI API error (header analysis): {e}")
-            # Continue without GPT analysis
-
-    # 3) Tail-end regex scan (last 2 pages)
-    try:
-        with pdfplumber.open(pdf_path) as pdf:
-            tail_text = "\n".join(p.extract_text() or "" for p in pdf.pages[-2:])
-    except Exception:
-        tail_text = ""
-
-    tail_hits = [name for name, pat in tests.items() if pat.search(tail_text)]
-    if tail_hits:
-        for name in tail_hits:
-            if name not in matched:
-                matched.append(name)
-            snippets.setdefault("tail_"+name, tail_text[:200] + "...")
-        score = max(score, 0.5)
-
-    # 4) Baseline score
-    if score == 0.0:
-        score = len(matched) / (len(tests) + 2)
-
-    # 5) Conditional full-text GPT-4 pass
-    try:
-        with pdfplumber.open(pdf_path) as pdf:
-            full_text = "\n".join(p.extract_text() or "" for p in pdf.pages)
-            page_count = len(pdf.pages)
-    except Exception:
-        full_text = ""
-        page_count = 0
-
-    # after computing `score` and loading full_text…
-
-    # only invoke full‐text GPT if:
-    # 1) there was some regex/tail signal (score ≥ 0.1)
-    # 2) and the PDF actually has a Discussion/Implications/Conclusion heading
-    needs_ai = (
-        score >= 0.1
-        and bool(re.search(r"\b(Discussion|Implications|Conclusion)\b",
-                           full_text,
-                           re.IGNORECASE))
-    )
-
-    if needs_ai:
-        m = re.search(r"(Discussion|Implications|Conclusion)", full_text, re.IGNORECASE)
-        tail = full_text[m.start():] if m else full_text
-        words = tail.split()
-        chunk_size = 500
-        for i in range(0, len(words), chunk_size):
-            chunk = " ".join(words[i:i+chunk_size])
-            resp = openai.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a specialist in academic research methods. "
-                            "Identify any first‑person (‘I’ or ‘we’) statements in this passage "
-                            "where the author Reflects on their own positionality or standpoint. "
-                            "If none exists, reply 'NO'."
-                        )
-                    },
-                    {
-                        "role": "user",
-                        "content": "Passage:\n\n" + chunk
-                    }
-                ],
-                temperature=0
-            )
-            answer = resp.choices[0].message.content.strip()
-            if answer.upper().startswith("YES"):
-                matched.append("gpt_full_text")
-                snippet = answer.splitlines()[1] if "\n" in answer else answer
-                snippets["gpt_full_text"] = snippet
-                score = 1.0
-                break
-
+            # Get text from all pages with section markers
+            sections = {}
+            full_text = []
+            
+            for i, page in enumerate(pdf.pages):
+                page_text = page.extract_text() or ""
+                full_text.append(page_text)
+                
+                # Identify key sections
+                if i == 0:
+                    sections['introduction'] = page_text[:2000]
+                elif i < 3:
+                    if not sections.get('introduction'):
+                        sections['introduction'] = sections.get('introduction', '') + '\n' + page_text
+                
+                # Look for methodology/methods section
+                if re.search(r'\b(Methods?|Methodology)\b', page_text, re.IGNORECASE):
+                    sections['methods'] = page_text[:2000]
+                
+            # Get conclusion (last 2 pages)
+            if len(pdf.pages) >= 2:
+                sections['conclusion'] = '\n'.join(p.extract_text() or "" for p in pdf.pages[-2:])
+            
+            full_text_str = '\n'.join(full_text)
+            total_words = len(full_text_str.split())
+            
+    except Exception as e:
+        print(f"Error reading PDF: {e}")
+        return {'positionality_tests': [], 'positionality_snippets': {}, 'positionality_score': 0.0}
+    
+    # PASS 1: Explicit positionality detection (15-30%)
+    report_progress(15, "Pass 1/4: Scanning for explicit positionality statements...")
+    explicit_result = _analyze_explicit_positionality(client, sections.get('introduction', ''), 
+                                                       sections.get('methods', ''))
+    if explicit_result['found']:
+        matched.append('explicit_positionality')
+        snippets['explicit'] = explicit_result['evidence']
+        score = max(score, 0.9)
+        report_progress(30, "Found explicit positionality statement!")
+    
+    # PASS 2: Reflexive awareness detection (30-45%)
+    report_progress(30, "Pass 2/4: Analyzing for reflexive awareness and researcher positioning...")
+    reflexive_result = _analyze_reflexive_awareness(client, sections.get('methods', ''), 
+                                                     sections.get('conclusion', ''))
+    if reflexive_result['found']:
+        matched.append('reflexive_awareness')
+        snippets['reflexive'] = reflexive_result['evidence']
+        score = max(score, 0.7)
+        report_progress(45, "Found reflexive awareness!")
+    
+    # PASS 3: Subtle/implicit positionality (45-65%)
+    if score < 0.5:  # Only do deep scan if we haven't found strong signals yet
+        report_progress(45, "Pass 3/4: Deep contextual analysis for subtle positionality...")
+        subtle_result = _analyze_subtle_positionality(client, full_text_str, total_words)
+        if subtle_result['found']:
+            matched.append('subtle_positionality')
+            snippets['subtle'] = subtle_result['evidence']
+            score = max(score, 0.5)
+            report_progress(65, "Found subtle positionality indicators!")
+    else:
+        report_progress(65, "Skipping subtle analysis - strong evidence already found")
+    
+    # PASS 4: Final comprehensive assessment (65-90%)
+    report_progress(70, "Pass 4/4: Comprehensive semantic assessment...")
+    assessment = _final_comprehensive_assessment(client, sections, matched, snippets)
+    
+    # Combine all findings
+    final_snippets = {**snippets, **assessment.get('additional_evidence', {})}
+    final_score = assessment.get('confidence_score', score)
+    final_tests = matched + assessment.get('additional_patterns', [])
+    
+    report_progress(95, "Generating detailed analysis report...")
+    
+    # Generate human-readable explanation
+    explanation = _generate_explanation(final_tests, final_snippets, final_score)
+    final_snippets['ai_explanation'] = explanation
+    
+    report_progress(100, "Deep analysis complete!")
+    
     return {
-        "positionality_tests": matched,
-        "positionality_snippets": snippets,
-        "positionality_score": score
+        "positionality_tests": final_tests,
+        "positionality_snippets": final_snippets,
+        "positionality_score": final_score
     }
+
+
+def _fallback_regex_analysis(pdf_path, report_progress):
+    """Fallback regex-based analysis when AI is not available"""
+    report_progress(20, "AI unavailable - using pattern matching...")
+    
+    # Quick regex scan as fallback
+    matched = []
+    snippets = {}
+    
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            first_page = pdf.pages[0].extract_text() or ""
+            
+            patterns = {
+                "positionality_term": r"\bpositionalit\w*\b",
+                "first_person_reflexivity": r"\bI\s+(?:acknowledge|recognize|reflect)",
+            }
+            
+            for name, pattern in patterns.items():
+                if re.search(pattern, first_page, re.IGNORECASE):
+                    matched.append(name)
+                    snippets[name] = "Pattern match found (AI analysis unavailable for details)"
+                    break
+    except Exception:
+        pass
+    
+    report_progress(100, "Basic analysis complete")
+    return {
+        'positionality_tests': matched,
+        'positionality_snippets': snippets,
+        'positionality_score': 0.3 if matched else 0.0
+    }
+
+
+def _analyze_explicit_positionality(client, intro_text, methods_text):
+    """Pass 1: Look for explicit positionality statements"""
+    try:
+        combined_text = (intro_text or '')[:3000] + '\n\n' + (methods_text or '')[:3000]
+        
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are an expert in qualitative research methodology and reflexivity in academic writing.
+
+Your task: Identify EXPLICIT positionality statements where the author directly discusses their own identity, 
+background, or position in relation to their research.
+
+Look for statements like:
+- "As a [identity] researcher..."
+- "My positionality as..."
+- "I acknowledge my position as..."
+- "Coming from a [background]..."
+
+Return ONLY 'NO' if no explicit statements exist.
+If found, return 'YES' followed by the EXACT quote(s) on new lines."""
+                },
+                {
+                    "role": "user",
+                    "content": f"Analyze this text for explicit positionality statements:\n\n{combined_text}"
+                }
+            ],
+            temperature=0,
+            max_tokens=400,
+            timeout=20.0
+        )
+        
+        answer = resp.choices[0].message.content.strip()
+        if answer.upper().startswith("YES"):
+            evidence = '\n'.join(answer.split('\n')[1:]) if '\n' in answer else answer
+            return {'found': True, 'evidence': evidence}
+        
+    except Exception as e:
+        print(f"Explicit analysis failed: {e}")
+    
+    return {'found': False, 'evidence': ''}
+
+
+def _analyze_reflexive_awareness(client, methods_text, conclusion_text):
+    """Pass 2: Look for reflexive awareness and researcher self-awareness"""
+    try:
+        combined_text = (methods_text or '')[:3000] + '\n\n' + (conclusion_text or '')[:3000]
+        
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are an expert in reflexive research practices.
+
+Your task: Identify instances where the researcher demonstrates reflexive awareness - acknowledging 
+how their background, assumptions, or position may influence the research.
+
+Look for:
+- Acknowledgment of potential bias or influence
+- Discussion of researcher role in the study
+- Recognition of power dynamics
+- Statements about assumptions or limitations due to researcher background
+
+Return 'NO' if not found.
+If found, return 'YES' followed by the most relevant quote(s)."""
+                },
+                {
+                    "role": "user",
+                    "content": f"Analyze for reflexive awareness:\n\n{combined_text}"
+                }
+            ],
+            temperature=0,
+            max_tokens=400,
+            timeout=25.0
+        )
+        
+        answer = resp.choices[0].message.content.strip()
+        if answer.upper().startswith("YES"):
+            evidence = '\n'.join(answer.split('\n')[1:]) if '\n' in answer else answer
+            return {'found': True, 'evidence': evidence}
+        
+    except Exception as e:
+        print(f"Reflexive analysis failed: {e}")
+    
+    return {'found': False, 'evidence': ''}
+
+
+def _analyze_subtle_positionality(client, full_text, total_words):
+    """Pass 3: Deep analysis for subtle/implicit positionality markers"""
+    try:
+        # Analyze in chunks for thoroughness
+        chunk_size = 3000
+        words = full_text.split()[:chunk_size * 3]  # First ~9000 words
+        chunk = ' '.join(words)
+        
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are an expert at identifying subtle positionality markers in academic writing.
+
+Your task: Look for SUBTLE or IMPLICIT indicators that the author is reflecting on their position, 
+even if not explicitly stated as "positionality."
+
+This includes:
+- Descriptions of the author's relationship to the research site/participants
+- Mention of shared identity or difference with research subjects
+- Discussion of insider/outsider status
+- Personal experiences that motivated the research
+- Acknowledgment of privilege, access, or particular perspectives
+
+Return 'NO' if nothing found.
+If found, return 'YES' followed by the relevant passages and WHY they suggest positionality awareness."""
+                },
+                {
+                    "role": "user",
+                    "content": f"Analyze this text for subtle positionality indicators:\n\n{chunk}"
+                }
+            ],
+            temperature=0.1,  # Slightly higher for nuanced interpretation
+            max_tokens=500,
+            timeout=35.0
+        )
+        
+        answer = resp.choices[0].message.content.strip()
+        if answer.upper().startswith("YES"):
+            evidence = '\n'.join(answer.split('\n')[1:]) if '\n' in answer else answer
+            return {'found': True, 'evidence': evidence}
+        
+    except Exception as e:
+        print(f"Subtle analysis failed: {e}")
+    
+    return {'found': False, 'evidence': ''}
+
+
+def _final_comprehensive_assessment(client, sections, matched_patterns, snippets):
+    """Pass 4: Final comprehensive assessment and confidence scoring"""
+    try:
+        # Summarize what we found so far
+        findings_summary = f"Patterns found: {', '.join(matched_patterns) if matched_patterns else 'None'}\n"
+        findings_summary += "Evidence collected:\n"
+        for key, value in snippets.items():
+            findings_summary += f"- {key}: {value[:200]}...\n"
+        
+        intro_sample = sections.get('introduction', '')[:1500]
+        methods_sample = sections.get('methods', '')[:1500]
+        
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are a senior qualitative research methodologist providing final assessment.
+
+Given preliminary findings, provide a comprehensive assessment:
+
+1. Confirm or refine the analysis
+2. Assign a confidence score (0.0-1.0) for positionality presence
+3. Identify any missed indicators
+4. Explain the significance of what was (or wasn't) found
+
+Format your response as:
+CONFIDENCE: [0.0-1.0]
+ASSESSMENT: [Your detailed assessment]
+ADDITIONAL_EVIDENCE: [Any new quotes found, or "None"]"""
+                },
+                {
+                    "role": "user",
+                    "content": f"Preliminary findings:\n{findings_summary}\n\nIntroduction sample:\n{intro_sample}\n\nMethods sample:\n{methods_sample}\n\nProvide final assessment:"
+                }
+            ],
+            temperature=0.2,
+            max_tokens=600,
+            timeout=30.0
+        )
+        
+        answer = resp.choices[0].message.content.strip()
+        
+        # Parse response
+        confidence_match = re.search(r'CONFIDENCE:\s*([0-9.]+)', answer)
+        confidence = float(confidence_match.group(1)) if confidence_match else 0.5
+        
+        assessment_match = re.search(r'ASSESSMENT:\s*(.+?)(?=ADDITIONAL_EVIDENCE:|$)', answer, re.DOTALL)
+        assessment_text = assessment_match.group(1).strip() if assessment_match else answer
+        
+        additional_match = re.search(r'ADDITIONAL_EVIDENCE:\s*(.+)', answer, re.DOTALL)
+        additional_evidence = additional_match.group(1).strip() if additional_match else "None"
+        
+        result = {
+            'confidence_score': confidence,
+            'assessment': assessment_text,
+            'additional_evidence': {'final_assessment': assessment_text},
+            'additional_patterns': []
+        }
+        
+        if additional_evidence and additional_evidence.lower() != "none":
+            result['additional_evidence']['supplemental'] = additional_evidence
+            result['additional_patterns'].append('comprehensive_review')
+        
+        return result
+        
+    except Exception as e:
+        print(f"Final assessment failed: {e}")
+        return {'confidence_score': 0.5, 'additional_evidence': {}, 'additional_patterns': []}
+
+
+def _generate_explanation(patterns, snippets, score):
+    """Generate human-readable explanation of findings"""
+    if score >= 0.7:
+        level = "STRONG positionality detected"
+        emoji = ""
+    elif score >= 0.4:
+        level = "MODERATE positionality indicators found"
+        emoji = ""
+    else:
+        level = "MINIMAL or NO positionality detected"
+        emoji = ""
+    
+    explanation = f"{level} (Confidence: {score:.2f})\n\n"
+    
+    if patterns:
+        explanation += f"Patterns identified: {', '.join(patterns)}\n\n"
+        explanation += "Key evidence:\n"
+        for key, value in list(snippets.items())[:5]:  # Show top 5
+            if key != 'ai_explanation':
+                explanation += f"• {key}: {value[:150]}...\n"
+    else:
+        explanation += "No clear positionality statements were identified in this paper.\n"
+        explanation += "The author does not explicitly discuss their position, background, or potential biases.\n"
+    
+    return explanation
 
 
 def extract_metadata(pdf_path):
