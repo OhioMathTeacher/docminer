@@ -1262,6 +1262,9 @@ class EnhancedTrainingInterface(QMainWindow):
             # Refresh GitHub uploader with new configuration
             self.github_uploader = GitHubReportUploader()
             
+            # Update status indicators
+            self.update_status_indicators()
+            
             # Update button tooltips with new repository info
             self.update_button_states()
             
@@ -1551,9 +1554,100 @@ class EnhancedTrainingInterface(QMainWindow):
         
         layout.addLayout(button_layout)
         
-        # Status bar
-        repo_info = f"📦 Uploads to: {self.github_uploader.owner}/{self.github_uploader.repo}"
-        self.statusBar().showMessage(f"Ready to analyze papers and make decisions. Select a PDF folder to begin. {repo_info}")
+        # Create permanent status bar widgets with clickable indicators
+        self.create_status_bar_widgets()
+        
+        # Initial status message
+        self.update_status_indicators()
+        
+    def create_status_bar_widgets(self):
+        """Create clickable status indicators in the status bar"""
+        from PySide6.QtWidgets import QLabel
+        from PySide6.QtCore import Qt
+        
+        # API Key Status (clickable)
+        self.api_status_label = QLabel()
+        self.api_status_label.setStyleSheet("QLabel { padding: 2px 8px; } QLabel:hover { background-color: #e0e0e0; cursor: pointer; }")
+        self.api_status_label.mousePressEvent = lambda e: self.on_api_status_clicked()
+        self.api_status_label.setToolTip("Click to configure API key")
+        
+        # GitHub Status (clickable)
+        self.github_status_label = QLabel()
+        self.github_status_label.setStyleSheet("QLabel { padding: 2px 8px; } QLabel:hover { background-color: #e0e0e0; cursor: pointer; }")
+        self.github_status_label.mousePressEvent = lambda e: self.on_github_status_clicked()
+        self.github_status_label.setToolTip("Click to configure GitHub")
+        
+        # Add to status bar (permanent widgets)
+        self.statusBar().addPermanentWidget(self.api_status_label)
+        self.statusBar().addPermanentWidget(self.github_status_label)
+        
+    def on_api_status_clicked(self):
+        """Handle click on API status - open config if missing"""
+        from configuration_dialog import load_configuration
+        config = load_configuration()
+        
+        if not config.get("openai_api_key"):
+            # Missing - show info and open config
+            QMessageBox.information(self, "API Key Required", 
+                                   "🔑 No API key configured.\n\n"
+                                   "Opening configuration to set up your API key...")
+            self.show_configuration()
+        else:
+            # Configured - just show details
+            key_preview = config["openai_api_key"][:15] + "..."
+            provider = "OpenRouter" if config["openai_api_key"].startswith("sk-or-") else "OpenAI"
+            QMessageBox.information(self, "API Key Configured", 
+                                   f"✅ {provider} API key is configured\n\n"
+                                   f"Key: {key_preview}\n\n"
+                                   "Click Configuration menu to change.")
+    
+    def on_github_status_clicked(self):
+        """Handle click on GitHub status - open config if missing"""
+        if not (self.github_uploader.owner and self.github_uploader.repo):
+            # Missing - show info and open config
+            QMessageBox.information(self, "GitHub Required", 
+                                   "📦 GitHub not configured.\n\n"
+                                   "Opening configuration to set up GitHub uploads...")
+            self.show_configuration()
+        else:
+            # Configured - show details
+            QMessageBox.information(self, "GitHub Configured", 
+                                   f"✅ GitHub uploads configured\n\n"
+                                   f"Owner: {self.github_uploader.owner}\n"
+                                   f"Repo: {self.github_uploader.repo}\n\n"
+                                   "Click Configuration menu to change.")
+    
+    def update_status_indicators(self):
+        """Update the status bar indicators"""
+        from configuration_dialog import load_configuration
+        config = load_configuration()
+        
+        # API Key Status
+        if config.get("openai_api_key"):
+            provider = "OpenRouter" if config["openai_api_key"].startswith("sk-or-") else "OpenAI"
+            self.api_status_label.setText(f"🔑 {provider} ✅")
+            self.api_status_label.setStyleSheet("QLabel { color: #2e7d32; font-weight: bold; padding: 2px 8px; } QLabel:hover { background-color: #e0e0e0; cursor: pointer; }")
+            self.api_status_label.setToolTip(f"{provider} API key configured - click for details")
+        else:
+            self.api_status_label.setText("🔑 API Key ❌")
+            self.api_status_label.setStyleSheet("QLabel { color: #d32f2f; font-weight: bold; padding: 2px 8px; } QLabel:hover { background-color: #ffebee; cursor: pointer; }")
+            self.api_status_label.setToolTip("⚠️ No API key - CLICK HERE to configure")
+        
+        # GitHub Status
+        if self.github_uploader.owner and self.github_uploader.repo:
+            self.github_status_label.setText(f"📦 GitHub ✅")
+            self.github_status_label.setStyleSheet("QLabel { color: #2e7d32; font-weight: bold; padding: 2px 8px; } QLabel:hover { background-color: #e0e0e0; cursor: pointer; }")
+            self.github_status_label.setToolTip(f"Uploads to {self.github_uploader.owner}/{self.github_uploader.repo} - click for details")
+        else:
+            self.github_status_label.setText("📦 GitHub ❌")
+            self.github_status_label.setStyleSheet("QLabel { color: #d32f2f; font-weight: bold; padding: 2px 8px; } QLabel:hover { background-color: #ffebee; cursor: pointer; }")
+            self.github_status_label.setToolTip("⚠️ GitHub not configured - CLICK HERE to set up")
+        
+        # Update main status message
+        status_msg = "Ready to analyze papers"
+        if self.papers_list:
+            status_msg = f"Loaded {len(self.papers_list)} papers - Ready to analyze"
+        self.statusBar().showMessage(status_msg)
         
     def select_folder(self):
         """Select folder containing PDFs to train on"""

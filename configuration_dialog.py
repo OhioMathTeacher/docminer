@@ -101,7 +101,7 @@ class ConfigurationDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("🔧 Research Buddy Configuration")
-        self.setFixedSize(650, 700)
+        self.setFixedSize(650, 550)  # Reduced height since we removed status section
         
         # Make dialog truly modal - blocks interaction with parent window
         self.setWindowModality(Qt.ApplicationModal)
@@ -128,12 +128,13 @@ class ConfigurationDialog(QDialog):
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        # Security notice
+        # Security notice - simplified and more helpful
         security_notice = QLabel(
-            "🔒 Secure Configuration\n\n"
-            "Enter your API keys and tokens below. They will be set as environment variables "
-            "for this session and can optionally be saved to your shell profile for persistence.\n\n"
-            "Repository settings are saved to your local config file."
+            "🔒 Configuration\n\n"
+            "All settings are saved permanently to your secure config file.\n"
+            "• OpenAI/OpenRouter API key for AI analysis\n"
+            "• GitHub token for uploading training reports\n"
+            "• Repository settings for upload destination"
         )
         security_notice.setWordWrap(True)
         security_notice.setAlignment(Qt.AlignLeft | Qt.AlignTop)
@@ -145,7 +146,7 @@ class ConfigurationDialog(QDialog):
             "padding: 15px; "
             "margin: 10px; "
             "color: #2c3e50; "
-            "font-size: 12px; "
+            "font-size: 11px; "
             "}"
         )
         layout.addWidget(security_notice)
@@ -156,33 +157,16 @@ class ConfigurationDialog(QDialog):
         
         self.openai_key_input = QLineEdit()
         self.openai_key_input.setEchoMode(QLineEdit.Password)
-        self.openai_key_input.setPlaceholderText("sk-your-openai-api-key-here")
-        api_layout.addRow("OpenAI API Key:", self.openai_key_input)
+        self.openai_key_input.setPlaceholderText("sk-... (OpenAI) or sk-or-... (OpenRouter)")
+        api_layout.addRow("API Key:", self.openai_key_input)
         
         self.github_token_input = QLineEdit()
         self.github_token_input.setEchoMode(QLineEdit.Password)
-        self.github_token_input.setPlaceholderText("ghp_your-github-token-here")
+        self.github_token_input.setPlaceholderText("ghp_... (GitHub Personal Access Token)")
         api_layout.addRow("GitHub Token:", self.github_token_input)
         
         api_group.setLayout(api_layout)
         layout.addWidget(api_group)
-        
-        # Environment Variables Status
-        env_group = QGroupBox("� Current Environment Status")
-        env_layout = QFormLayout()
-        
-        self.openai_key_status = QLineEdit()
-        self.openai_key_status.setReadOnly(True)
-        self.openai_key_status.setPlaceholderText("Not currently set")
-        env_layout.addRow("OpenAI API Key:", self.openai_key_status)
-        
-        self.github_token_status = QLineEdit()
-        self.github_token_status.setReadOnly(True)
-        self.github_token_status.setPlaceholderText("Not currently set")
-        env_layout.addRow("GitHub Token:", self.github_token_status)
-        
-        env_group.setLayout(env_layout)
-        layout.addWidget(env_group)
         
         # Repository Configuration
         repo_group = QGroupBox("📦 Repository Configuration")
@@ -242,36 +226,12 @@ class ConfigurationDialog(QDialog):
         
     def load_values(self):
         """Load values into the form"""
-        # Don't load actual API keys into input fields for security
-        # Leave them empty - users can enter new ones if needed
-        
-        # Show environment variable status
-        self.update_environment_status()
-        
-        # Load repository settings
+        # Load repository settings (pre-fill if already configured)
         self.github_owner_input.setText(self.config.get("github_owner", ""))
         self.github_repo_input.setText(self.config.get("github_repo", "research-buddy"))
-    
-    def update_environment_status(self):
-        """Update the environment status display"""
-        openai_key = os.environ.get("RESEARCH_BUDDY_OPENAI_API_KEY", "")
-        if openai_key:
-            # Show that it's set, but don't imply it's validated with green checkmark
-            self.openai_key_status.setText(f"Set (sk-****...)")
-            self.openai_key_status.setStyleSheet("color: #0066cc; font-weight: bold;")  # Blue, not green
-        else:
-            self.openai_key_status.setText("❌ Not set")
-            self.openai_key_status.setStyleSheet("color: #cc0000; font-weight: bold;")
-            
-        github_token = os.environ.get("RESEARCH_BUDDY_GITHUB_TOKEN", "")
-        if github_token:
-            token_prefix = "ghp_" if github_token.startswith("ghp_") else "github_pat_" if github_token.startswith("github_pat_") else "***"
-            # Show that it's set, but don't imply it's validated with green checkmark
-            self.github_token_status.setText(f"Set ({token_prefix}****...)")
-            self.github_token_status.setStyleSheet("color: #0066cc; font-weight: bold;")  # Blue, not green
-        else:
-            self.github_token_status.setText("❌ Not set")
-            self.github_token_status.setStyleSheet("color: #cc0000; font-weight: bold;")
+        
+        # Don't load API keys/tokens into input fields for security
+        # User must re-enter them to change
         
     def save_configuration_data(self):
         """Save the current configuration and set environment variables."""

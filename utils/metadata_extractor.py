@@ -7,8 +7,23 @@ api_key = (os.getenv("RESEARCH_BUDDY_OPENAI_API_KEY") or
 
 if api_key:
     openai.api_key = api_key
+    
+    # Auto-detect API provider based on key prefix and configure endpoint
+    if api_key.startswith("sk-or-"):
+        # OpenRouter key detected
+        openai.api_base = "https://openrouter.ai/api/v1"
+        print("✅ Detected OpenRouter API key - using OpenRouter endpoint")
+    elif api_key.startswith(("sk-", "sk-proj-")):
+        # Standard OpenAI key
+        openai.api_base = "https://api.openai.com/v1"
+        print("✅ Detected OpenAI API key - using OpenAI endpoint")
+    else:
+        # Unknown key format - try OpenAI as default
+        openai.api_base = "https://api.openai.com/v1"
+        print(f"⚠️  Unknown API key format (starts with {api_key[:10]}...) - defaulting to OpenAI endpoint")
 else:
     print("⚠️  No OpenAI API key found. AI analysis will be disabled.")
+    openai.api_key = None
     openai.api_key = None
 import fitz  # PyMuPDF
 import re
@@ -148,7 +163,17 @@ def extract_positionality(pdf_path):
     
     if api_key and api_key != openai.api_key:
         openai.api_key = api_key
-        print(f"✅ Updated OpenAI API key from environment")
+        
+        # Auto-detect API provider and configure endpoint
+        if api_key.startswith("sk-or-"):
+            openai.api_base = "https://openrouter.ai/api/v1"
+            print(f"✅ Updated API key from environment - using OpenRouter")
+        elif api_key.startswith(("sk-", "sk-proj-")):
+            openai.api_base = "https://api.openai.com/v1"
+            print(f"✅ Updated API key from environment - using OpenAI")
+        else:
+            openai.api_base = "https://api.openai.com/v1"
+            print(f"✅ Updated API key from environment - defaulting to OpenAI")
     
     matched = []
     snippets = {}
