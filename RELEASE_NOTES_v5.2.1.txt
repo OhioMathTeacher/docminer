@@ -1,0 +1,58 @@
+# 🚀 Research Buddy 5.2.1 - Critical AI Fix & 93% Size Reduction
+
+**Emergency patch with working AI analysis and massive optimization!**
+
+## 🔥 Critical Fixes
+
+### AI Analysis Now Works! 
+- **FIXED**: AI positionality extraction now functions in standalone app
+- v5.2 bug: API keys saved but not loaded into environment variables
+- v5.2.1 fix: Environment variables properly set from config file
+- **Impact**: OpenAI-powered analysis now works in DMG/AppImage/EXE
+
+### Massive Size Reduction
+- macOS DMG: **1.1 GB → 81 MB (93% smaller!)**
+- App bundle: **1.1 GB → 172 MB (85% smaller!)**
+- Excluded unnecessary ML libraries (torch, scipy, pandas, etc.)
+- All features work perfectly with optimized size
+
+## 📥 Downloads
+
+### macOS 🍎 (81 MB)
+Download **ResearchBuddy-5.2.1-macos.dmg**
+- Works on Intel & Apple Silicon Macs
+- If blocked: Right-click → Open, or `xattr -cr ResearchBuddy5.2.1.app`
+
+### Linux 🐧 (Coming via Actions)
+**ResearchBuddy-5.2.1-x86_64.AppImage** 
+- Universal Linux executable
+
+### Windows 🪟 (Coming via Actions)
+**ResearchBuddy-5.2.1-windows.zip**
+- If Defender warns: "More info" → "Run anyway"
+
+## ✨ What's New
+
+**AI Fix:**
+- v5.2: "None (0.000)" confidence scores ❌
+- v5.2.1: Actual AI analysis with real scores ✅
+
+**Size Optimization:**
+- Removed 800+ MB of unused ML libraries
+- Kept all essential PDF/AI/GUI dependencies
+- Build time: 90 minutes → 24 seconds
+
+## 🎯 All Features Working
+
+✅ PDF viewer with text selection  
+✅ **AI positionality detection (NOW WORKING!)**  
+✅ Manual analysis mode  
+✅ Evidence collection  
+✅ GitHub report upload  
+✅ Persistent configuration  
+
+---
+
+**Last ResearchBuddy release before DocMiner 6.0!** 🚀
+
+📜 License: CC BY-NC 4.0 | © 2025 Michael Todd Edwards
