@@ -11,9 +11,10 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 **No Python, no setup, no terminal commands - just download and double-click!**
 
 ### **macOS**
-🍎 [**Download ResearchBuddy-macos.dmg**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-macos.dmg) 
+🍎 [**Download ResearchBuddy-5.2-macos.dmg**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-5.2-macos.dmg) (1.1 GB)
 - Download → Double-click the DMG → Drag `ResearchBuddy5.2.app` to Applications
-- **Works on both Intel and Apple Silicon Macs**
+- **Includes sample PDF with JSTOR article links for testing**
+- **Works on both Intel and Apple Silicon Macs** (Intel via Rosetta 2)
 
 **First-time setup (security bypass):**
 1. Try to open the app (it will show security warning)
@@ -22,6 +23,8 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 **Alternative (no Terminal):**
 - Right-click the .app → Open → Open (may need to do this twice)
+
+**Note:** First launch stores your API keys and GitHub settings securely in `~/.research_buddy/` - you only configure once!
 
 ### **Windows**  
 🪟 [**Download ResearchBuddy-windows.zip**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-windows.zip)
