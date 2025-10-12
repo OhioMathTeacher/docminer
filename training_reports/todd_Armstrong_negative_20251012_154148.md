@@ -1,0 +1,47 @@
+# Training Session Report
+
+## Session Information
+- **GA Name**: todd
+- **Session ID**: 20251012_1541
+- **Timestamp**: 2025-10-12T15:41:48.991857
+- **Papers Analyzed**: 1
+
+## Summary Statistics
+
+### Judgment Distribution
+- **negative**: 1 papers (100.0%)
+
+### Pattern Analysis
+- **Total Evidence Quotes**: 0
+- **Average Confidence**: 0.0/5
+
+## Evidence Examples
+
+## Pattern Suggestions
+
+No pattern suggestions provided.
+
+## Next Steps for Analysis
+
+1. **Pattern Discovery**: Analyze evidence quotes for new regex patterns
+2. **False Negative Review**: Check papers marked negative for missed statements  
+3. **Validation Testing**: Test discovered patterns on validation set
+4. **System Integration**: Add successful patterns to detection engine
+
+## Raw Data
+
+```json
+[
+  {
+    "filename": "Armstrong-ETHICALENGAGEMENTANTHROPOLOGY-2025.pdf",
+    "timestamp": "2025-10-12T15:41:48.987542",
+    "judgment": "negative",
+    "evidence": "The first community-\u200bengaged assignment bridges students\u2019 personal\ncommitments, first-\u200bhand experiences in an organization, and the val-\nues promoted by that organization. Students learn about the policies\nand operations of SLUG, the cafeteria\u2019s food management corporation\nBon Appetit, and the campus food pantry, alongside each organization\u2019s\nethical commitments (sustainability for the garden, sustainability and\nwellness for the food management corporation, and welfare and agency\nfor the pantry). Next, through volunteer experiences, students examine\nhow policies are put into practice. The subsequent written assignment\n(approximately 4\u2013\u200b6 paragraphs) includes four components: student\nobservations of policy and practice in an organization, identification\nof values promoted by those practices, value trade-\u200boffs and prioriti-\nzation, and additional lines of inquiry. Because these experiences are\nnot curated exclusively by the instructor for learning, students practice\nmetacognitive skills such as understanding when additional information\nis needed, when to ask questions, who to pose questions to, and alterna-\ntive information resources if questions go unanswered (Table 14.1: Goals\n& Outcomes).",
+    "ai_analysis": "AI Analysis for Armstrong-ETHICALENGAGEMENTANTHROPOLOGY-2025.pdf\n\nConfidence Level: None (0.000)\nRecommendation: No positionality detected\nPatterns Detected: None\n\n\nNo specific evidence excerpts extracted. Consider manual review of the full paper.\n\n\nAI Recommendation:\nNo clear positionality detected. Recommend categorizing as No positionality statements.",
+    "pattern_types": [],
+    "confidence": 3,
+    "explanation": "",
+    "pattern_suggestions": ""
+  }
+]
+```
