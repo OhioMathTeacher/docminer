@@ -113,31 +113,28 @@ jobs:
     - name: 🔨 Build macOS Executable (Apple Silicon)
       if: matrix.platform == 'macos'
       run: |
-        echo "Building for Apple Silicon/ARM64..."
-        python -m PyInstaller build_files/ResearchBuddy5.2.spec \
+        echo "Building optimized ResearchBuddy 5.2.1..."
+        python -m PyInstaller build_files/ResearchBuddy5.2.1.spec \
           --distpath ./dist \
           --workpath ./build \
           --clean \
           --noconfirm
         
         echo "Verifying architecture..."
-        file dist/ResearchBuddy5.2.app/Contents/MacOS/ResearchBuddy5.2
+        file dist/ResearchBuddy5.2.1.app/Contents/MacOS/ResearchBuddy5.2.1
+        
+        echo "Checking size..."
+        du -sh dist/ResearchBuddy5.2.1.app
         
         echo "Creating DMG..."
-        mkdir -p dmg-temp
-        cp -R dist/ResearchBuddy5.2.app dmg-temp/
-        ln -s /Applications dmg-temp/Applications
-        
         hdiutil create \
-          -volname "ResearchBuddy 5.2" \
-          -srcfolder dmg-temp \
+          -volname "Research Buddy 5.2.1" \
+          -srcfolder dist/ResearchBuddy5.2.1.app \
           -ov -format UDZO \
-          ResearchBuddy-5.2.dmg
-        
-        rm -rf dmg-temp
+          ResearchBuddy-5.2.1-macos.dmg
         
         echo "DMG created successfully!"
-        ls -lh ResearchBuddy-5.2.dmg
+        ls -lh ResearchBuddy-5.2.1-macos.dmg
 
     - name: 📦 Create Package
       shell: bash
@@ -147,7 +144,7 @@ jobs:
           7z a "../${{ matrix.name }}.zip" *
         elif [ "${{ matrix.platform }}" = "macos" ]; then
           # DMG already created, just rename it
-          mv ResearchBuddy-5.2.dmg ${{ matrix.name }}.dmg
+          mv ResearchBuddy-5.2.1-macos.dmg ${{ matrix.name }}.dmg
         else
           # Linux: Create both tar.gz and keep AppImage
           cd release
