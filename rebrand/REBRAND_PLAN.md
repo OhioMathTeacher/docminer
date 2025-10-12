@@ -49,6 +49,44 @@ This will:
 - ✅ Rename files and build specs
 - ✅ Create a backup before making changes
 
+### Phase 1.5: UI/UX Updates
+
+**Force Light Theme** (Dark theme looks bad!)
+
+Update `enhanced_training_interface.py` to force light/grey theme:
+
+```python
+# Add at the top of the file, after imports
+from PySide6.QtGui import QPalette, QColor
+from PySide6.QtWidgets import QApplication
+
+# In the main() function or __init__, add:
+app.setStyle("Fusion")  # Use Fusion style for consistency
+
+# Force light palette
+palette = QPalette()
+palette.setColor(QPalette.Window, QColor(240, 240, 240))
+palette.setColor(QPalette.WindowText, QColor(0, 0, 0))
+palette.setColor(QPalette.Base, QColor(255, 255, 255))
+palette.setColor(QPalette.AlternateBase, QColor(245, 245, 245))
+palette.setColor(QPalette.ToolTipBase, QColor(255, 255, 220))
+palette.setColor(QPalette.ToolTipText, QColor(0, 0, 0))
+palette.setColor(QPalette.Text, QColor(0, 0, 0))
+palette.setColor(QPalette.Button, QColor(240, 240, 240))
+palette.setColor(QPalette.ButtonText, QColor(0, 0, 0))
+palette.setColor(QPalette.BrightText, QColor(255, 0, 0))
+palette.setColor(QPalette.Link, QColor(42, 130, 218))
+palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
+app.setPalette(palette)
+```
+
+**Other UI Improvements:**
+- [ ] Consistent grey/white color scheme
+- [ ] Better dialog styling
+- [ ] Improved button contrast
+- [ ] Professional appearance regardless of OS theme
+
 ### Phase 2: Test Locally
 
 ```bash
@@ -63,6 +101,7 @@ pyinstaller build_files/DocMiner5.2.spec --clean
 
 Verify:
 - [ ] Application launches
+- [ ] **Light theme is enforced (no dark mode)**
 - [ ] Configuration dialog works
 - [ ] PDF loading works
 - [ ] Evidence marking works
