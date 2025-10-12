@@ -4,10 +4,10 @@
 
 set -e
 
-VERSION="5.1.1"
+VERSION="5.2"
 APP_NAME="ResearchBuddy"
 APP_DIR="${APP_NAME}.AppDir"
-OUTPUT_DIR="releases"
+OUTPUT_DIR="."
 
 echo "🐧 Creating AppImage for ResearchBuddy ${VERSION}"
 echo "================================================"
@@ -17,8 +17,8 @@ echo ""
 mkdir -p "$OUTPUT_DIR"
 
 # Check if the executable exists
-if [ ! -f "dist/ResearchBuddy5.1.1/ResearchBuddy5.1.1" ]; then
-    echo "❌ Error: dist/ResearchBuddy5.1.1/ResearchBuddy5.1.1 not found"
+if [ ! -f "dist/ResearchBuddy5.2/ResearchBuddy5.2" ]; then
+    echo "❌ Error: dist/ResearchBuddy5.2/ResearchBuddy5.2 not found"
     exit 1
 fi
 
@@ -33,7 +33,7 @@ mkdir -p "$APP_DIR/usr/share/icons/hicolor/256x256/apps"
 echo "📦 Creating AppDir structure..."
 
 # Copy the entire dist folder contents
-cp -r dist/ResearchBuddy5.1.1/* "$APP_DIR/usr/bin/"
+cp -r dist/ResearchBuddy5.2/* "$APP_DIR/usr/bin/"
 echo "   ✅ Copied application files"
 
 # Create desktop file
@@ -42,7 +42,7 @@ cat > "$APP_DIR/${APP_NAME}.desktop" << 'EOF'
 Type=Application
 Name=Research Buddy
 Comment=Professional Positionality Analysis Interface
-Exec=ResearchBuddy5.1.1
+Exec=ResearchBuddy5.2
 Icon=researchbuddy
 Categories=Education;Science;Office;
 Terminal=false
@@ -51,11 +51,19 @@ EOF
 cp "$APP_DIR/${APP_NAME}.desktop" "$APP_DIR/usr/share/applications/"
 echo "   ✅ Created desktop file"
 
-# Create a simple placeholder icon (1x1 pixel PNG)
-echo 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' | base64 -d > "$APP_DIR/researchbuddy.png"
-cp "$APP_DIR/researchbuddy.png" "$APP_DIR/usr/share/icons/hicolor/256x256/apps/"
-cp "$APP_DIR/researchbuddy.png" "$APP_DIR/.DirIcon"
-echo "   ✅ Created icon"
+# Use the robot icon
+if [ -f "build_files/robot_icon_256x256.png" ]; then
+    cp "build_files/robot_icon_256x256.png" "$APP_DIR/researchbuddy.png"
+    cp "$APP_DIR/researchbuddy.png" "$APP_DIR/usr/share/icons/hicolor/256x256/apps/"
+    cp "$APP_DIR/researchbuddy.png" "$APP_DIR/.DirIcon"
+    echo "   ✅ Added robot icon"
+else
+    # Fallback to placeholder if icon not found
+    echo 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' | base64 -d > "$APP_DIR/researchbuddy.png"
+    cp "$APP_DIR/researchbuddy.png" "$APP_DIR/usr/share/icons/hicolor/256x256/apps/"
+    cp "$APP_DIR/researchbuddy.png" "$APP_DIR/.DirIcon"
+    echo "   ✅ Created placeholder icon"
+fi
 
 # Create AppRun script
 cat > "$APP_DIR/AppRun" << 'EOF'
@@ -64,7 +72,7 @@ SELF=$(readlink -f "$0")
 HERE=${SELF%/*}
 export LD_LIBRARY_PATH="${HERE}/usr/bin:${LD_LIBRARY_PATH}"
 export PATH="${HERE}/usr/bin:${PATH}"
-exec "${HERE}/usr/bin/ResearchBuddy5.1.1" "$@"
+exec "${HERE}/usr/bin/ResearchBuddy5.2" "$@"
 EOF
 
 chmod +x "$APP_DIR/AppRun"
