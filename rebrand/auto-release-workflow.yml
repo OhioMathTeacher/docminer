@@ -1,0 +1,228 @@
+name: 🚀 DocMiner Auto-Build & Release
+
+on:
+  # Option B: Manual trigger with auto-version (recommended to start)
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: false
+        default: 'patch'
+        type: choice
+        options:
+          - patch  # 6.2.14 → 6.2.15 (default)
+          - minor  # 6.2.14 → 6.3.0
+          - major  # 6.2.14 → 7.0.0
+  
+  # Uncomment below to enable automatic releases on every push to main
+  # push:
+  #   branches:
+  #     - main
+
+permissions:
+  contents: write
+  actions: read
+  packages: read
+
+jobs:
+  version-and-release:
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.bump_version.outputs.new_version }}
+      
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Need full history for version detection
+    
+    - name: 🔍 Get latest version
+      id: get_version
+      run: |
+        # Get latest tag, default to v6.0.0 if none exist
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v6.0.0")
+        echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+        echo "📌 Latest version: $LATEST_TAG"
+    
+    - name: ⬆️ Bump version
+      id: bump_version
+      run: |
+        LATEST="${{ steps.get_version.outputs.latest_tag }}"
+        BUMP="${{ github.event.inputs.bump_type || 'patch' }}"
+        
+        # Remove 'v' prefix and split into parts
+        VERSION="${LATEST#v}"
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+        
+        # Bump appropriate version number
+        case $BUMP in
+          major)
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+            ;;
+          minor)
+            MINOR=$((MINOR + 1))
+            PATCH=0
+            ;;
+          patch)
+            PATCH=$((PATCH + 1))
+            ;;
+        esac
+        
+        NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "version_number=${MAJOR}.${MINOR}.${PATCH}" >> $GITHUB_OUTPUT
+        
+        echo "🎯 Bumped $LATEST → $NEW_VERSION ($BUMP)"
+    
+    - name: 🏷️ Create and push tag
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git tag -a ${{ steps.bump_version.outputs.new_version }} -m "Auto-release ${{ steps.bump_version.outputs.new_version }}"
+        git push origin ${{ steps.bump_version.outputs.new_version }}
+
+  build:
+    needs: version-and-release
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            platform: linux
+            name: DocMiner-linux
+          - os: windows-latest
+            platform: windows
+            name: DocMiner-windows
+          - os: macos-latest
+            platform: macos
+            name: DocMiner-macos
+
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ needs.version-and-release.outputs.new_version }}
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: 🔨 Build executable
+      run: |
+        python -m PyInstaller build_files/DocMiner6.0.spec --distpath ./dist --workpath ./build --clean --noconfirm
+    
+    - name: 📁 Prepare release files
+      shell: bash
+      run: |
+        VERSION="${{ needs.version-and-release.outputs.new_version }}"
+        VERSION_NUM="${VERSION#v}"  # Remove 'v' prefix
+        
+        mkdir -p release-files
+        
+        if [ "${{ matrix.platform }}" == "windows" ]; then
+          cd dist/DocMiner6.0
+          powershell -Command "Compress-Archive -Path * -DestinationPath ../../release-files/DocMiner-${VERSION_NUM}-windows.zip"
+        elif [ "${{ matrix.platform }}" == "macos" ]; then
+          # Install create-dmg
+          brew install create-dmg
+          
+          # Create DMG
+          create-dmg \
+            --volname "DocMiner ${VERSION_NUM}" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --app-drop-link 425 120 \
+            "release-files/DocMiner-${VERSION_NUM}-macOS.dmg" \
+            "dist/DocMiner6.0.app"
+        else
+          # Linux - create both tar.gz and AppImage
+          cd dist
+          tar -czf ../release-files/DocMiner-${VERSION_NUM}-linux.tar.gz DocMiner6.0/
+          
+          # Build AppImage if script exists
+          if [ -f "../build_files/create_appimage.sh" ]; then
+            cd ..
+            bash build_files/create_appimage.sh
+            mv DocMiner-*-x86_64.AppImage release-files/ || true
+          fi
+        fi
+    
+    - name: 📤 Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.name }}
+        path: release-files/*
+        retention-days: 7
+
+  release:
+    needs: [version-and-release, build]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    
+    - name: 📋 Consolidate release files
+      run: |
+        mkdir -p release-files
+        find artifacts -type f -exec cp {} release-files/ \;
+        ls -lh release-files/
+    
+    - name: 🎉 Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ needs.version-and-release.outputs.new_version }}
+        name: "DocMiner ${{ needs.version-and-release.outputs.new_version }}"
+        draft: false
+        prerelease: false
+        make_latest: true
+        files: release-files/*
+        generate_release_notes: true
+        body: |
+          # 🎯 DocMiner ${{ needs.version-and-release.outputs.new_version }}
+          
+          **Automated release build**
+          
+          ## 📥 Quick Downloads
+          
+          - 🐧 **Linux**: `DocMiner-*-x86_64.AppImage` (recommended) or `DocMiner-*-linux.tar.gz`
+          - 🍎 **macOS**: `DocMiner-*-macOS.dmg` (Intel & Apple Silicon)
+          - 🪟 **Windows**: `DocMiner-*-windows.zip`
+          
+          ## 📝 Installation
+          
+          ### Linux
+          ```bash
+          chmod +x DocMiner-*-x86_64.AppImage
+          ./DocMiner-*-x86_64.AppImage
+          ```
+          
+          ### macOS
+          1. Download DMG
+          2. Double-click to open
+          3. Drag DocMiner to Applications
+          4. If blocked: `xattr -cr /Applications/DocMiner*.app`
+          
+          ### Windows
+          1. Download ZIP
+          2. Extract all files
+          3. Double-click `DocMiner*.exe`
+          
+          ---
+          
+          **Full changelog**: See below for detailed changes
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
