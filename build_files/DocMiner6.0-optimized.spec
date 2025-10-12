@@ -122,8 +122,8 @@ a = Analysis(
         
         # Other heavy libs
         'lxml.etree',
-        'cryptography',
-        'pycparser',
+        # 'cryptography',  # KEEP - needed by pdfminer/pdfplumber
+        # 'pycparser',  # KEEP - dependency of cryptography
     ],
     noarchive=False,
     optimize=0,

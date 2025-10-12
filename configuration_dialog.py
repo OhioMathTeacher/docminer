@@ -53,6 +53,13 @@ def load_configuration():
     if not config["github_token"]:
         config["github_token"] = os.environ.get("RESEARCH_BUDDY_GITHUB_TOKEN", "")
     
+    # SET environment variables from loaded config so AI functions can access them
+    # This is critical for executables where env vars aren't set on launch
+    if config["openai_api_key"]:
+        os.environ["RESEARCH_BUDDY_OPENAI_API_KEY"] = config["openai_api_key"]
+    if config["github_token"]:
+        os.environ["RESEARCH_BUDDY_GITHUB_TOKEN"] = config["github_token"]
+    
     return config
 
 
