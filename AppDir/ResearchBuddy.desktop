@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=ResearchBuddy
+Comment=AI-Powered Research Analysis Tool
+Exec=ResearchBuddy
+Icon=ResearchBuddy
+Categories=Education;Office;
+Terminal=false

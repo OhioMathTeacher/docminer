@@ -16,7 +16,7 @@ a = Analysis(
     binaries=[],
     datas=[
         # Include sample PDFs
-        ('../sample_pdfs/about.pdf', 'sample_pdfs'),
+        ('../sample_pdfs/aboutRB.pdf', 'sample_pdfs'),
         # Include documentation
         ('../README.md', '.'),
         ('../docs/QUICK_START_FOR_GAS.md', 'docs'),

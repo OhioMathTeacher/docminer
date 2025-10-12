@@ -39,8 +39,9 @@ class GitHubReportUploader:
             
         self.base_url = f"https://api.github.com/repos/{self.owner}/{self.repo}"
         self.headers = {
-            "Authorization": f"token {self.token}",
-            "Accept": "application/vnd.github.v3+json"
+            "Authorization": f"Bearer {self.token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28"
         }
         
         # Initialize reports directory in user's home directory (writable location)
