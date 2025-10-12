@@ -290,8 +290,10 @@ class ConfigurationDialog(QDialog):
             os.environ["RESEARCH_BUDDY_GITHUB_TOKEN"] = github_token
             print(f"✅ Set RESEARCH_BUDDY_GITHUB_TOKEN in current process")
         
-        # Save repository settings to file
+        # Save ALL settings to file (including API keys and tokens)
         config = {
+            "openai_api_key": openai_key,
+            "github_token": github_token,
             "github_owner": self.github_owner_input.text().strip(),
             "github_repo": self.github_repo_input.text().strip()
         }
@@ -299,16 +301,16 @@ class ConfigurationDialog(QDialog):
         if save_configuration(config):
             message = "Configuration saved successfully!\n\n"
             if openai_key:
-                message += "✅ OpenAI API key set for current session\n"
+                message += "✅ OpenAI API key saved permanently\n"
             if github_token:
-                message += "✅ GitHub token set for current session\n"
+                message += "✅ GitHub token saved permanently\n"
             message += "✅ Repository settings saved\n\n"
             
             if config['github_owner'] and config['github_repo']:
                 message += f"📦 Upload destination: https://github.com/{config['github_owner']}/{config['github_repo']}\n\n"
             
-            message += "Note: API keys are set for this session only.\n"
-            message += "To make them permanent, restart the application and they will be remembered."
+            message += "All settings are saved to your secure config file.\n"
+            message += "They will be automatically loaded when you restart the application."
             
             QMessageBox.information(self, "Configuration Saved", message)
             
