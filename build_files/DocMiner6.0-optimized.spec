@@ -85,10 +85,10 @@ a = Analysis(
         'jsonschema',
         'narwhals',
         
-        # Web frameworks
+        # Web frameworks (keep anyio - needed by httpx/openai)
         'uvicorn',
         'websockets',
-        'anyio',
+        # 'anyio',  # KEEP - needed by httpx
         
         # Testing/dev tools
         'pytest',
