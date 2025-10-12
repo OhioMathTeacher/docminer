@@ -103,6 +103,12 @@ class ConfigurationDialog(QDialog):
         self.setWindowTitle("🔧 Research Buddy Configuration")
         self.setFixedSize(650, 700)
         
+        # Make dialog truly modal - blocks interaction with parent window
+        self.setWindowModality(Qt.ApplicationModal)
+        
+        # Ensure dialog stays on top
+        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+        
         # Load existing configuration
         self.config = load_configuration()
         
@@ -250,20 +256,22 @@ class ConfigurationDialog(QDialog):
         """Update the environment status display"""
         openai_key = os.environ.get("RESEARCH_BUDDY_OPENAI_API_KEY", "")
         if openai_key:
-            self.openai_key_status.setText(f"✅ Set (sk-***...)")
-            self.openai_key_status.setStyleSheet("color: green;")
+            # Show that it's set, but don't imply it's validated with green checkmark
+            self.openai_key_status.setText(f"Set (sk-****...)")
+            self.openai_key_status.setStyleSheet("color: #0066cc; font-weight: bold;")  # Blue, not green
         else:
             self.openai_key_status.setText("❌ Not set")
-            self.openai_key_status.setStyleSheet("color: red;")
+            self.openai_key_status.setStyleSheet("color: #cc0000; font-weight: bold;")
             
         github_token = os.environ.get("RESEARCH_BUDDY_GITHUB_TOKEN", "")
         if github_token:
             token_prefix = "ghp_" if github_token.startswith("ghp_") else "github_pat_" if github_token.startswith("github_pat_") else "***"
-            self.github_token_status.setText(f"✅ Set ({token_prefix}***...)")
-            self.github_token_status.setStyleSheet("color: green;")
+            # Show that it's set, but don't imply it's validated with green checkmark
+            self.github_token_status.setText(f"Set ({token_prefix}****...)")
+            self.github_token_status.setStyleSheet("color: #0066cc; font-weight: bold;")  # Blue, not green
         else:
             self.github_token_status.setText("❌ Not set")
-            self.github_token_status.setStyleSheet("color: red;")
+            self.github_token_status.setStyleSheet("color: #cc0000; font-weight: bold;")
         
     def save_configuration_data(self):
         """Save the current configuration and set environment variables."""

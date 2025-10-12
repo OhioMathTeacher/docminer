@@ -1160,9 +1160,13 @@ class EnhancedTrainingInterface(QMainWindow):
         # Initialize with default folder and README
         self.initialize_with_readme()
         
-        # Use QTimer to check for first-time setup after window is shown
-        # This ensures the dialog appears on top of the main window
-        QTimer.singleShot(100, self.check_first_time_setup)
+        # Check if configuration is needed BEFORE showing the window
+        # This prevents the main window from being visible during setup
+        self._needs_initial_config = self.check_if_config_needed()
+        
+        # Use QTimer to handle first-time setup after event loop starts
+        # If config is needed, window will stay hidden until config is complete
+        QTimer.singleShot(100, self.handle_first_time_setup)
         
     def create_menu_bar(self):
         """Create the application menu bar"""
@@ -1190,17 +1194,71 @@ class EnhancedTrainingInterface(QMainWindow):
         about_action.triggered.connect(self.show_about)
         about_action.setStatusTip('About Research Buddy')
         
-    def check_first_time_setup(self):
-        """Check if this is first-time setup and prompt for configuration if needed"""
-        # Only show if GitHub repository is not configured
+    def check_if_config_needed(self):
+        """Check if configuration is needed (returns True if config missing)"""
+        from configuration_dialog import load_configuration
+        
+        config = load_configuration()
+        
+        # Check if critical settings are missing
+        if not config.get("openai_api_key"):
+            return True
+        if not config.get("github_token"):
+            return True
         if not (self.github_uploader.owner and self.github_uploader.repo):
-            # Show the configuration dialog directly - user must configure before proceeding
+            return True
+            
+        return False
+    
+    def handle_first_time_setup(self):
+        """Handle first-time setup - shows config dialog and hides main window if needed"""
+        if self._needs_initial_config:
+            # Hide main window during initial configuration
+            self.hide()
+            
+            from configuration_dialog import load_configuration
+            config = load_configuration()
+            
+            missing_items = []
+            if not config.get("openai_api_key"):
+                missing_items.append("OpenAI API Key")
+            if not config.get("github_token"):
+                missing_items.append("GitHub Token")
+            if not (self.github_uploader.owner and self.github_uploader.repo):
+                missing_items.append("GitHub Repository")
+            
+            missing_text = ", ".join(missing_items)
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Information)
+            msg.setWindowTitle("Configuration Required")
+            msg.setText(f"⚙️ Configuration Setup Required\n\nMissing: {missing_text}")
+            msg.setInformativeText(
+                "Research Buddy requires configuration before use.\n\n"
+                "You'll need:\n"
+                "• OpenAI API Key (for AI analysis)\n"
+                "• GitHub Personal Access Token (for uploading reports)\n"
+                "• GitHub Repository settings\n\n"
+                "The configuration dialog will open now."
+            )
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec()
+            
+            # Show configuration dialog - it's modal so it blocks
             self.show_configuration()
+            
+            # After configuration, show the main window
+            self.show()
+    
+    def check_first_time_setup(self):
+        """Deprecated - replaced by handle_first_time_setup"""
+        pass
     
     def show_configuration(self):
         """Show the configuration dialog"""
         dialog = ConfigurationDialog(self)
-        if dialog.exec() == QDialog.Accepted:
+        result = dialog.exec()
+        
+        if result == QDialog.Accepted:
             # Refresh GitHub uploader with new configuration
             self.github_uploader = GitHubReportUploader()
             
@@ -1223,8 +1281,22 @@ class EnhancedTrainingInterface(QMainWindow):
                 self.statusBar().showMessage(f"{base_message} {repo_info}")
             else:
                 self.statusBar().showMessage(f"{current_status} {repo_info}")
+        elif self._needs_initial_config:
+            # User cancelled during initial setup - can't use app without config
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Warning)
+            msg.setWindowTitle("Configuration Required")
+            msg.setText("⚠️ Configuration Required")
+            msg.setInformativeText(
+                "Research Buddy cannot function without proper configuration.\n\n"
+                "The application will now exit.\n\n"
+                "Please run the application again and complete the configuration."
+            )
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec()
             
-            # Success dialog is already shown by ConfigurationDialog, no need for duplicate
+            # Exit the application
+            QApplication.quit()
     
     def show_about(self):
         """Show about dialog"""
@@ -2168,8 +2240,13 @@ class EnhancedTrainingInterface(QMainWindow):
                 self.current_ai_findings = None
                 
         except Exception as e:
-            error_msg = str(e)
-            if "401" in error_msg or "invalid_api_key" in error_msg or "API key" in error_msg:
+            error_msg = str(e).lower()
+            # Only show API key error for actual authentication failures
+            # Don't trigger on generic mentions of "API key" in other errors
+            if ("401" in error_msg and "unauthorized" in error_msg) or \
+               "invalid_api_key" in error_msg or \
+               "authentication" in error_msg or \
+               "incorrect api key" in error_msg:
                 # Handle API key issues with a popup
                 QMessageBox.warning(self, "API Key Error", 
                                   "🔑 OpenAI API Key Error!\n\n"
