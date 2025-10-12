@@ -1,4 +1,4 @@
-# Research Buddy 5.2 - Professional Positionality Analysis Interface
+# Research Buddy 5.2.1 - Professional Positionality Analysis Interface
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
@@ -10,15 +10,17 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 **No Python, no setup, no terminal commands - just download and double-click!**
 
-### **macOS**
-🍎 [**Download ResearchBuddy-5.2-macos.dmg**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-5.2-macos.dmg) (1.1 GB)
-- Download → Double-click the DMG → Drag `ResearchBuddy5.2.app` to Applications
+### **macOS** ⭐ **NEW v5.2.1 - AI Fixed + 93% Smaller!**
+🍎 [**Download ResearchBuddy-5.2.1-macos.dmg**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2.1/ResearchBuddy-5.2.1-macos.dmg) **(81 MB)**
+- **CRITICAL FIX**: AI positionality analysis now works! 
+- **93% smaller**: 81 MB (was 1.1 GB)
+- Download → Double-click the DMG → Drag `ResearchBuddy5.2.1.app` to Applications
 - **Includes sample PDF with JSTOR article links for testing**
 - **Works on both Intel and Apple Silicon Macs** (Intel via Rosetta 2)
 
 **First-time setup (security bypass):**
 1. Try to open the app (it will show security warning)
-2. Open Terminal and run: `xattr -cr /Applications/ResearchBuddy5.2.app`
+2. Open Terminal and run: `xattr -cr /Applications/ResearchBuddy5.2.1.app`
 3. Now double-click the app - it will open!
 
 **Alternative (no Terminal):**
@@ -30,6 +32,7 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 🪟 [**Download ResearchBuddy-windows.zip**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-windows.zip)
 - Download → Extract → Double-click `ResearchBuddy5.2.exe`
 - If Windows Defender blocks: Click "More info" → "Run anyway"
+- **Note:** v5.2.1 with AI fix coming soon via GitHub Actions
 
 ### **Linux**
 🐧 [**Download ResearchBuddy-5.2-x86_64.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-5.2-x86_64.AppImage) **(Recommended)**
@@ -49,6 +52,7 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 **That's it!** The app will launch. AppImage is portable - just move the file anywhere and double-click to run.
 
 - **Universal Linux executable - works on all distros** (Ubuntu, Fedora, Arch, Debian, Linux Mint, etc.)
+- **Note:** v5.2.1 with AI fix coming soon via GitHub Actions
 
 ---
 
