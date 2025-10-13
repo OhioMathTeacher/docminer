@@ -15,7 +15,11 @@ a = Analysis(
     binaries=[],
     datas=[
         # Include sample PDFs
-        ('../sample_pdfs/about.pdf', 'sample_pdfs'),
+        ('../sample_pdfs/aboutDM.pdf', 'sample_pdfs'),
+        # Include Robbie animation frames (3 transparent 60x60 frames)
+        ('../images/robbie_anim_1.png', 'images'),
+        ('../images/robbie_anim_2.png', 'images'),
+        ('../images/robbie_anim_3.png', 'images'),
         # Include documentation
         ('../README.md', '.'),
         ('../docs/QUICK_START_FOR_GAS.md', 'docs'),

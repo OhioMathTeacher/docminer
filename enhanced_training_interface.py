@@ -1165,7 +1165,7 @@ class PDFViewer(QWidget):
 class EnhancedTrainingInterface(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("DocMiner 5.2 - Professional Positionality Analysis Interface")
+        self.setWindowTitle("DocMiner 6.0.1 - Professional Positionality Analysis Interface")
         # Set reasonable default size but allow user to resize
         self.resize(1200, 800)  # Default size - user can resize as needed
         
@@ -1180,7 +1180,7 @@ class EnhancedTrainingInterface(QMainWindow):
         
         # Default folder in user's home directory
         self.default_pdf_folder = Path.home() / "ExtractorPDFs" 
-        self.readme_pdf_path = self.default_pdf_folder / "about.pdf"
+        self.readme_pdf_path = self.default_pdf_folder / "aboutDM.pdf"
         
         # Settings file in user's config directory (works with AppImage)
         config_dir = Path.home() / ".research_buddy"
@@ -1349,8 +1349,8 @@ class EnhancedTrainingInterface(QMainWindow):
     
     def show_about(self):
         """Show about dialog"""
-        QMessageBox.about(self, "About DocMiner 5.2", 
-                         "🎓 DocMiner 5.2\n\n"
+        QMessageBox.about(self, "About DocMiner 6.0.1", 
+                         "🎓 DocMiner 6.0.1\n\n"
                          "Professional Positionality Analysis Interface\n\n"
                          "Features:\n"
                          "• Paper state persistence\n"
@@ -1392,20 +1392,43 @@ class EnhancedTrainingInterface(QMainWindow):
         folder_btn.setStyleSheet("QPushButton { font-weight: bold; padding: 8px; }")
         header_layout.addWidget(folder_btn)
         
-        # Animated processing indicator (hidden by default, shown during AI analysis)
+        # Spacer to push Robbie to the right
+        header_layout.addStretch()
+        
+        # Animated Robbie processing indicator (always visible, animates during AI analysis)
         self.processing_indicator = QLabel("")
-        self.processing_indicator.setFont(QFont("Arial", 14))
-        self.processing_indicator.setStyleSheet("QLabel { color: #2196F3; padding: 8px; }")
-        self.processing_indicator.setVisible(False)
+        self.processing_indicator.setMinimumSize(60, 60)  # Reserve space but don't force resize
+        self.processing_indicator.setMaximumSize(60, 60)  # Limit size
+        self.processing_indicator.setScaledContents(True)  # Scale image to fit
+        self.processing_indicator.setAlignment(Qt.AlignCenter)  # Center the image
+        self.processing_indicator.setVisible(True)  # Always visible
         header_layout.addWidget(self.processing_indicator)
+        
+        # Load Robbie animation frames
+        self.robbie_frames = []
+        for i in range(1, 4):  # Load 3 transparent frames (60x60)
+            # Check if running as frozen exe (PyInstaller bundle)
+            if getattr(sys, 'frozen', False):
+                frame_path = os.path.join(sys._MEIPASS, 'images', f'robbie_anim_{i}.png')
+            else:
+                frame_path = os.path.join(os.path.dirname(__file__), 'images', f'robbie_anim_{i}.png')
+            
+            if os.path.exists(frame_path):
+                pixmap = QPixmap(frame_path)
+                self.robbie_frames.append(pixmap)
+        
+        # Set initial static frame (first frame, not animating)
+        if self.robbie_frames:
+            self.processing_indicator.setPixmap(self.robbie_frames[0])
+        
+        # Fallback if Robbie frames not found
+        if not self.robbie_frames:
+            print("Warning: Robbie animation frames not found, using text fallback")
         
         # Animation timer for processing indicator
         self.processing_timer = QTimer()
         self.processing_timer.timeout.connect(self.update_processing_animation)
         self.animation_frame = 0
-        
-        # Spacer to keep elements balanced
-        header_layout.addStretch()
         
         layout.addLayout(header_layout)
         
@@ -1757,19 +1780,25 @@ class EnhancedTrainingInterface(QMainWindow):
         self.papers_completed.setText(f"{processed_count} of {total} papers processed")
         
     def update_processing_animation(self):
-        """Update the animated processing indicator"""
-        # Cycle through different spinner animations
-        spinners = [
-            "⚙️ ⚙️ ⚙️",
-            " ⚙️ ⚙️",
-            "  ⚙️",
-            "   ⚙️",
-            "    ⚙️",
-            "   ⚙️",
-            "  ⚙️",
-            " ⚙️ ⚙️",
-        ]
-        self.processing_indicator.setText(spinners[self.animation_frame % len(spinners)])
+        """Update the animated Robbie processing indicator"""
+        if self.robbie_frames:
+            # Cycle through Robbie animation frames
+            frame_index = self.animation_frame % len(self.robbie_frames)
+            self.processing_indicator.setPixmap(self.robbie_frames[frame_index])
+        else:
+            # Fallback to gear text animation if images not loaded
+            spinners = [
+                "⚙️ ⚙️ ⚙️",
+                " ⚙️ ⚙️",
+                "  ⚙️",
+                "   ⚙️",
+                "    ⚙️",
+                "   ⚙️",
+                "  ⚙️",
+                " ⚙️ ⚙️",
+            ]
+            self.processing_indicator.setText(spinners[self.animation_frame % len(spinners)])
+        
         self.animation_frame += 1
         
     def open_pdf_externally(self):
@@ -2209,15 +2238,23 @@ class EnhancedTrainingInterface(QMainWindow):
     
     def ensure_readme_exists(self):
         """Ensure the README PDF exists in the default folder"""
+        # Remove old about.pdf if it exists (legacy cleanup)
+        old_readme = self.default_pdf_folder / "about.pdf"
+        if old_readme.exists():
+            try:
+                old_readme.unlink()
+                print(f"Removed legacy about.pdf")
+            except:
+                pass
+        
+        # Always copy fresh aboutDM.pdf from bundle to ensure latest version
         if not self.readme_pdf_path.exists():
-            # Try to find bundled about.pdf in multiple locations
+            # Try to find bundled aboutDM.pdf in multiple locations
             possible_sources = [
                 # PyInstaller .app bundle location
-                Path(sys._MEIPASS) / "sample_pdfs" / "about.pdf" if getattr(sys, 'frozen', False) else None,
+                Path(sys._MEIPASS) / "sample_pdfs" / "aboutDM.pdf" if getattr(sys, 'frozen', False) else None,
                 # Development location
-                Path(__file__).parent / "sample_pdfs" / "about.pdf",
-                # Archive location (legacy)
-                Path(__file__).parent / "archive" / "documentation" / "about.pdf",
+                Path(__file__).parent / "sample_pdfs" / "aboutDM.pdf",
             ]
             
             source_readme = None
@@ -2229,7 +2266,7 @@ class EnhancedTrainingInterface(QMainWindow):
             if source_readme:
                 import shutil
                 shutil.copy2(source_readme, self.readme_pdf_path)
-                print(f"Copied professional training guide to {self.readme_pdf_path}")
+                print(f"Copied DocMiner training guide to {self.readme_pdf_path}")
             else:
                 # Create README if it doesn't exist
                 try:
@@ -2237,12 +2274,12 @@ class EnhancedTrainingInterface(QMainWindow):
                     create_readme_pdf(self.readme_pdf_path)
                     print(f"Created README at {self.readme_pdf_path}")
                 except:
-                    print(f"Could not create README - about.pdf not found in bundle")
+                    print(f"Could not create README - aboutDM.pdf not found in bundle")
     
     def find_readme_index(self):
-        """Find the index of the about.pdf file in papers list"""
+        """Find the index of the aboutDM.pdf file in papers list"""
         for i, paper in enumerate(self.papers_list):
-            if "about.pdf" in paper.lower():
+            if "aboutdm.pdf" in paper.lower() or "about.pdf" in paper.lower():
                 return i
         return -1
     
@@ -2254,15 +2291,8 @@ class EnhancedTrainingInterface(QMainWindow):
                     settings = json.load(f)
                     self.pdf_folder = settings.get("pdf_folder", str(self.default_pdf_folder))
                     
-                    # Load window geometry if saved
-                    window_geometry = settings.get("window_geometry")
-                    if window_geometry:
-                        self.setGeometry(
-                            window_geometry.get("x", 100),
-                            window_geometry.get("y", 100),
-                            window_geometry.get("width", 1400),
-                            window_geometry.get("height", 1000)
-                        )
+                    # Don't restore window geometry - always use default size
+                    # This prevents full-screen windows on subsequent launches
         except Exception as e:
             print(f"Could not load settings: {e}")
             self.pdf_folder = str(self.default_pdf_folder)
@@ -2371,8 +2401,7 @@ class EnhancedTrainingInterface(QMainWindow):
         self.analysis_progress.setVisible(True)
         self.analysis_progress.setValue(0)
         
-        # Start animated processing indicator
-        self.processing_indicator.setVisible(True)
+        # Start animated processing indicator (Robbie is always visible, just animate it)
         self.animation_frame = 0
         self.processing_timer.start(200)  # Update every 200ms
         
@@ -2413,9 +2442,10 @@ class EnhancedTrainingInterface(QMainWindow):
             QApplication.processEvents()
 
         def on_analysis_finished(result, paper_name):
-            # Stop animation
+            # Stop animation and reset to static first frame
             self.processing_timer.stop()
-            self.processing_indicator.setVisible(False)
+            if self.robbie_frames:
+                self.processing_indicator.setPixmap(self.robbie_frames[0])
             
             self.analysis_progress.setVisible(False)
             findings_text = self.format_ai_findings(result, paper_name)
@@ -2430,9 +2460,10 @@ class EnhancedTrainingInterface(QMainWindow):
             self.initial_analysis_btn.setEnabled(True)
 
         def on_analysis_error(e):
-            # Stop animation
+            # Stop animation and reset to static first frame
             self.processing_timer.stop()
-            self.processing_indicator.setVisible(False)
+            if self.robbie_frames:
+                self.processing_indicator.setPixmap(self.robbie_frames[0])
             
             self.analysis_progress.setVisible(False)
             error_msg = str(e).lower()
@@ -2711,6 +2742,27 @@ def main():
     
     # Set application style
     app.setStyle('Fusion')
+    
+    # Force light theme with custom palette
+    from PySide6.QtGui import QPalette, QColor
+    palette = QPalette()
+    
+    # Window and base colors (light grey background)
+    palette.setColor(QPalette.Window, QColor(240, 240, 240))
+    palette.setColor(QPalette.WindowText, QColor(0, 0, 0))
+    palette.setColor(QPalette.Base, QColor(255, 255, 255))
+    palette.setColor(QPalette.AlternateBase, QColor(245, 245, 245))
+    palette.setColor(QPalette.ToolTipBase, QColor(255, 255, 220))
+    palette.setColor(QPalette.ToolTipText, QColor(0, 0, 0))
+    palette.setColor(QPalette.Text, QColor(0, 0, 0))
+    palette.setColor(QPalette.Button, QColor(240, 240, 240))
+    palette.setColor(QPalette.ButtonText, QColor(0, 0, 0))
+    palette.setColor(QPalette.BrightText, QColor(255, 0, 0))
+    palette.setColor(QPalette.Link, QColor(0, 0, 255))
+    palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+    palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
+    
+    app.setPalette(palette)
     
     window = EnhancedTrainingInterface()
     window.show()
