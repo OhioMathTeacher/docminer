@@ -29,6 +29,8 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 *Check the [Releases](https://github.com/OhioMathTeacher/docminer/releases) page for the latest builds!*
 
+*For immediate access to v6.1.0 features, run from source (instructions below).*
+
 ---
 
 ## 🎥 **Video Tutorial - Quick Start Guide**
@@ -55,6 +57,30 @@ Learn how to:
 * **Manual Analysis** – Works immediately without any API keys
 * **Training Data** – Export reviewer decisions for analysis
 * **GitHub Integration** – Upload results automatically (optional)
+
+---
+
+## 🛠️ **For Developers**
+
+### Running from Source
+```bash
+git clone https://github.com/OhioMathTeacher/docminer.git
+cd docminer
+pip install -r requirements.txt
+python3 run_research_buddy.py  # On Windows, use 'python'
+```
+
+### Building Executables
+```bash
+python build_files/build.py
+```
+
+Built executables will be in the `dist/` directory.
+
+### Running Tests
+```bash
+python -m pytest tests/
+```
 
 ---
 

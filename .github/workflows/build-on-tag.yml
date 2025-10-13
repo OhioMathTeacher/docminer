@@ -1,0 +1,226 @@
+name: 🏗️ Build Executables on Version Tag
+
+# Triggers automatically when you push a version tag (e.g., v6.1.0, v6.2.0, v7.0.0)
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Matches v6.1.0, v6.2.1, v7.0.0, etc.
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  detect-version:
+    name: 🔍 Detect Version & Spec File
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      version_number: ${{ steps.get_version.outputs.version_number }}
+      spec_file: ${{ steps.find_spec.outputs.spec_file }}
+      
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔍 Extract version from tag
+      id: get_version
+      run: |
+        # Tag is like refs/tags/v6.1.0
+        TAG_NAME="${GITHUB_REF#refs/tags/}"
+        VERSION_NUMBER="${TAG_NAME#v}"  # Remove 'v' prefix
+        
+        echo "version=$TAG_NAME" >> $GITHUB_OUTPUT
+        echo "version_number=$VERSION_NUMBER" >> $GITHUB_OUTPUT
+        
+        echo "📌 Building version: $TAG_NAME ($VERSION_NUMBER)"
+    
+    - name: 🔎 Find matching spec file
+      id: find_spec
+      run: |
+        VERSION_NUMBER="${{ steps.get_version.outputs.version_number }}"
+        
+        # Extract major.minor (e.g., "6.1" from "6.1.0")
+        MAJOR_MINOR=$(echo "$VERSION_NUMBER" | cut -d. -f1,2)
+        
+        # Look for exact match first (DocMiner6.1.0.spec), then major.minor (DocMiner6.1.spec)
+        if [ -f "build_files/DocMiner${VERSION_NUMBER}.spec" ]; then
+          SPEC_FILE="DocMiner${VERSION_NUMBER}.spec"
+          echo "✅ Found exact spec: $SPEC_FILE"
+        elif [ -f "build_files/DocMiner${MAJOR_MINOR}.spec" ]; then
+          SPEC_FILE="DocMiner${MAJOR_MINOR}.spec"
+          echo "✅ Found major.minor spec: $SPEC_FILE"
+        else
+          echo "❌ No spec file found for version $VERSION_NUMBER"
+          echo "   Looked for: DocMiner${VERSION_NUMBER}.spec or DocMiner${MAJOR_MINOR}.spec"
+          exit 1
+        fi
+        
+        echo "spec_file=$SPEC_FILE" >> $GITHUB_OUTPUT
+        echo "🎯 Using spec file: build_files/$SPEC_FILE"
+
+  build:
+    name: 🔨 Build ${{ matrix.platform }}
+    needs: detect-version
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            platform: Linux
+            artifact_name: DocMiner-linux
+          - os: windows-latest
+            platform: Windows
+            artifact_name: DocMiner-windows
+          - os: macos-latest
+            platform: macOS
+            artifact_name: DocMiner-macos
+
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: 🔨 Build executable
+      run: |
+        python -m PyInstaller build_files/${{ needs.detect-version.outputs.spec_file }} --distpath ./dist --workpath ./build --clean --noconfirm
+    
+    - name: 📁 Prepare release files
+      shell: bash
+      run: |
+        VERSION_NUM="${{ needs.detect-version.outputs.version_number }}"
+        
+        # Extract app name from spec file (e.g., DocMiner6.1 from DocMiner6.1.spec)
+        SPEC_BASE=$(basename "${{ needs.detect-version.outputs.spec_file }}" .spec)
+        
+        mkdir -p release-files
+        
+        if [ "${{ matrix.platform }}" == "Windows" ]; then
+          cd dist/${SPEC_BASE}
+          powershell -Command "Compress-Archive -Path * -DestinationPath ../../release-files/DocMiner-${VERSION_NUM}-Windows.zip"
+        elif [ "${{ matrix.platform }}" == "macOS" ]; then
+          # Install create-dmg
+          brew install create-dmg
+          
+          # Create DMG
+          create-dmg \
+            --volname "DocMiner ${VERSION_NUM}" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --app-drop-link 425 120 \
+            "release-files/DocMiner-${VERSION_NUM}-macOS.dmg" \
+            "dist/${SPEC_BASE}.app" || \
+          # Fallback if create-dmg fails
+          hdiutil create -volname "DocMiner ${VERSION_NUM}" -srcfolder "dist/${SPEC_BASE}.app" -ov -format UDZO "release-files/DocMiner-${VERSION_NUM}-macOS.dmg"
+        else
+          # Linux - create both tar.gz and try AppImage
+          cd dist
+          tar -czf ../release-files/DocMiner-${VERSION_NUM}-Linux.tar.gz ${SPEC_BASE}/
+          
+          # Build AppImage if script exists
+          if [ -f "../build_files/create_appimage.sh" ]; then
+            cd ..
+            bash build_files/create_appimage.sh || echo "AppImage build failed, continuing..."
+            mv DocMiner-*-x86_64.AppImage release-files/ 2>/dev/null || true
+          fi
+        fi
+    
+    - name: 📤 Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: release-files/*
+        retention-days: 7
+
+  release:
+    name: 🎉 Create GitHub Release
+    needs: [detect-version, build]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code (for release notes)
+      uses: actions/checkout@v4
+    
+    - name: 📥 Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    
+    - name: 📋 Consolidate release files
+      run: |
+        mkdir -p release-files
+        find artifacts -type f -exec cp {} release-files/ \;
+        ls -lh release-files/
+    
+    - name: 📝 Check for release notes
+      id: check_notes
+      run: |
+        VERSION_NUM="${{ needs.detect-version.outputs.version_number }}"
+        NOTES_FILE="RELEASE_NOTES_v${VERSION_NUM}.txt"
+        
+        if [ -f "$NOTES_FILE" ]; then
+          echo "has_notes=true" >> $GITHUB_OUTPUT
+          echo "notes_file=$NOTES_FILE" >> $GITHUB_OUTPUT
+          echo "✅ Found release notes: $NOTES_FILE"
+        else
+          echo "has_notes=false" >> $GITHUB_OUTPUT
+          echo "ℹ️  No release notes file found (looked for $NOTES_FILE)"
+        fi
+    
+    - name: 🎉 Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ needs.detect-version.outputs.version }}
+        name: "DocMiner ${{ needs.detect-version.outputs.version }}"
+        draft: false
+        prerelease: false
+        make_latest: true
+        files: release-files/*
+        body_path: ${{ steps.check_notes.outputs.has_notes == 'true' && steps.check_notes.outputs.notes_file || '' }}
+        body: |
+          # 🎯 DocMiner ${{ needs.detect-version.outputs.version }}
+          
+          **Automated release build**
+          
+          ## 📥 Quick Downloads
+          
+          - 🐧 **Linux**: `DocMiner-*-x86_64.AppImage` (recommended) or `DocMiner-*-Linux.tar.gz`
+          - 🍎 **macOS**: `DocMiner-*-macOS.dmg` (Intel & Apple Silicon compatible)
+          - 🪟 **Windows**: `DocMiner-*-Windows.zip`
+          
+          ## 📝 Installation
+          
+          ### Linux
+          ```bash
+          chmod +x DocMiner-*-x86_64.AppImage
+          ./DocMiner-*-x86_64.AppImage
+          ```
+          
+          ### macOS
+          1. Download DMG
+          2. Double-click to open
+          3. Drag DocMiner to Applications
+          4. If blocked by security: `xattr -cr /Applications/DocMiner*.app`
+          
+          ### Windows
+          1. Download ZIP
+          2. Extract all files
+          3. Double-click `DocMiner*.exe`
+          
+          ---
+          
+          ${{ steps.check_notes.outputs.has_notes == 'true' && 'See detailed release notes above.' || 'Built from latest source code.' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
