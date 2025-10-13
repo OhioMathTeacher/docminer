@@ -1,15 +1,15 @@
-# Building Research Buddy 5.2 for macOS (M1/ARM64)
+# Building DocMiner 5.2 for macOS (M1/ARM64)
 
 ## Quick Build Instructions
 
 ### 1. Clone or Update Repository
 ```bash
 # If not already cloned:
-git clone https://github.com/OhioMathTeacher/research-buddy.git
-cd research-buddy
+git clone https://github.com/OhioMathTeacher/docminer.git
+cd docminer
 
 # OR if already cloned:
-cd research-buddy
+cd docminer
 git pull origin main
 ```
 
@@ -23,15 +23,15 @@ pip3 install pyinstaller
 ### 3. Build the macOS Application
 ```bash
 # Build with PyInstaller
-pyinstaller build_files/ResearchBuddy5.2.spec --clean
+pyinstaller build_files/DocMiner5.2.spec --clean
 ```
 
-This will create: `dist/ResearchBuddy5.2.app/`
+This will create: `dist/DocMiner5.2.app/`
 
 ### 4. Test the Build
 ```bash
 # Launch the app
-open dist/ResearchBuddy5.2.app
+open dist/DocMiner5.2.app
 ```
 
 Test:
@@ -45,7 +45,7 @@ Test:
 #### Option A: Create ZIP Archive (Simple)
 ```bash
 cd dist
-zip -r ResearchBuddy-5.2-macOS.zip ResearchBuddy5.2.app
+zip -r DocMiner-5.2-macOS.zip DocMiner5.2.app
 ```
 
 #### Option B: Create DMG (Recommended)
@@ -55,22 +55,22 @@ brew install create-dmg
 
 # Create DMG
 create-dmg \
-  --volname "Research Buddy 5.2" \
+  --volname "DocMiner 5.2" \
   --window-pos 200 120 \
   --window-size 600 400 \
   --icon-size 100 \
-  --icon "ResearchBuddy5.2.app" 175 120 \
-  --hide-extension "ResearchBuddy5.2.app" \
+  --icon "DocMiner5.2.app" 175 120 \
+  --hide-extension "DocMiner5.2.app" \
   --app-drop-link 425 120 \
-  "ResearchBuddy-5.2-macOS.dmg" \
-  "dist/ResearchBuddy5.2.app"
+  "DocMiner-5.2-macOS.dmg" \
+  "dist/DocMiner5.2.app"
 ```
 
 ### 6. Upload to GitHub Release
 
-1. Go to: https://github.com/OhioMathTeacher/research-buddy/releases/tag/v5.2
+1. Go to: https://github.com/OhioMathTeacher/docminer/releases/tag/v5.2
 2. Click "Edit release"
-3. Upload: `ResearchBuddy-5.2-macOS.dmg` (or `.zip`)
+3. Upload: `DocMiner-5.2-macOS.dmg` (or `.zip`)
 4. Click "Update release"
 
 ## Build Details
@@ -94,13 +94,13 @@ pip3 install --upgrade -r requirements.txt
 
 ### Issue: Permission denied
 ```bash
-chmod +x dist/ResearchBuddy5.2.app/Contents/MacOS/ResearchBuddy5.2
+chmod +x dist/DocMiner5.2.app/Contents/MacOS/DocMiner5.2
 ```
 
 ### Issue: "App is damaged" warning
 ```bash
 # Remove quarantine flag
-xattr -cr dist/ResearchBuddy5.2.app
+xattr -cr dist/DocMiner5.2.app
 ```
 
 ## Notes

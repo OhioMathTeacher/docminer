@@ -1,4 +1,4 @@
-# DALL-E Image Generation Prompts for Research Buddy Tutorial
+# DALL-E Image Generation Prompts for DocMiner Tutorial
 ## Complete Visual Asset List in Scene Order
 
 **Total Images Needed:** 15-20 images  
@@ -20,7 +20,7 @@ Professional male professor in his 50s, friendly warm smile, short gray beard, g
 
 ---
 
-### Image 02: Research Buddy Avatar  
+### Image 02: DocMiner Avatar  
 **Filename:** `research_buddy.png`  
 **DALL-E Prompt:**
 ```
@@ -49,7 +49,7 @@ Young female graduate student in her mid-20s, enthusiastic smile, brown hair in 
 **Scene:** Opening (before Scene 1)  
 **DALL-E Prompt:**
 ```
-Modern professional title card design reading "Research Buddy Tutorial" with subtitle "AI-Assisted Positionality Analysis for Academic Research", clean minimalist design, blue and white color scheme, academic theme with subtle book and magnifying glass icons, professional educational software branding, 16:9 landscape format
+Modern professional title card design reading "DocMiner Tutorial" with subtitle "AI-Assisted Positionality Analysis for Academic Research", clean minimalist design, blue and white color scheme, academic theme with subtle book and magnifying glass icons, professional educational software branding, 16:9 landscape format
 ```
 
 **Usage:** 0:00-0:05 - Opening title screen
@@ -229,7 +229,7 @@ Simplified GitHub repository interface mockup showing folder structure with "tra
 **Scene:** Scene 7 Closing  
 **DALL-E Prompt:**
 ```
-Friendly closing screen showing the three characters (professor, AI robot, graduate student) waving goodbye together, text overlay reading "Thank You for Watching!" and "Happy Analyzing!" with Research Buddy logo, warm friendly design, professional educational branding, 16:9 landscape format
+Friendly closing screen showing the three characters (professor, AI robot, graduate student) waving goodbye together, text overlay reading "Thank You for Watching!" and "Happy Analyzing!" with DocMiner logo, warm friendly design, professional educational branding, 16:9 landscape format
 ```
 
 **Usage:** 10:15-10:30 - Closing credits
@@ -241,7 +241,7 @@ Friendly closing screen showing the three characters (professor, AI robot, gradu
 **Scene:** Final Screen  
 **DALL-E Prompt:**
 ```
-Professional credits screen with centered text layout reading "Research Buddy v5.2" "Created by: Michael Todd Edwards (OhioMathTeacher)" "License: CC BY-NC 4.0" "GitHub: github.com/OhioMathTeacher/research-buddy", clean minimalist design, blue and white color scheme, easy to read typography
+Professional credits screen with centered text layout reading "DocMiner v5.2" "Created by: Michael Todd Edwards (OhioMathTeacher)" "License: CC BY-NC 4.0" "GitHub: github.com/OhioMathTeacher/docminer", clean minimalist design, blue and white color scheme, easy to read typography
 ```
 
 **Usage:** 10:30-10:45 - Final credits
@@ -254,7 +254,7 @@ Professional credits screen with centered text layout reading "Research Buddy v5
 **Filename:** `workflow_overview.png`  
 **DALL-E Prompt:**
 ```
-Simple flowchart diagram showing Research Buddy workflow: "Load PDF" → "Select Text" → "AI Analysis" → "Make Decision" → "Upload to GitHub", clean educational infographic style, blue arrows connecting each step, icon for each stage, professional diagram design
+Simple flowchart diagram showing DocMiner workflow: "Load PDF" → "Select Text" → "AI Analysis" → "Make Decision" → "Upload to GitHub", clean educational infographic style, blue arrows connecting each step, icon for each stage, professional diagram design
 ```
 
 **Usage:** Can be shown during introduction or transition scenes

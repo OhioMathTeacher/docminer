@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Simple Research Buddy Launcher with Secure Credentials
+Simple DocMiner Launcher with Secure Credentials
 
-Just double-click to run Research Buddy with your saved credentials.
+Just double-click to run DocMiner with your saved credentials.
 """
 
 import os
@@ -12,23 +12,23 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication, QMessageBox, QInputDialog, QDialog, QVBoxLayout, QLabel, QPushButton
 
 class SimpleCredentialDialog(QDialog):
-    """Simple dialog to get credentials and launch Research Buddy"""
+    """Simple dialog to get credentials and launch DocMiner"""
     
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Research Buddy - Quick Launch")
+        self.setWindowTitle("DocMiner - Quick Launch")
         self.setModal(True)
         self.resize(400, 200)
         
         layout = QVBoxLayout(self)
         
         # Title
-        title = QLabel("🚀 Research Buddy Quick Launch")
+        title = QLabel("🚀 DocMiner Quick Launch")
         title.setStyleSheet("font-size: 16px; font-weight: bold; margin: 10px;")
         layout.addWidget(title)
         
         # Info
-        info = QLabel("Enter your credentials to launch Research Buddy securely.")
+        info = QLabel("Enter your credentials to launch DocMiner securely.")
         info.setStyleSheet("margin: 10px; color: #666;")
         layout.addWidget(info)
         
@@ -138,7 +138,7 @@ class SimpleCredentialDialog(QDialog):
             return False
     
     def launch_research_buddy(self):
-        """Launch Research Buddy with credentials"""
+        """Launch DocMiner with credentials"""
         try:
             # Get paths
             env_script = Path.home() / ".research_buddy" / "scripts" / "set_env.sh"
@@ -152,11 +152,11 @@ class SimpleCredentialDialog(QDialog):
             subprocess.Popen(["/bin/bash", "-c", cmd])
             
             # Show success and close
-            QMessageBox.information(self, "Launched!", "Research Buddy is starting...")
+            QMessageBox.information(self, "Launched!", "DocMiner is starting...")
             self.accept()
             
         except Exception as e:
-            QMessageBox.critical(self, "Launch Error", f"Could not launch Research Buddy: {e}")
+            QMessageBox.critical(self, "Launch Error", f"Could not launch DocMiner: {e}")
 
 def main():
     app = QApplication(sys.argv)

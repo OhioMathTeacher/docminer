@@ -14,11 +14,11 @@
 ### Build Infrastructure  
 - [x] Created `manual-build.yml` GitHub Actions workflow for cross-platform builds
 - [x] Created `build_local.sh` script for local macOS builds
-- [x] Verified build spec file `build_files/ResearchBuddy5.1.1.spec` is ready
+- [x] Verified build spec file `build_files/DocMiner5.1.1.spec` is ready
 - [x] All changes committed and pushed to GitHub
 
 ### Repository Organization
-- [x] Confirmed repository name `research-buddy` is correct and consistent
+- [x] Confirmed repository name `docminer` is correct and consistent
 - [x] Verified folder structure is clean and organized
 - [x] All workflows are in `.github/workflows/`
 
@@ -48,7 +48,7 @@
 
 While executables are being built, GAs can use **GitHub Codespaces**:
 
-1. Go to https://github.com/OhioMathTeacher/research-buddy
+1. Go to https://github.com/OhioMathTeacher/docminer
 2. Click green "Code" → "Codespaces" → "Create codespace"
 3. Run: `python run_research_buddy.py`
 
@@ -83,16 +83,16 @@ Get GAs downloading and running executables without any Python/git/terminal setu
 
 - `enhanced_training_interface.py` - Main application
 - `run_research_buddy.py` - Developer entry point
-- `build_files/ResearchBuddy5.1.1.spec` - PyInstaller spec
+- `build_files/DocMiner5.1.1.spec` - PyInstaller spec
 - `.github/workflows/manual-build.yml` - Automated builds
 - `requirements.txt` - Python dependencies
 - `README.md` - User-facing documentation
 
 ## 🔗 Important Links
 
-- Repository: https://github.com/OhioMathTeacher/research-buddy
-- Actions: https://github.com/OhioMathTeacher/research-buddy/actions
-- Releases: https://github.com/OhioMathTeacher/research-buddy/releases
+- Repository: https://github.com/OhioMathTeacher/docminer
+- Actions: https://github.com/OhioMathTeacher/docminer/actions
+- Releases: https://github.com/OhioMathTeacher/docminer/releases
 
 ---
 

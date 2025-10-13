@@ -1,6 +1,6 @@
 # Quick Fix for Graduate Assistants
 
-If you get "no such file or directory" when running `cd research-buddy`, the git clone probably failed.
+If you get "no such file or directory" when running `cd docminer`, the git clone probably failed.
 
 ## Step-by-Step Troubleshooting:
 
@@ -12,7 +12,7 @@ If this fails, git isn't installed.
 
 ### 2. Try the clone again with verbose output:
 ```bash
-git clone https://github.com/OhioMathTeacher/research-buddy.git
+git clone https://github.com/OhioMathTeacher/docminer.git
 ```
 
 ### 3. Check what folders exist:
@@ -20,10 +20,10 @@ git clone https://github.com/OhioMathTeacher/research-buddy.git
 ls -la
 ```
 
-### 4. If clone worked, you should see a folder called `research-buddy`
+### 4. If clone worked, you should see a folder called `docminer`
 
 ### 5. If git isn't available, try GitHub Codespaces instead:
-- Go to https://github.com/OhioMathTeacher/research-buddy
+- Go to https://github.com/OhioMathTeacher/docminer
 - Click green "Code" button
 - Click "Codespaces" tab  
 - Click "Create codespace"
@@ -32,7 +32,7 @@ ls -la
 
 ## Alternative: Download ZIP
 If git doesn't work:
-1. Go to https://github.com/OhioMathTeacher/research-buddy
+1. Go to https://github.com/OhioMathTeacher/docminer
 2. Click green "Code" button → "Download ZIP"
 3. Extract the ZIP file
 4. Open the extracted folder in VS Code

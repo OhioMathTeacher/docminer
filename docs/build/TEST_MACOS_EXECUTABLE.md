@@ -11,15 +11,15 @@
 ### Option 1: Download from GitHub Release (Recommended)
 ```bash
 cd ~/Downloads
-curl -L -o ResearchBuddy-5.1.1-macos.tar.gz \
-  "https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-macos.tar.gz"
-tar -xzf ResearchBuddy-5.1.1-macos.tar.gz
-cd ResearchBuddy5.1.1
+curl -L -o DocMiner-5.1.1-macos.tar.gz \
+  "https://github.com/OhioMathTeacher/docminer/releases/download/v5.1.1/DocMiner-5.1.1-macos.tar.gz"
+tar -xzf DocMiner-5.1.1-macos.tar.gz
+cd DocMiner5.1.1
 ```
 
 ### Option 2: If You Already Built It Locally
 ```bash
-cd ~/research-buddy/dist/ResearchBuddy5.1.1
+cd ~/docminer/dist/DocMiner5.1.1
 ```
 
 ---
@@ -28,7 +28,7 @@ cd ~/research-buddy/dist/ResearchBuddy5.1.1
 
 ### 1. Basic Launch Test
 ```bash
-./ResearchBuddy5.1.1
+./DocMiner5.1.1
 ```
 
 **Expected:**
@@ -40,8 +40,8 @@ cd ~/research-buddy/dist/ResearchBuddy5.1.1
 ```bash
 # Right-click the app → Open → Open
 # Or from terminal:
-xattr -dr com.apple.quarantine ResearchBuddy5.1.1
-./ResearchBuddy5.1.1
+xattr -dr com.apple.quarantine DocMiner5.1.1
+./DocMiner5.1.1
 ```
 
 ### 2. PDF Loading Test
@@ -87,16 +87,16 @@ xattr -dr com.apple.quarantine ResearchBuddy5.1.1
 
 ## 🐛 Common Issues & Fixes
 
-### Issue: "ResearchBuddy5.1.1 is damaged and can't be opened"
+### Issue: "DocMiner5.1.1 is damaged and can't be opened"
 **Fix:**
 ```bash
-xattr -dr com.apple.quarantine ResearchBuddy5.1.1
+xattr -dr com.apple.quarantine DocMiner5.1.1
 ```
 
 ### Issue: Application crashes on startup
 **Fix:** Run from terminal to see error:
 ```bash
-./ResearchBuddy5.1.1
+./DocMiner5.1.1
 # Look for error messages in terminal output
 ```
 
@@ -104,7 +104,7 @@ xattr -dr com.apple.quarantine ResearchBuddy5.1.1
 **Fix:** This shouldn't happen (all bundled), but if it does:
 ```bash
 # Check what's missing
-otool -L ResearchBuddy5.1.1
+otool -L DocMiner5.1.1
 ```
 
 ### Issue: PDF won't load

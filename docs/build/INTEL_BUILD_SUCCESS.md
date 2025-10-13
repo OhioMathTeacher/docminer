@@ -2,7 +2,7 @@
 
 ## 🎉 Successfully Built Intel Version!
 
-**File:** `releases-intel/ResearchBuddy-5.1.1-macos-intel.dmg` (124 MB)
+**File:** `releases-intel/DocMiner-5.1.1-macos-intel.dmg` (124 MB)
 **Architecture:** x86_64 (Intel 64-bit)
 **Status:** ✅ WORKING
 
@@ -27,13 +27,13 @@ excludes=[
 ## 📦 What You Have Now
 
 ### Intel Version (This Build)
-- **File:** `ResearchBuddy-5.1.1-macos-intel.dmg`
+- **File:** `DocMiner-5.1.1-macos-intel.dmg`
 - **Architecture:** x86_64 (Intel)
 - **Size:** 124 MB
 - **Works on:** Intel Macs natively
 
 ### ARM Version (From GitHub Actions)
-- **File:** `ResearchBuddy-5.1.1-macos.dmg` (from earlier workflow)
+- **File:** `DocMiner-5.1.1-macos.dmg` (from earlier workflow)
 - **Architecture:** ARM64 (Apple Silicon)
 - **Size:** ~257 MB  
 - **Works on:** Apple Silicon natively, Intel via Rosetta 2 (if Rosetta installed)
@@ -66,12 +66,12 @@ Try building with older PySide6 version or wait for updated packages
 
 1. **Test the Intel DMG:**
    ```bash
-   open releases-intel/ResearchBuddy-5.1.1-macos-intel.dmg
+   open releases-intel/DocMiner-5.1.1-macos-intel.dmg
    ```
 
 2. **If it works, upload to GitHub Release:**
    - Manual upload via GitHub web interface
-   - Or use GitHub CLI: `gh release upload v5.1.1 releases-intel/ResearchBuddy-5.1.1-macos-intel.dmg`
+   - Or use GitHub CLI: `gh release upload v5.1.1 releases-intel/DocMiner-5.1.1-macos-intel.dmg`
 
 3. **Update README:**
    - Change download link to Intel version
@@ -84,7 +84,7 @@ Try building with older PySide6 version or wait for updated packages
 ./build_intel_macos.sh
 ```
 
-Output will be in `releases-intel/ResearchBuddy-5.1.1-macos-intel.dmg`
+Output will be in `releases-intel/DocMiner-5.1.1-macos-intel.dmg`
 
 ## 📝 Technical Notes
 

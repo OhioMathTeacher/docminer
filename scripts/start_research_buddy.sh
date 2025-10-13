@@ -1,6 +1,6 @@
 #!/bin/bash
-# Research Buddy - Simple Startup Script
-# This script loads your environment variables and launches Research Buddy
+# DocMiner - Simple Startup Script
+# This script loads your environment variables and launches DocMiner
 
 # Get the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -8,11 +8,11 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Source environment variables from bashrc
 source ~/.bashrc
 
-# Change to the research-buddy directory
+# Change to the docminer directory
 cd "$SCRIPT_DIR"
 
-# Launch Research Buddy
-echo "🚀 Launching Research Buddy..."
+# Launch DocMiner
+echo "🚀 Launching DocMiner..."
 python3 run_research_buddy.py
 
 # If Python 3 command fails, try just 'python'

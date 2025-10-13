@@ -1,4 +1,4 @@
-#!/home/todd/research-buddy/venv_appimage/bin/python3
+#!/home/todd/docminer/venv_appimage/bin/python3
 import sys
 from distro.distro import main
 if __name__ == '__main__':

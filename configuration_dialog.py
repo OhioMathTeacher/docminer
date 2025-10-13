@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Configuration Dialog for Research Buddy
+Configuration Dialog for DocMiner
 
 Secure configuration with environment variables for sensitive data.
 """
@@ -96,11 +96,11 @@ def save_configuration(config):
 
 
 class ConfigurationDialog(QDialog):
-    """Secure configuration dialog for Research Buddy settings"""
+    """Secure configuration dialog for DocMiner settings"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("🔧 Research Buddy Configuration")
+        self.setWindowTitle("🔧 DocMiner Configuration")
         self.setFixedSize(650, 550)  # Reduced height since we removed status section
         
         # Make dialog truly modal - blocks interaction with parent window
@@ -120,7 +120,7 @@ class ConfigurationDialog(QDialog):
         layout = QVBoxLayout()
         
         # Title
-        title = QLabel("🔧 Research Buddy Configuration")
+        title = QLabel("🔧 DocMiner Configuration")
         title_font = QFont()
         title_font.setPointSize(16)
         title_font.setBold(True)
@@ -177,7 +177,7 @@ class ConfigurationDialog(QDialog):
         repo_layout.addRow("GitHub Owner:", self.github_owner_input)
         
         self.github_repo_input = QLineEdit()
-        self.github_repo_input.setPlaceholderText("research-buddy")
+        self.github_repo_input.setPlaceholderText("docminer")
         repo_layout.addRow("GitHub Repository:", self.github_repo_input)
         
         repo_group.setLayout(repo_layout)
@@ -228,7 +228,7 @@ class ConfigurationDialog(QDialog):
         """Load values into the form"""
         # Load repository settings (pre-fill if already configured)
         self.github_owner_input.setText(self.config.get("github_owner", ""))
-        self.github_repo_input.setText(self.config.get("github_repo", "research-buddy"))
+        self.github_repo_input.setText(self.config.get("github_repo", "docminer"))
         
         # Don't load API keys/tokens into input fields for security
         # User must re-enter them to change

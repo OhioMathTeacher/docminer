@@ -57,7 +57,7 @@ The action will automatically use the default `GITHUB_TOKEN` with the permission
     GH_TOKEN: ${{ github.token }}
   run: |
     gh release create v5.1.1 \
-      --title "Research Buddy 5.1.1" \
+      --title "DocMiner 5.1.1" \
       --notes-file release-notes.md \
       release-files/*
 ```

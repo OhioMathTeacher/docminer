@@ -25,7 +25,7 @@ Update the GitHub Actions workflow or build instructions to ALWAYS use the spec 
 
 Add the launcher script to existing downloads:
 
-1. Create `Launch ResearchBuddy.command` in the distribution
+1. Create `Launch DocMiner.command` in the distribution
 2. Include `MACOS_RUN_INSTRUCTIONS.md` in the tarball
 3. Update README with correct Terminal instructions
 
@@ -34,15 +34,15 @@ Add the launcher script to existing downloads:
 Build locally on macOS to verify it creates a `.app`:
 
 ```bash
-cd ~/research-buddy
+cd ~/docminer
 python build_files/build.py macos --spec-file --clean
 ```
 
 This should create:
-- `dist/ResearchBuddy5.1.1.app/` (macOS app bundle - can be double-clicked!)
+- `dist/DocMiner5.1.1.app/` (macOS app bundle - can be double-clicked!)
 
 Instead of:
-- `dist/ResearchBuddy5.1.1` (Unix executable - Terminal only)
+- `dist/DocMiner5.1.1` (Unix executable - Terminal only)
 
 ### Verification Steps
 
@@ -51,13 +51,13 @@ After building with spec file:
 ```bash
 # Check that .app was created
 ls -la dist/
-# Should see: ResearchBuddy5.1.1.app/
+# Should see: DocMiner5.1.1.app/
 
 # Test the app
-open dist/ResearchBuddy5.1.1.app
+open dist/DocMiner5.1.1.app
 
 # Verify it's a proper bundle
-file dist/ResearchBuddy5.1.1.app/Contents/MacOS/ResearchBuddy5.1.1
+file dist/DocMiner5.1.1.app/Contents/MacOS/DocMiner5.1.1
 # Should show: Mach-O 64-bit executable arm64
 ```
 
@@ -66,8 +66,8 @@ file dist/ResearchBuddy5.1.1.app/Contents/MacOS/ResearchBuddy5.1.1
 For next release, the macOS tarball should contain:
 
 ```
-ResearchBuddy5.1.1-macos/
-├── ResearchBuddy5.1.1.app/     ← The .app bundle
+DocMiner5.1.1-macos/
+├── DocMiner5.1.1.app/     ← The .app bundle
 ├── README.md
 ├── MACOS_RUN_INSTRUCTIONS.md   ← Just in case
 └── sample_pdfs/
@@ -75,6 +75,6 @@ ResearchBuddy5.1.1-macos/
 
 ## References
 
-- Spec file: `build_files/ResearchBuddy5.1.1.spec` (already has BUNDLE section)
+- Spec file: `build_files/DocMiner5.1.1.spec` (already has BUNDLE section)
 - Build script: `build_files/build.py` (needs to use --spec-file for macOS)
 - GitHub Actions: `.github/workflows/build.yml` (needs update)

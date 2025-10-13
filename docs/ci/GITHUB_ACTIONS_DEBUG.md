@@ -47,13 +47,13 @@ jobs:
 ## What Should Happen
 
 1. **Build job** creates platform-specific files:
-   - macOS: `releases/ResearchBuddy-5.1.1.dmg`
-   - Windows: `releases/ResearchBuddy-5.1.1-windows.zip`
-   - Linux: `releases/ResearchBuddy-5.1.1-linux.tar.gz` + `releases/ResearchBuddy-5.1.1-x86_64.AppImage`
+   - macOS: `releases/DocMiner-5.1.1.dmg`
+   - Windows: `releases/DocMiner-5.1.1-windows.zip`
+   - Linux: `releases/DocMiner-5.1.1-linux.tar.gz` + `releases/DocMiner-5.1.1-x86_64.AppImage`
 
 2. **Upload artifacts** to GitHub (each in its own subdirectory)
 
-3. **Download artifacts** to `artifacts/` (creates subdirectories like `artifacts/ResearchBuddy-5.1.1-macos/`)
+3. **Download artifacts** to `artifacts/` (creates subdirectories like `artifacts/DocMiner-5.1.1-macos/`)
 
 4. **Flatten** structure by copying all files to `release-files/`
 

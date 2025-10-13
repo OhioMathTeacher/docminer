@@ -1,7 +1,7 @@
 #!/bin/bash
-# Test configuration script for Research Buddy
+# Test configuration script for DocMiner
 
-echo "🔍 Testing Research Buddy Configuration"
+echo "🔍 Testing DocMiner Configuration"
 echo "========================================"
 echo ""
 

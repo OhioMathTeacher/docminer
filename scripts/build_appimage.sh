@@ -1,19 +1,19 @@
 #!/bin/bash
 #
-# AppImage Build Script for Research Buddy
+# AppImage Build Script for DocMiner
 # Run this on Linux (tested on Linux Mint / Ubuntu 20.04+)
 #
 # This script will:
 # 1. Install dependencies
 # 2. Build the standalone executable with PyInstaller
 # 3. Create an AppImage using appimagetool
-# 4. Output: ResearchBuddy-5.2-x86_64.AppImage
+# 4. Output: DocMiner-5.2-x86_64.AppImage
 #
 
 set -e  # Exit on any error
 
 echo "=========================================="
-echo "Research Buddy AppImage Build Script"
+echo "DocMiner AppImage Build Script"
 echo "=========================================="
 echo ""
 
@@ -32,7 +32,7 @@ echo ""
 
 # Version
 VERSION="5.2"
-APP_NAME="ResearchBuddy"
+APP_NAME="DocMiner"
 FULL_NAME="${APP_NAME}-${VERSION}"
 
 # Check for Python 3
@@ -143,7 +143,7 @@ SELF=$(readlink -f "$0")
 HERE=${SELF%/*}
 export PATH="${HERE}/usr/bin:${PATH}"
 export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
-exec "${HERE}/usr/bin/ResearchBuddy" "$@"
+exec "${HERE}/usr/bin/DocMiner" "$@"
 EOF
 
 chmod +x AppDir/AppRun
@@ -174,7 +174,7 @@ echo "To test, run:"
 echo "  ./${FULL_NAME}-x86_64.AppImage"
 echo ""
 echo "To upload to GitHub release:"
-echo "  1. Go to https://github.com/OhioMathTeacher/research-buddy/releases/tag/v${VERSION}"
+echo "  1. Go to https://github.com/OhioMathTeacher/docminer/releases/tag/v${VERSION}"
 echo "  2. Click 'Edit release'"
 echo "  3. Upload ${FULL_NAME}-x86_64.AppImage"
 echo ""

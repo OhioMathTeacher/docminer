@@ -76,7 +76,7 @@ with:
 
 ## Test This
 
-1. Go to: https://github.com/OhioMathTeacher/research-buddy/actions
+1. Go to: https://github.com/OhioMathTeacher/docminer/actions
 2. Click "Manual Build All Platforms"
 3. Click "Run workflow" → "Run workflow"
 4. Watch for:
@@ -87,11 +87,11 @@ with:
 ## Expected Results
 
 After successful run:
-- **macOS**: `ResearchBuddy-5.1.1.dmg` (Universal Binary - Intel + Apple Silicon)
-- **Windows**: `ResearchBuddy-5.1.1-windows.zip`
-- **Linux**: `ResearchBuddy-5.1.1-linux.tar.gz` + `ResearchBuddy-5.1.1-x86_64.AppImage`
+- **macOS**: `DocMiner-5.1.1.dmg` (Universal Binary - Intel + Apple Silicon)
+- **Windows**: `DocMiner-5.1.1-windows.zip`
+- **Linux**: `DocMiner-5.1.1-linux.tar.gz` + `DocMiner-5.1.1-x86_64.AppImage`
 
-All available at: https://github.com/OhioMathTeacher/research-buddy/releases/tag/v5.1.1
+All available at: https://github.com/OhioMathTeacher/docminer/releases/tag/v5.1.1
 
 ---
 

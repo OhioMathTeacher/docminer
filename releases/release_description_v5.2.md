@@ -1,4 +1,4 @@
-# 🚀 Research Buddy v5.2 - Enhanced Upload & Configuration# 🚀 Research Buddy v5.2 - The Complete Academic Analysis Solution
+# 🚀 DocMiner v5.2 - Enhanced Upload & Configuration# 🚀 DocMiner v5.2 - The Complete Academic Analysis Solution
 
 
 
@@ -56,7 +56,7 @@
 
 ---2. **Extract** the downloaded archive
 
-3. **Double-click** the ResearchBuddy executable
+3. **Double-click** the DocMiner executable
 
 ## **📥 Quick Start**4. **Start analyzing** papers immediately!
 
@@ -66,7 +66,7 @@
 
 2. Install/Extract the application  5. Click **Configuration → Settings** in the menu
 
-3. Launch ResearchBuddy6. Enter your **OpenAI API key** (starts with `sk-`)
+3. Launch DocMiner6. Enter your **OpenAI API key** (starts with `sk-`)
 
 4. Configure GitHub credentials (first time only)7. Enter your **GitHub token** (for automatic uploads)
 
@@ -100,7 +100,7 @@
 - **OpenAI API Key**: For AI-assisted analysis
 - **GitHub Account**: For automatic result management
 
-## ** Why Choose Research Buddy 5.2?**
+## ** Why Choose DocMiner 5.2?**
 
 ✅ **Proven in Academia** - Used by research institutions worldwide  
 ✅ **Zero Setup Friction** - Graduate assistants love the simplicity  
@@ -112,8 +112,8 @@
 ---
 
 **File Sizes:**
-- **Linux**: ResearchBuddy5.1-linux.tar.gz (~9MB)
-- **Windows**: ResearchBuddy5.1-windows.zip (~9MB)
-- **macOS**: ResearchBuddy5.1-macos.tar.gz (~9MB)
+- **Linux**: DocMiner5.1-linux.tar.gz (~9MB)
+- **Windows**: DocMiner5.1-windows.zip (~9MB)
+- **macOS**: DocMiner5.1-macos.tar.gz (~9MB)
 
 ** Perfect for academic teams who need reliable, professional document analysis tools that graduate assistants can use immediately!**

@@ -1,8 +1,8 @@
-# 🎓 Research Buddy 3.1 - Quick Start for Graduate Assistants
+# 🎓 DocMiner 3.1 - Quick Start for Graduate Assistants
 
 ## 📦 What You Get
 
-- **ResearchBuddy3.1** - Standalone executable (double-click to run!)
+- **DocMiner3.1** - Standalone executable (double-click to run!)
 - No Python installation needed
 - No command line required
 - No technical setup
@@ -10,14 +10,14 @@
 ## 🚀 How to Use
 
 ### Step 1: Download & Extract
-1. Download the Research Buddy package for your system
+1. Download the DocMiner package for your system
 2. Extract/unzip the files to your Desktop or Documents folder
 3. **That's it!** No installation required
 
-### Step 2: Launch Research Buddy
-- **macOS**: Double-click `ResearchBuddy3.1.app`
-- **Windows**: Double-click `ResearchBuddy3.1.exe`
-- **Linux**: Double-click `ResearchBuddy3.1`
+### Step 2: Launch DocMiner
+- **macOS**: Double-click `DocMiner3.1.app`
+- **Windows**: Double-click `DocMiner3.1.exe`
+- **Linux**: Double-click `DocMiner3.1`
 
 ### Step 3: Start Analyzing Papers
 1. The interface will open automatically
@@ -34,7 +34,7 @@ If you want AI-powered analysis (optional):
 3. Enter it in the configuration dialog
 4. Click "Save Repository Settings"
 
-**Note**: Research Buddy works great for manual analysis even without AI!
+**Note**: DocMiner works great for manual analysis even without AI!
 
 ## 🎯 What to Look For (Positionality)
 

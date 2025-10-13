@@ -22,7 +22,7 @@
 
 This will build all three platforms automatically:
 
-1. Go to: https://github.com/OhioMathTeacher/research-buddy/actions
+1. Go to: https://github.com/OhioMathTeacher/docminer/actions
 2. Click **"Manual Build All Platforms"** workflow
 3. Click **"Run workflow"** → **"Run workflow"** button
 4. Wait 10-15 minutes for builds to complete
@@ -30,9 +30,9 @@ This will build all three platforms automatically:
 6. Create GitHub release and upload the files
 
 **Files you'll get:**
-- `ResearchBuddy-5.1.1-macos.zip` (macOS .app bundle)
-- `ResearchBuddy-5.1.1-windows.zip` (Windows .exe)
-- `ResearchBuddy-5.1.1-linux.tar.gz` (Linux executable)
+- `DocMiner-5.1.1-macos.zip` (macOS .app bundle)
+- `DocMiner-5.1.1-windows.zip` (Windows .exe)
+- `DocMiner-5.1.1-linux.tar.gz` (Linux executable)
 
 ### **Option 2: Build Linux Executable Locally**
 
@@ -40,8 +40,8 @@ On your Linux machine:
 
 ```bash
 # Clone if not already there
-git clone https://github.com/OhioMathTeacher/research-buddy.git
-cd research-buddy
+git clone https://github.com/OhioMathTeacher/docminer.git
+cd docminer
 git pull  # Get latest changes
 
 # Set up Python environment
@@ -51,7 +51,7 @@ pip install -r requirements.txt
 pip install pyinstaller
 
 # Build the Linux executable
-python -m PyInstaller build_files/ResearchBuddy5.1.1.spec \
+python -m PyInstaller build_files/DocMiner5.1.1.spec \
     --distpath ./dist \
     --workpath ./build \
     --clean \
@@ -60,11 +60,11 @@ python -m PyInstaller build_files/ResearchBuddy5.1.1.spec \
 # Create distribution package
 mkdir -p releases
 cd dist
-tar -czf ../releases/ResearchBuddy-5.1.1-linux.tar.gz ResearchBuddy5.1.1
+tar -czf ../releases/DocMiner-5.1.1-linux.tar.gz DocMiner5.1.1
 cd ..
 
 # Test it
-./dist/ResearchBuddy5.1.1/ResearchBuddy5.1.1
+./dist/DocMiner5.1.1/DocMiner5.1.1
 ```
 
 ### **Option 3: Create Linux AppImage (Optional - More User Friendly)**
@@ -79,38 +79,38 @@ wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appima
 chmod +x appimagetool-x86_64.AppImage
 
 # Create AppImage directory structure
-mkdir -p ResearchBuddy.AppDir/usr/bin
-mkdir -p ResearchBuddy.AppDir/usr/share/applications
-mkdir -p ResearchBuddy.AppDir/usr/share/icons/hicolor/256x256/apps
+mkdir -p DocMiner.AppDir/usr/bin
+mkdir -p DocMiner.AppDir/usr/share/applications
+mkdir -p DocMiner.AppDir/usr/share/icons/hicolor/256x256/apps
 
 # Copy executable
-cp -r dist/ResearchBuddy5.1.1/* ResearchBuddy.AppDir/usr/bin/
+cp -r dist/DocMiner5.1.1/* DocMiner.AppDir/usr/bin/
 
 # Create .desktop file
-cat > ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop << 'EOF'
+cat > DocMiner.AppDir/usr/share/applications/docminer.desktop << 'EOF'
 [Desktop Entry]
 Type=Application
-Name=Research Buddy
-Exec=ResearchBuddy5.1.1
-Icon=researchbuddy
+Name=DocMiner
+Exec=DocMiner5.1.1
+Icon=docminer
 Categories=Education;Science;
 EOF
 
 # Create AppRun script
-cat > ResearchBuddy.AppDir/AppRun << 'EOF'
+cat > DocMiner.AppDir/AppRun << 'EOF'
 #!/bin/bash
 SELF=$(readlink -f "$0")
 HERE=${SELF%/*}
 export PATH="${HERE}/usr/bin/:${PATH}"
-exec "${HERE}/usr/bin/ResearchBuddy5.1.1" "$@"
+exec "${HERE}/usr/bin/DocMiner5.1.1" "$@"
 EOF
-chmod +x ResearchBuddy.AppDir/AppRun
+chmod +x DocMiner.AppDir/AppRun
 
 # Build AppImage
-./appimagetool-x86_64.AppImage ResearchBuddy.AppDir ResearchBuddy-5.1.1-x86_64.AppImage
+./appimagetool-x86_64.AppImage DocMiner.AppDir DocMiner-5.1.1-x86_64.AppImage
 
 # Test it
-./ResearchBuddy-5.1.1-x86_64.AppImage
+./DocMiner-5.1.1-x86_64.AppImage
 ```
 
 ---
@@ -119,18 +119,18 @@ chmod +x ResearchBuddy.AppDir/AppRun
 
 Once you have all three executables:
 
-1. Go to: https://github.com/OhioMathTeacher/research-buddy/releases
+1. Go to: https://github.com/OhioMathTeacher/docminer/releases
 2. Click **"Draft a new release"**
 3. Tag: `v5.1.1`
-4. Title: **Research Buddy 5.1.1 - Complete Cross-Platform Release**
+4. Title: **DocMiner 5.1.1 - Complete Cross-Platform Release**
 5. Upload files:
-   - `ResearchBuddy-5.1.1-macos.zip`
-   - `ResearchBuddy-5.1.1-windows.zip`
-   - `ResearchBuddy-5.1.1-linux.tar.gz` (or `.AppImage`)
+   - `DocMiner-5.1.1-macos.zip`
+   - `DocMiner-5.1.1-windows.zip`
+   - `DocMiner-5.1.1-linux.tar.gz` (or `.AppImage`)
 6. Description:
 
 ```markdown
-# 🚀 Research Buddy 5.1.1 - Ready to Run!
+# 🚀 DocMiner 5.1.1 - Ready to Run!
 
 **NO Python, NO setup, NO terminal - just download and run!**
 
@@ -138,7 +138,7 @@ Once you have all three executables:
 
 - **macOS**: Download → Extract → Double-click `.app`
 - **Windows**: Download → Extract → Double-click `.exe`  
-- **Linux**: Download → Extract → Run `./ResearchBuddy5.1.1`
+- **Linux**: Download → Extract → Run `./DocMiner5.1.1`
 
 ## ✨ Features
 
@@ -169,9 +169,9 @@ If downloads don't work, use **GitHub Codespaces** (zero installation):
 After creating the release, the download links in README.md should work automatically since they point to:
 
 ```
-https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-macos.zip
-https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-windows.zip
-https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.1.1/ResearchBuddy-5.1.1-linux.tar.gz
+https://github.com/OhioMathTeacher/docminer/releases/download/v5.1.1/DocMiner-5.1.1-macos.zip
+https://github.com/OhioMathTeacher/docminer/releases/download/v5.1.1/DocMiner-5.1.1-windows.zip
+https://github.com/OhioMathTeacher/docminer/releases/download/v5.1.1/DocMiner-5.1.1-linux.tar.gz
 ```
 
 If you change file names, update README.md accordingly.
@@ -184,20 +184,20 @@ Before sharing with GAs, test each executable:
 
 ### macOS:
 ```bash
-unzip ResearchBuddy-5.1.1-macos.zip
-open ResearchBuddy5.1.1.app
+unzip DocMiner-5.1.1-macos.zip
+open DocMiner5.1.1.app
 ```
 
 ### Windows (if you have access):
 1. Extract ZIP
-2. Double-click `ResearchBuddy5.1.1.exe`
+2. Double-click `DocMiner5.1.1.exe`
 3. If Windows Defender blocks: "More info" → "Run anyway"
 
 ### Linux:
 ```bash
-tar -xzf ResearchBuddy-5.1.1-linux.tar.gz
-cd ResearchBuddy5.1.1
-./ResearchBuddy5.1.1
+tar -xzf DocMiner-5.1.1-linux.tar.gz
+cd DocMiner5.1.1
+./DocMiner5.1.1
 ```
 
 ---
@@ -228,7 +228,7 @@ Direct them to GitHub Codespaces (already in README):
 
 - **Main entry point:** `enhanced_training_interface.py`
 - **Developer entry:** `run_research_buddy.py`
-- **Build spec:** `build_files/ResearchBuddy5.1.1.spec`
+- **Build spec:** `build_files/DocMiner5.1.1.spec`
 - **Workflows:** `.github/workflows/manual-build.yml`
 - **Requirements:** `requirements.txt`
 
@@ -238,9 +238,9 @@ Direct them to GitHub Codespaces (already in README):
 
 Get these three files available for download:
 
-1. ✅ `ResearchBuddy-5.1.1-macos.zip` (macOS .app)
-2. ⏳ `ResearchBuddy-5.1.1-windows.zip` (Windows .exe) 
-3. ⏳ `ResearchBuddy-5.1.1-linux.tar.gz` (Linux executable or AppImage)
+1. ✅ `DocMiner-5.1.1-macos.zip` (macOS .app)
+2. ⏳ `DocMiner-5.1.1-windows.zip` (Windows .exe) 
+3. ⏳ `DocMiner-5.1.1-linux.tar.gz` (Linux executable or AppImage)
 
 Then update README if needed and tell your GAs to download and run!
 

@@ -1,6 +1,6 @@
 # Tests
 
-This directory contains test files for Research Buddy functionality.
+This directory contains test files for DocMiner functionality.
 
 ## Files:
 
@@ -10,7 +10,7 @@ This directory contains test files for Research Buddy functionality.
 ## Running Tests:
 
 ```bash
-cd /path/to/research-buddy
+cd /path/to/docminer
 python -m pytest tests/
 ```
 

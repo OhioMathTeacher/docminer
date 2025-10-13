@@ -55,7 +55,7 @@ class GitHubReportUploader:
         config_file = config_dir / "interface_settings.json"
         default_config = {
             "github_owner": "OhioMathTeacher",
-            "github_repo": "research-buddy", 
+            "github_repo": "docminer", 
             "github_token": ""
         }
         

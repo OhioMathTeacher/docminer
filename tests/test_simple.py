@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simplified Research Buddy for testing executable creation
+Simplified DocMiner for testing executable creation
 """
 
 import sys
@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QW
 class SimpleApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Research Buddy Test")
+        self.setWindowTitle("DocMiner Test")
         self.setGeometry(100, 100, 400, 300)
         
         central_widget = QWidget()
@@ -19,7 +19,7 @@ class SimpleApp(QMainWindow):
         layout = QVBoxLayout()
         central_widget.setLayout(layout)
         
-        label = QLabel("Research Buddy is working!")
+        label = QLabel("DocMiner is working!")
         label.setStyleSheet("font-size: 18px; padding: 20px;")
         layout.addWidget(label)
 

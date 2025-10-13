@@ -15,7 +15,7 @@ When `target_arch='universal2'` is set in the PyInstaller spec, it attempts to c
 
 Changed from Universal Binary to native architecture build:
 
-1. **PyInstaller Spec** (`build_files/ResearchBuddy5.1.1.spec`):
+1. **PyInstaller Spec** (`build_files/DocMiner5.1.1.spec`):
    - Changed `target_arch='universal2'` → `target_arch=None`
    - Builds for native architecture of the build machine
 
@@ -34,9 +34,9 @@ This is the **standard approach** used by modern macOS applications (Chrome, VS 
 ## Additional Fix
 
 Also fixed DMG filename to match artifact pattern:
-- Changed: `releases/ResearchBuddy-5.1.1.dmg`  
+- Changed: `releases/DocMiner-5.1.1.dmg`  
 - To: `releases/${{ matrix.name }}.dmg`  
-- Result: `releases/ResearchBuddy-5.1.1-macos.dmg`
+- Result: `releases/DocMiner-5.1.1-macos.dmg`
 
 ## Status
 

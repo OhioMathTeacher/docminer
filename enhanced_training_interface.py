@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Research Buddy - Enhanced Training Interface for Positionality Detection
+DocMiner - Enhanced Training Interface for Positionality Detection
 Copyright (c) 2025 Michael Todd Edwards (OhioMathTeacher)
 
 Licensed under Creative Commons Attribution-NonCommercial 4.0 International License
@@ -1165,7 +1165,7 @@ class PDFViewer(QWidget):
 class EnhancedTrainingInterface(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Research Buddy 5.2 - Professional Positionality Analysis Interface")
+        self.setWindowTitle("DocMiner 5.2 - Professional Positionality Analysis Interface")
         # Set reasonable default size but allow user to resize
         self.resize(1200, 800)  # Default size - user can resize as needed
         
@@ -1231,14 +1231,14 @@ class EnhancedTrainingInterface(QMainWindow):
         # Exit action
         exit_action = file_menu.addAction('❌ Exit')
         exit_action.triggered.connect(self.close)
-        exit_action.setStatusTip('Exit Research Buddy')
+        exit_action.setStatusTip('Exit DocMiner')
         
         # Help menu
         help_menu = menubar.addMenu('❓ Help')
         
-        about_action = help_menu.addAction('📖 About Research Buddy...')
+        about_action = help_menu.addAction('📖 About DocMiner...')
         about_action.triggered.connect(self.show_about)
-        about_action.setStatusTip('About Research Buddy')
+        about_action.setStatusTip('About DocMiner')
         
     def check_if_config_needed(self):
         """Check if configuration is needed (returns True if config missing)"""
@@ -1279,7 +1279,7 @@ class EnhancedTrainingInterface(QMainWindow):
             msg.setWindowTitle("Configuration Required")
             msg.setText(f"⚙️ Configuration Setup Required\n\nMissing: {missing_text}")
             msg.setInformativeText(
-                "Research Buddy requires configuration before use.\n\n"
+                "DocMiner requires configuration before use.\n\n"
                 "You'll need:\n"
                 "• OpenAI API Key (for AI analysis)\n"
                 "• GitHub Personal Access Token (for uploading reports)\n"
@@ -1337,7 +1337,7 @@ class EnhancedTrainingInterface(QMainWindow):
             msg.setWindowTitle("Configuration Required")
             msg.setText("⚠️ Configuration Required")
             msg.setInformativeText(
-                "Research Buddy cannot function without proper configuration.\n\n"
+                "DocMiner cannot function without proper configuration.\n\n"
                 "The application will now exit.\n\n"
                 "Please run the application again and complete the configuration."
             )
@@ -1349,8 +1349,8 @@ class EnhancedTrainingInterface(QMainWindow):
     
     def show_about(self):
         """Show about dialog"""
-        QMessageBox.about(self, "About Research Buddy 5.2", 
-                         "🎓 Research Buddy 5.2\n\n"
+        QMessageBox.about(self, "About DocMiner 5.2", 
+                         "🎓 DocMiner 5.2\n\n"
                          "Professional Positionality Analysis Interface\n\n"
                          "Features:\n"
                          "• Paper state persistence\n"
@@ -1361,13 +1361,13 @@ class EnhancedTrainingInterface(QMainWindow):
                          "• AI-assisted and manual analysis modes\n\n"
                          "Built for Graduate Assistants and Research Teams\n\n"
                          "📦 GitHub Repository:\n"
-                         "https://github.com/OhioMathTeacher/research-buddy\n\n"
+                         "https://github.com/OhioMathTeacher/docminer\n\n"
                          "📜 License:\n"
                          "Creative Commons Attribution-NonCommercial 4.0\n"
                          "Academic and educational use freely permitted.\n"
                          "Contact copyright holder for commercial use.\n\n"
                          "© 2025 Michael Todd Edwards (OhioMathTeacher)\n"
-                         "Research Buddy Project")
+                         "DocMiner Project")
         
     def setup_ui(self):
         """Create the enhanced training interface"""
@@ -2355,7 +2355,7 @@ class EnhancedTrainingInterface(QMainWindow):
                                       "1. Get an OpenAI API Key:\n"
                                       "   • Visit platform.openai.com/account/api-keys\n"
                                       "   • Create a new API key\n\n"
-                                      "2. Configure in Research Buddy:\n"
+                                      "2. Configure in DocMiner:\n"
                                       "   • Use menu: Configuration → Settings\n"
                                       "   • Enter your API key\n\n"
                                       "💡 You can still analyze papers manually using the PDF viewer!\n"
@@ -2454,7 +2454,7 @@ class EnhancedTrainingInterface(QMainWindow):
                 <p>To use AI-powered analysis, you need to configure an OpenAI API key:</p>
                 <ol>
                 <li><b>Get an API Key:</b> Visit <a href=\"https://platform.openai.com/account/api-keys\">platform.openai.com/account/api-keys</a></li>
-                <li><b>Configure in Research Buddy:</b> Use the menu: <b>Configuration → Settings</b></li>
+                <li><b>Configure in DocMiner:</b> Use the menu: <b>Configuration → Settings</b></li>
                 <li><b>Alternative:</b> You can still analyze papers manually using the PDF viewer and Human Input tab</li>
                 </ol>
                 <p><b>Manual Analysis:</b><br>
@@ -2462,7 +2462,7 @@ class EnhancedTrainingInterface(QMainWindow):
                 • Look for first-person statements about the author's background, position, or bias<br>
                 • Select text in the PDF to copy quotes as evidence<br>
                 • Make your judgment using the radio buttons</p>
-                <p><i>Research Buddy works great for manual analysis even without AI!</i></p>
+                <p><i>DocMiner works great for manual analysis even without AI!</i></p>
                 """)
             else:
                 self.statusBar().showMessage(f"❌ Analysis failed: {str(e)}")

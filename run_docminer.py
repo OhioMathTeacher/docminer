@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Research Buddy - Main Entry Point
+DocMiner - Main Entry Point
 
 A GUI application for analyzing academic papers for positionality statements.
-This is the main entry point for running Research Buddy from source.
+This is the main entry point for running DocMiner from source.
 
 For production use, see the pre-built app in releases:
-https://github.com/OhioMathTeacher/research-buddy/releases
+https://github.com/OhioMathTeacher/docminer/releases
 
 Usage:
     python run_research_buddy.py

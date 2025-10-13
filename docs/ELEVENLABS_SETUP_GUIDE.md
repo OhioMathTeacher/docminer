@@ -1,4 +1,4 @@
-# ElevenLabs Setup Guide for Research Buddy Tutorial
+# ElevenLabs Setup Guide for DocMiner Tutorial
 
 ## Quick Start Guide
 
@@ -17,7 +17,7 @@
    - Tone: Warm, authoritative, professorial
    - Accent: American (neutral)
 
-2. **Research Buddy** (AI Assistant)
+2. **DocMiner** (AI Assistant)
    - Voice: "Josh" or "Arnold"  
    - Age: Young adult
    - Tone: Friendly, helpful, enthusiastic
@@ -42,7 +42,7 @@
 ### Step 4: Organize Your Files
 
 ```
-research-buddy/
+docminer/
   docs/
     video_tutorial/
       audio/
@@ -64,7 +64,7 @@ research-buddy/
 
 **Breakdown by character:**
 - Professor Todd: ~1,200 words (~9,600 characters)
-- Research Buddy: ~1,100 words (~8,800 characters)
+- DocMiner: ~1,100 words (~8,800 characters)
 - Maya: ~1,200 words (~9,600 characters)
 
 **Free tier limit:** 10,000 characters/month
@@ -87,7 +87,7 @@ Style Exaggeration: 30%
 Speaker Boost: ON
 ```
 
-### Research Buddy - Friendly & Helpful
+### DocMiner - Friendly & Helpful
 ```
 Voice: Josh
 Stability: 50%
@@ -131,7 +131,7 @@ If you want truly custom voices:
 ## Next Steps After Audio Generation
 
 1. **Import audio into video editor** (DaVinci Resolve, Adobe Premiere, iMovie)
-2. **Sync with screen recording** of Research Buddy
+2. **Sync with screen recording** of DocMiner
 3. **Add character images** as overlays in corner
 4. **Add visual callouts** (arrows, circles, text highlights)
 5. **Export final video**
@@ -144,7 +144,7 @@ If you want truly custom voices:
 - Starter plan: 30,000 characters ✓
 
 **ROI:** One month subscription produces:
-- This Research Buddy tutorial
+- This DocMiner tutorial
 - Multiple Mathemagical History Tour episodes
 - Any other narrated content
 
@@ -154,7 +154,7 @@ Want to test before committing? Try this short sample:
 
 **Test Text (Professor Todd):**
 ```
-Welcome to Research Buddy! I'm Professor Todd, and I've been researching 
+Welcome to DocMiner! I'm Professor Todd, and I've been researching 
 positionality statements in academic writing for years. Today, I'll show you 
 how our AI-powered tool can help identify these important elements in scholarly work.
 ```

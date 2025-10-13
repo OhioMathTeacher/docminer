@@ -26,7 +26,7 @@ The application now automatically detects when critical configuration is missing
 
 Missing: OpenAI API Key, GitHub Token
 
-Research Buddy requires configuration before use.
+DocMiner requires configuration before use.
 
 You'll need:
 • OpenAI API Key (for AI analysis)
@@ -80,7 +80,7 @@ To test the first-time experience:
 mv ~/.research_buddy/interface_settings.json ~/.research_buddy/interface_settings.json.backup
 
 # Launch the app
-./dist/ResearchBuddy5.2.1/ResearchBuddy5.2.1
+./dist/DocMiner5.2.1/DocMiner5.2.1
 
 # You should see:
 # 1. Main window appears (but disabled)

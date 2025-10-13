@@ -1,6 +1,6 @@
 # Documentation
 
-This directory contains all documentation files for Research Buddy.
+This directory contains all documentation files for DocMiner.
 
 ## Files:
 

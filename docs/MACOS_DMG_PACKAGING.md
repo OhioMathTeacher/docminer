@@ -21,14 +21,14 @@
 
 ### 1. First: Fix the .app Bundle (Required for DMG)
 
-The spec file already creates `ResearchBuddy5.1.1.app`, but GitHub Actions isn't packaging it correctly.
+The spec file already creates `DocMiner5.1.1.app`, but GitHub Actions isn't packaging it correctly.
 
 **Test locally:**
 ```bash
-cd ~/research-buddy
-python -m PyInstaller build_files/ResearchBuddy5.1.1.spec --clean --noconfirm
+cd ~/docminer
+python -m PyInstaller build_files/DocMiner5.1.1.spec --clean --noconfirm
 ls -la dist/
-# Should see: ResearchBuddy5.1.1.app/
+# Should see: DocMiner5.1.1.app/
 ```
 
 ### 2. Create DMG with create-dmg Tool
@@ -41,16 +41,16 @@ brew install create-dmg
 Create the DMG:
 ```bash
 create-dmg \
-  --volname "ResearchBuddy 5.1.1" \
+  --volname "DocMiner 5.1.1" \
   --volicon "app-icon.icns" \
   --window-pos 200 120 \
   --window-size 800 400 \
   --icon-size 100 \
-  --icon "ResearchBuddy5.1.1.app" 200 190 \
-  --hide-extension "ResearchBuddy5.1.1.app" \
+  --icon "DocMiner5.1.1.app" 200 190 \
+  --hide-extension "DocMiner5.1.1.app" \
   --app-drop-link 600 185 \
-  "ResearchBuddy-5.1.1.dmg" \
-  "dist/ResearchBuddy5.1.1.app"
+  "DocMiner-5.1.1.dmg" \
+  "dist/DocMiner5.1.1.app"
 ```
 
 ### 3. Alternative: Simple DMG Creation
@@ -58,24 +58,24 @@ create-dmg \
 Without extra tools, using hdiutil:
 ```bash
 #!/bin/bash
-# Create a DMG for ResearchBuddy
+# Create a DMG for DocMiner
 
 # Create a temporary directory
 mkdir -p dmg-temp
-cp -R dist/ResearchBuddy5.1.1.app dmg-temp/
+cp -R dist/DocMiner5.1.1.app dmg-temp/
 cp README.md dmg-temp/
 ln -s /Applications dmg-temp/Applications
 
 # Create the DMG
-hdiutil create -volname "ResearchBuddy 5.1.1" \
+hdiutil create -volname "DocMiner 5.1.1" \
   -srcfolder dmg-temp \
   -ov -format UDZO \
-  ResearchBuddy-5.1.1.dmg
+  DocMiner-5.1.1.dmg
 
 # Clean up
 rm -rf dmg-temp
 
-echo "✅ Created ResearchBuddy-5.1.1.dmg"
+echo "✅ Created DocMiner-5.1.1.dmg"
 ```
 
 ### 4. Add to Build Script
@@ -87,7 +87,7 @@ def create_dmg_package(app_path, version):
     """Create a macOS DMG package"""
     import subprocess
     
-    dmg_name = f"ResearchBuddy-{version}.dmg"
+    dmg_name = f"DocMiner-{version}.dmg"
     
     # Create temp directory
     temp_dir = Path("dmg-temp")
@@ -102,7 +102,7 @@ def create_dmg_package(app_path, version):
     # Create DMG
     subprocess.run([
         "hdiutil", "create",
-        "-volname", f"ResearchBuddy {version}",
+        "-volname", f"DocMiner {version}",
         "-srcfolder", str(temp_dir),
         "-ov", "-format", "UDZO",
         dmg_name
@@ -143,18 +143,18 @@ To **completely eliminate** the malware warning:
    ```bash
    codesign --deep --force --verify --verbose \
      --sign "Developer ID Application: Your Name" \
-     ResearchBuddy5.1.1.app
+     DocMiner5.1.1.app
    ```
 3. **Notarize with Apple:**
    ```bash
-   xcrun notarytool submit ResearchBuddy-5.1.1.dmg \
+   xcrun notarytool submit DocMiner-5.1.1.dmg \
      --apple-id your@email.com \
      --password app-specific-password \
      --team-id TEAMID
    ```
 4. **Staple the notarization:**
    ```bash
-   xcrun stapler staple ResearchBuddy-5.1.1.dmg
+   xcrun stapler staple DocMiner-5.1.1.dmg
    ```
 
 ## Implementation Steps
@@ -179,13 +179,13 @@ To **completely eliminate** the malware warning:
   run: |
     # Create DMG from .app bundle
     mkdir -p dmg-temp
-    cp -R dist/ResearchBuddy5.1.1.app dmg-temp/
+    cp -R dist/DocMiner5.1.1.app dmg-temp/
     ln -s /Applications dmg-temp/Applications
     
-    hdiutil create -volname "ResearchBuddy 5.1.1" \
+    hdiutil create -volname "DocMiner 5.1.1" \
       -srcfolder dmg-temp \
       -ov -format UDZO \
-      releases/ResearchBuddy-5.1.1.dmg
+      releases/DocMiner-5.1.1.dmg
     
     rm -rf dmg-temp
 ```

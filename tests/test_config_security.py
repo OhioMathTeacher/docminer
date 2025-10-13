@@ -5,7 +5,7 @@ Test the configuration dialog security
 
 import sys
 import os
-sys.path.append('/Users/todd/research-buddy')
+sys.path.append('/Users/todd/docminer')
 
 from PySide6.QtWidgets import QApplication
 from configuration_dialog import ConfigurationDialog

@@ -13,9 +13,9 @@
 
 **Error:**
 ```
-Pattern 'release-files/ResearchBuddy-5.1.1-windows.zip' does not match any files.
-Pattern 'release-files/ResearchBuddy-5.1.1-linux.tar.gz' does not match any files.
-Pattern 'release-files/ResearchBuddy-5.1.1-macos.dmg' does not match any files.
+Pattern 'release-files/DocMiner-5.1.1-windows.zip' does not match any files.
+Pattern 'release-files/DocMiner-5.1.1-linux.tar.gz' does not match any files.
+Pattern 'release-files/DocMiner-5.1.1-macos.dmg' does not match any files.
 ```
 
 **Confirmed files exist:**
@@ -23,9 +23,9 @@ From "Display and flatten artifacts" step:
 ```
 ✅ Files ready for release:
 total 769M
--rw-r--r-- 1 runner runner 282M Oct  8 15:19 ResearchBuddy-5.1.1-linux.tar.gz
--rw-r--r-- 1 runner runner 257M Oct  8 15:19 ResearchBuddy-5.1.1-macos.dmg
--rw-r--r-- 1 runner runner 230M Oct  8 15:19 ResearchBuddy-5.1.1-windows.zip
+-rw-r--r-- 1 runner runner 282M Oct  8 15:19 DocMiner-5.1.1-linux.tar.gz
+-rw-r--r-- 1 runner runner 257M Oct  8 15:19 DocMiner-5.1.1-macos.dmg
+-rw-r--r-- 1 runner runner 230M Oct  8 15:19 DocMiner-5.1.1-windows.zip
 ```
 
 ## 🔍 Root Cause Analysis
@@ -62,8 +62,8 @@ Use `actions/upload-release-asset` for each file individually:
   uses: actions/upload-release-asset@v1
   with:
     upload_url: ${{ steps.create_release.outputs.upload_url }}
-    asset_path: ./release-files/ResearchBuddy-5.1.1-windows.zip
-    asset_name: ResearchBuddy-5.1.1-windows.zip
+    asset_path: ./release-files/DocMiner-5.1.1-windows.zip
+    asset_name: DocMiner-5.1.1-windows.zip
     asset_content_type: application/zip
 ```
 
@@ -93,12 +93,12 @@ files: release-files/*
 - Setting: `fail_on_unmatched_files: false` (prevents failure but no files upload)
 
 ### README Status
-Currently points to: `ResearchBuddy-5.1.1.dmg` (old file from previous release)
+Currently points to: `DocMiner-5.1.1.dmg` (old file from previous release)
 
 Needs to point to:
-- `ResearchBuddy-5.1.1-windows.zip`
-- `ResearchBuddy-5.1.1-linux.tar.gz`
-- `ResearchBuddy-5.1.1-macos.dmg`
+- `DocMiner-5.1.1-windows.zip`
+- `DocMiner-5.1.1-linux.tar.gz`
+- `DocMiner-5.1.1-macos.dmg`
 
 ## 🎯 Next Session Action Plan
 
@@ -111,11 +111,11 @@ Needs to point to:
 ## 📝 Files to Review
 - `.github/workflows/manual-build.yml` - Release upload configuration
 - `README.md` - Download links (currently pointing to old files)
-- `build_files/ResearchBuddy5.1.1.spec` - PyInstaller config (working correctly)
+- `build_files/DocMiner5.1.1.spec` - PyInstaller config (working correctly)
 
 ## 🔗 Quick Links
-- Workflow: https://github.com/OhioMathTeacher/research-buddy/actions/workflows/manual-build.yml
-- Release: https://github.com/OhioMathTeacher/research-buddy/releases/tag/v5.1.1
+- Workflow: https://github.com/OhioMathTeacher/docminer/actions/workflows/manual-build.yml
+- Release: https://github.com/OhioMathTeacher/docminer/releases/tag/v5.1.1
 - Latest commit: 900b0eb
 
 ---

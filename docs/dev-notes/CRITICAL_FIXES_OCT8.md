@@ -11,7 +11,7 @@
 
 **Fix Applied:**
 ```python
-# In build_files/ResearchBuddy5.1.1.spec
+# In build_files/DocMiner5.1.1.spec
 target_arch='universal2'  # Now builds Universal Binary for BOTH architectures
 ```
 
@@ -29,7 +29,7 @@ target_arch='universal2'  # Now builds Universal Binary for BOTH architectures
 **Issue:** Workflow couldn't find DMG and AppImage files to upload
 
 **Root Cause:**
-- Artifacts downloaded into subdirectories: `artifacts/ResearchBuddy-5.1.1-macos/file.dmg`
+- Artifacts downloaded into subdirectories: `artifacts/DocMiner-5.1.1-macos/file.dmg`
 - Release action looked for: `artifacts/**/*.dmg` (doesn't match nested structure)
 - Pattern matching failed, files not uploaded
 
@@ -63,7 +63,7 @@ Test the new macOS build on:
 
 To check if it's truly Universal:
 ```bash
-file ResearchBuddy5.1.1.app/Contents/MacOS/ResearchBuddy5.1.1
+file DocMiner5.1.1.app/Contents/MacOS/DocMiner5.1.1
 # Should show: Mach-O universal binary with 2 architectures
 ```
 
@@ -71,10 +71,10 @@ file ResearchBuddy5.1.1.app/Contents/MacOS/ResearchBuddy5.1.1
 - Trigger "Manual Build All Platforms" workflow
 - Verify all 3 platforms build successfully
 - Check that release contains ALL files:
-  - ResearchBuddy-5.1.1.dmg (macOS)
-  - ResearchBuddy-5.1.1-windows.zip (Windows)
-  - ResearchBuddy-5.1.1-linux.tar.gz (Linux)
-  - ResearchBuddy-5.1.1-x86_64.AppImage (Linux)
+  - DocMiner-5.1.1.dmg (macOS)
+  - DocMiner-5.1.1-windows.zip (Windows)
+  - DocMiner-5.1.1-linux.tar.gz (Linux)
+  - DocMiner-5.1.1-x86_64.AppImage (Linux)
 
 ---
 
@@ -104,7 +104,7 @@ Some Python packages might not have Universal Binary wheels.
 ## 🎯 Next Steps
 
 1. **Trigger GitHub Actions** to test the fixes:
-   - Go to: https://github.com/OhioMathTeacher/research-buddy/actions
+   - Go to: https://github.com/OhioMathTeacher/docminer/actions
    - Run "Manual Build All Platforms" workflow
    - Watch for any new errors
 
@@ -121,7 +121,7 @@ Some Python packages might not have Universal Binary wheels.
 
 ## 📝 Files Changed
 
-1. `build_files/ResearchBuddy5.1.1.spec` - Universal Binary support
+1. `build_files/DocMiner5.1.1.spec` - Universal Binary support
 2. `.github/workflows/manual-build.yml` - Fixed artifact paths, added ARCHFLAGS
 3. `MACOS_UNIVERSAL_FIX.md` - This documentation
 

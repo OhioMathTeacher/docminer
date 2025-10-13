@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Secure Environment Variable Setup for Research Buddy
+Secure Environment Variable Setup for DocMiner
 
-This script helps you securely set environment variables for Research Buddy
+This script helps you securely set environment variables for DocMiner
 without storing them in plain text files.
 """
 
@@ -15,7 +15,7 @@ def create_env_script():
     """Create a secure script to set environment variables"""
     
     # Get user's API keys
-    print("🔐 Research Buddy Secure Credential Setup")
+    print("🔐 DocMiner Secure Credential Setup")
     print("=" * 50)
     print("This will create a secure way to set your API credentials.")
     print("Your keys will NOT be stored in plain text files.\n")
@@ -35,7 +35,7 @@ def create_env_script():
     env_script_path = script_dir / "set_env.sh"
     
     script_content = "#!/bin/bash\n"
-    script_content += "# Research Buddy Environment Variables\n"
+    script_content += "# DocMiner Environment Variables\n"
     script_content += "# This script is protected by file permissions\n\n"
     
     if openai_key:
@@ -44,7 +44,7 @@ def create_env_script():
     if github_token:
         script_content += f'export RESEARCH_BUDDY_GITHUB_TOKEN="{github_token}"\n'
     
-    script_content += '\necho "✅ Research Buddy credentials loaded"\n'
+    script_content += '\necho "✅ DocMiner credentials loaded"\n'
     
     # Write the script
     with open(env_script_path, 'w') as f:
@@ -56,16 +56,16 @@ def create_env_script():
     print(f"\n✅ Secure credential script created at: {env_script_path}")
     print(f"📁 File permissions set to owner-only (700)")
     
-    # Create a launcher script for Research Buddy
+    # Create a launcher script for DocMiner
     launcher_path = script_dir / "launch_research_buddy.sh"
     launcher_content = f"""#!/bin/bash
-# Research Buddy Secure Launcher
+# DocMiner Secure Launcher
 # Sources credentials and launches the application
 
 # Set credentials
 source "{env_script_path}"
 
-# Launch Research Buddy
+# Launch DocMiner
 cd "{Path.cwd()}"
 python3 enhanced_training_interface.py
 """
@@ -98,7 +98,7 @@ def test_credentials():
     print(f"GitHub Token: {'✅ Set' if github_token else '❌ Not set'}")
     
     if openai_key or github_token:
-        print("\n🎉 You can now launch Research Buddy with these credentials!")
+        print("\n🎉 You can now launch DocMiner with these credentials!")
     else:
         print("\n⚠️  No credentials found in current environment.")
 

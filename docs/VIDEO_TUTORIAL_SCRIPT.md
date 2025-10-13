@@ -1,10 +1,10 @@
-# Research Buddy Video Tutorial Script
+# DocMiner Video Tutorial Script
 ## Character-Based Narration for ElevenLabs
 
 **Duration:** ~8-10 minutes  
 **Characters:**
 - **Professor Todd** (Left) - Warm, experienced educator voice
-- **Research Buddy** (Center) - Friendly, helpful AI assistant voice  
+- **DocMiner** (Center) - Friendly, helpful AI assistant voice  
 - **Maya** (Right, GA) - Curious, enthusiastic graduate student voice
 
 ---
@@ -14,10 +14,10 @@
 **[Screen: Title card with three characters]**
 
 **Professor Todd:**  
-"Welcome to Research Buddy! I'm Professor Todd, and I've been researching positionality statements in academic writing for years."
+"Welcome to DocMiner! I'm Professor Todd, and I've been researching positionality statements in academic writing for years."
 
-**Research Buddy:**  
-"And I'm Research Buddy, your AI-powered assistant! I'm here to help you identify and analyze positionality statements efficiently."
+**DocMiner:**  
+"And I'm DocMiner, your AI-powered assistant! I'm here to help you identify and analyze positionality statements efficiently."
 
 **Maya:**  
 "Hi! I'm Maya, a graduate assistant. I'll be learning alongside you today. Let's get started!"
@@ -34,7 +34,7 @@
 **Professor Todd:**  
 "Great question, Maya! Let's go through each field. First, you'll need an OpenAI API key."
 
-**Research Buddy:**  
+**DocMiner:**  
 "The API key lets me access ChatGPT to help analyze text and identify positionality patterns. You can get one from platform.openai.com."
 
 **Professor Todd:**  
@@ -43,11 +43,11 @@
 **Maya:**  
 "So the API key is for the AI analysis, and the GitHub token is for uploading our work. Got it!"
 
-**Research Buddy:**  
+**DocMiner:**  
 "Exactly! Now, let's talk about the GitHub username and repository fields."
 
 **Professor Todd:**  
-"Enter 'OhioMathTeacher' as the username - that's my GitHub account. And 'research-buddy' as the repository name."
+"Enter 'OhioMathTeacher' as the username - that's my GitHub account. And 'docminer' as the repository name."
 
 **Maya:**  
 "Why are we all using your repository, Professor?"
@@ -55,7 +55,7 @@
 **Professor Todd:**  
 "Good thinking! We're collecting everyone's analysis in one central location. This way, when all our graduate assistants analyze 5-10 articles each, we'll have a shared dataset."
 
-**Research Buddy:**  
+**DocMiner:**  
 "This shared data is crucial! Once we gather enough training examples, we'll use them to improve my pattern detection - aiming for 95% accuracy or better!"
 
 **[Screen: User clicks 'Save Configuration' - single success dialog appears]**
@@ -67,9 +67,9 @@
 
 ## Scene 3: Getting Started - Entering Your Name & Loading PDFs (1 minute)
 
-**[Screen: Main Research Buddy interface]**
+**[Screen: Main DocMiner interface]**
 
-**Research Buddy:**  
+**DocMiner:**  
 "First things first, Maya - enter your name in the 'Reviewer Name' field at the top."
 
 **Maya:**  
@@ -83,7 +83,7 @@
 **Maya:**  
 "Now I'll click 'Load PDF' and select an article to analyze. I'll start with this Armstrong paper on ethical engagement in anthropology."
 
-**Research Buddy:**  
+**DocMiner:**  
 "Great choice! The PDF is now displayed on the left side. You can navigate through pages using the controls at the bottom."
 
 ---
@@ -98,7 +98,7 @@
 **Maya:**  
 "Like when they say 'As a researcher...' or 'From my perspective as...'?"
 
-**Research Buddy:**  
+**DocMiner:**  
 "Exactly! When you find such a statement, simply click and drag to select the text in the PDF viewer."
 
 **[Screen: Maya highlights text on page 3]**
@@ -106,16 +106,16 @@
 **Maya:**  
 "I found one! 'Though the courses originated independently, our respective focus on access and agency spurred exploration...'"
 
-**Research Buddy:**  
+**DocMiner:**  
 "Perfect! See how the selected text now appears in the 'Selected Text for Evidence' panel on the right? This is your human-identified evidence."
 
 **Professor Todd:**  
-"This is crucial, Maya. Your human judgment is training data. You're teaching Research Buddy what a real positionality statement looks like."
+"This is crucial, Maya. Your human judgment is training data. You're teaching DocMiner what a real positionality statement looks like."
 
 **Maya:**  
 "So I'm not just analyzing papers - I'm helping train the AI!"
 
-**Research Buddy:**  
+**DocMiner:**  
 "Precisely! Every piece of evidence you mark helps me get better at automatic detection."
 
 ---
@@ -127,18 +127,18 @@
 **Maya:**  
 "What about this 'AI Pre-screening Analysis' button?"
 
-**Research Buddy:**  
+**DocMiner:**  
 "That's where I can help! Click that button, and I'll scan the entire document for potential positionality statements."
 
 **[Screen: Maya clicks button, AI analysis appears]**
 
 **Professor Todd:**  
-"Think of this as a first pass. Research Buddy will find likely candidates, but you still need to review them with your expert judgment."
+"Think of this as a first pass. DocMiner will find likely candidates, but you still need to review them with your expert judgment."
 
 **Maya:**  
 "Oh, I see - it found several possible statements. Some look good, but a couple seem like they might be false positives."
 
-**Research Buddy:**  
+**DocMiner:**  
 "Exactly my current limitation! That's why we need your training data. Your corrections teach me to distinguish real positionality statements from similar-sounding text."
 
 **Professor Todd:**  
@@ -153,7 +153,7 @@
 **Maya:**  
 "Now I need to make a decision. I see three options here..."
 
-**Research Buddy:**  
+**DocMiner:**  
 "Right! You can mark the paper as 'Positive' if it contains clear positionality statements, 'Negative' if it doesn't, or 'Needs Revision' if you're unsure."
 
 **Professor Todd:**  
@@ -168,7 +168,7 @@
 
 **[Screen: Upload and Download buttons visible]**
 
-**Research Buddy:**  
+**DocMiner:**  
 "Now you have two options for saving your work: Upload to GitHub, or Download locally."
 
 **Maya:**  
@@ -177,7 +177,7 @@
 **Professor Todd:**  
 "Upload to GitHub is our primary method. It automatically saves your analysis to our shared repository where the whole team can access it."
 
-**Research Buddy:**  
+**DocMiner:**  
 "When you click 'Upload to GitHub', I'll save your work locally first in your home directory at ~/.research_buddy/training_reports/, then copy it to the repository and push it to GitHub."
 
 **[Screen: Shows the upload process]**
@@ -188,7 +188,7 @@
 **Professor Todd:**  
 "Exactly! The local copy is your backup. The GitHub copy is shared with the team."
 
-**Research Buddy:**  
+**DocMiner:**  
 "And here's the important part - your file goes into a single folder on GitHub called 'training_reports'. Everyone's analyses collect there."
 
 **Maya:**  
@@ -197,7 +197,7 @@
 **Professor Todd:**  
 "Great question! That's why we added the Download option. Click it, and you'll get the JSON file saved to your downloads folder."
 
-**Research Buddy:**  
+**DocMiner:**  
 "You can manually upload it to GitHub later, or send it to Professor Todd via email. We wanted to make sure you never lose your work!"
 
 ---
@@ -212,7 +212,7 @@
 **Maya:**  
 "I can see files from different reviewers here - billy_Armstrong_positive, howard_Knight_negative... this is everyone's work!"
 
-**Research Buddy:**  
+**DocMiner:**  
 "This is my learning dataset! Once we collect analyses from all our graduate assistants on 5-10 articles each, we'll have dozens of training examples."
 
 **Professor Todd:**  
@@ -221,7 +221,7 @@
 **Maya:**  
 "So you'll use our collective judgment to improve the AI detection?"
 
-**Research Buddy:**  
+**DocMiner:**  
 "Exactly! The goal is to train me to automatically detect positionality statements with 95% or better accuracy."
 
 **Professor Todd:**  
@@ -230,7 +230,7 @@
 **Maya:**  
 "So eventually, the AI could do this automatically?"
 
-**Research Buddy:**  
+**DocMiner:**  
 "That's the goal! But we'll always need human verification. Your expert judgment is irreplaceable."
 
 ---
@@ -245,14 +245,14 @@
 **Maya:**  
 "I'm excited! This is real research - and I'm helping improve AI tools at the same time!"
 
-**Research Buddy:**  
+**DocMiner:**  
 "Remember: Every analysis you complete makes me smarter. Your careful attention to detail is training the next generation of research tools!"
 
 **Professor Todd:**  
 "If you have questions, check the documentation in the docs folder, or reach out to our team. Happy analyzing!"
 
 **All Three:**  
-"Thank you for joining us in the Research Buddy project!"
+"Thank you for joining us in the DocMiner project!"
 
 **[Screen: Fade to credits/resources]**
 
@@ -274,7 +274,7 @@
 
 ### Background Music:
 - Soft, professional, non-distracting
-- Slightly upbeat to match Research Buddy's helpful tone
+- Slightly upbeat to match DocMiner's helpful tone
 
 ---
 
@@ -284,7 +284,7 @@
 - Voice: "Adam" or "Antoni" - warm, authoritative, mature
 - Settings: Standard pace, slightly lower pitch
 
-**Research Buddy:**
+**DocMiner:**
 - Voice: "Josh" or "Arnold" - friendly, clear, helpful
 - Settings: Slightly faster pace, upbeat tone
 

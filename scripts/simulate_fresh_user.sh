@@ -1,5 +1,5 @@
 #!/bin/bash
-# Simulate Fresh User Experience for Research Buddy
+# Simulate Fresh User Experience for DocMiner
 
 echo "🎬 Setting up fresh user simulation..."
 echo ""
@@ -28,7 +28,7 @@ echo "Now you'll see exactly what a new user sees:"
 echo ""
 echo "1. First launch will show 'GitHub Repository Not Configured' dialog"
 echo "   → Enter: Owner = OhioMathTeacher"
-echo "   → Enter: Repository = research-buddy"
+echo "   → Enter: Repository = docminer"
 echo "   → Click OK"
 echo ""
 echo "2. If you haven't set environment variables in THIS terminal:"
@@ -40,10 +40,10 @@ echo "   source ~/.bashrc"
 echo ""
 echo "========================================"
 echo ""
-echo "Press ENTER to launch Research Buddy as a fresh user..."
+echo "Press ENTER to launch DocMiner as a fresh user..."
 read
 
-echo "🚀 Launching Research Buddy..."
+echo "🚀 Launching DocMiner..."
 echo ""
 
 # Launch with environment loaded

@@ -33,7 +33,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='ResearchBuddy',
+    name='DocMiner',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

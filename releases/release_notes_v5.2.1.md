@@ -1,4 +1,4 @@
-# 🚀 Research Buddy 5.2.1 - Critical AI Fix & Size Optimization
+# 🚀 DocMiner 5.2.1 - Critical AI Fix & Size Optimization
 
 **Emergency patch release with critical bug fix and massive size reduction!**
 
@@ -29,18 +29,18 @@
 ## 📥 Downloads
 
 ### macOS 🍎
-**ResearchBuddy-5.2.1-macos.dmg** (81 MB)
+**DocMiner-5.2.1-macos.dmg** (81 MB)
 - Double-click DMG → Drag app to Applications → Done!
 - Works on both Intel and Apple Silicon Macs (via Rosetta 2)
-- If macOS blocks: Right-click → Open, or run `xattr -cr ResearchBuddy5.2.1.app`
+- If macOS blocks: Right-click → Open, or run `xattr -cr DocMiner5.2.1.app`
 
 ### Linux 🐧
-**ResearchBuddy-5.2.1-x86_64.AppImage** (coming soon via GitHub Actions)
+**DocMiner-5.2.1-x86_64.AppImage** (coming soon via GitHub Actions)
 - Download → `chmod +x` → Run!
 - Universal Linux executable - works on all distros
 
 ### Windows 🪟
-**ResearchBuddy-5.2.1-windows.zip** (coming soon via GitHub Actions)
+**DocMiner-5.2.1-windows.zip** (coming soon via GitHub Actions)
 - Extract → Double-click `.exe` → Run!
 - If Windows Defender warns: Click "More info" → "Run anyway"
 
@@ -60,7 +60,7 @@ AFTER (v5.2.1):
 ```
 
 ### Size Optimization Details
-**Excluded (not needed for Research Buddy):**
+**Excluded (not needed for DocMiner):**
 - `torch` (500 MB) - PyTorch deep learning framework
 - `transformers` (200 MB) - Hugging Face models
 - `scipy` (100 MB) - Scientific computing
@@ -106,7 +106,7 @@ def load_configuration():
 ```
 
 ### Build Optimization
-- Created `ResearchBuddy5.2.1.spec` with aggressive exclusions
+- Created `DocMiner5.2.1.spec` with aggressive exclusions
 - Documented strategy in `build_files/BUILD_OPTIMIZATION.md`
 - Maintains all functionality with 85% size reduction
 - Build time reduced from ~90 minutes to ~24 seconds
@@ -139,4 +139,4 @@ Academic and educational use freely permitted.
 
 **Perfect for Graduate Assistants - No Python, no terminal, no setup!**
 
-Last ResearchBuddy release before DocMiner 6.0 rebrand coming soon! 🚀
+Last DocMiner release before DocMiner 6.0 rebrand coming soon! 🚀

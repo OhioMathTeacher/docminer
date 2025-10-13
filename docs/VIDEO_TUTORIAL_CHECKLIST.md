@@ -1,4 +1,4 @@
-# Research Buddy Video Tutorial - Feature Coverage Checklist
+# DocMiner Video Tutorial - Feature Coverage Checklist
 
 ## ✅ Features to Demonstrate (from User Requirements)
 
@@ -14,7 +14,7 @@
   - [ ] Explain: "OhioMathTeacher" (Professor's account)
   - [ ] Why shared: Central collection point for all GA analyses
 - [ ] GitHub Repository field
-  - [ ] Explain: "research-buddy" 
+  - [ ] Explain: "docminer" 
   - [ ] Purpose: Where all training data is stored
 
 **Script Coverage:** Scene 2 (2 minutes) ✅
@@ -164,7 +164,7 @@
 
 **Speaking time roughly equal?**
 - Professor Todd: ~35% (mentor/explainer role)
-- Research Buddy: ~33% (technical helper role)
+- DocMiner: ~33% (technical helper role)
 - Maya: ~32% (learner/questioner role)
 
 ✅ Well balanced - no single character dominates

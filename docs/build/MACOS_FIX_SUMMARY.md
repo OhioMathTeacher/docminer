@@ -1,12 +1,12 @@
 # macOS Double-Click Fix - Summary
 
 ## Problem
-The ResearchBuddy v5.1.1 macOS release cannot be double-clicked. macOS treats it as an unknown file type, requiring users to run it from Terminal.
+The DocMiner v5.1.1 macOS release cannot be double-clicked. macOS treats it as an unknown file type, requiring users to run it from Terminal.
 
 ## Root Cause
 The PyInstaller spec file creates **both**:
-1. A COLLECT output → `ResearchBuddy5.1.1/` folder (with binaries)
-2. A BUNDLE output → `ResearchBuddy5.1.1.app` (the actual macOS .app)
+1. A COLLECT output → `DocMiner5.1.1/` folder (with binaries)
+2. A BUNDLE output → `DocMiner5.1.1.app` (the actual macOS .app)
 
 The GitHub Actions build was packaging the COLLECT folder instead of the .app bundle.
 
@@ -15,7 +15,7 @@ The GitHub Actions build was packaging the COLLECT folder instead of the .app bu
 ### 1. `.github/workflows/manual-build.yml` ✅
 **Fixed**: macOS packaging now checks for and packages the `.app` bundle
 - Lines changed: Distribution package creation for macOS
-- Now tars `ResearchBuddy5.1.1.app` instead of `ResearchBuddy5.1.1/`
+- Now tars `DocMiner5.1.1.app` instead of `DocMiner5.1.1/`
 
 ### 2. `README.md` ✅  
 **Updated**: Clearer macOS instructions
@@ -45,7 +45,7 @@ The GitHub Actions build was packaging the COLLECT folder instead of the .app bu
 To test locally on macOS:
 
 ```bash
-cd ~/research-buddy
+cd ~/docminer
 
 # Clean build
 python build_files/build.py macos --spec-file --clean
@@ -54,11 +54,11 @@ python build_files/build.py macos --spec-file --clean
 ls -la dist/
 
 # You should see BOTH:
-# - ResearchBuddy5.1.1/      (COLLECT - folder with binaries)
-# - ResearchBuddy5.1.1.app/  (BUNDLE - the actual macOS app) ← This is what we want!
+# - DocMiner5.1.1/      (COLLECT - folder with binaries)
+# - DocMiner5.1.1.app/  (BUNDLE - the actual macOS app) ← This is what we want!
 
 # Test the .app
-open dist/ResearchBuddy5.1.1.app
+open dist/DocMiner5.1.1.app
 ```
 
 ## Next Steps
@@ -69,7 +69,7 @@ open dist/ResearchBuddy5.1.1.app
 
 ### For Next Release (v5.1.2 or v5.2)
 1. **Trigger the manual-build workflow** on GitHub
-2. **Verify** the .tar.gz contains `ResearchBuddy5.1.1.app`
+2. **Verify** the .tar.gz contains `DocMiner5.1.1.app`
 3. **Test** on a clean Mac by double-clicking the extracted .app
 4. **Update README** to remove the workaround note
 
@@ -103,6 +103,6 @@ git push
 
 1. Download the macOS release from GitHub
 2. Extract the tar.gz
-3. Verify `ResearchBuddy5.1.1.app` is present
+3. Verify `DocMiner5.1.1.app` is present
 4. Double-click it - should launch!
 5. May need to right-click → Open first time (unsigned app warning)

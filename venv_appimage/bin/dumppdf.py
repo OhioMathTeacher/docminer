@@ -1,4 +1,4 @@
-#!/home/todd/research-buddy/venv_appimage/bin/python3
+#!/home/todd/docminer/venv_appimage/bin/python3
 """Extract pdf structure in XML format"""
 
 import logging

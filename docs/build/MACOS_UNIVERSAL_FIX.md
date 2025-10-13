@@ -11,7 +11,7 @@ This is because:
 ## Solution Implemented
 
 ### 1. Updated PyInstaller Spec File
-Changed `build_files/ResearchBuddy5.1.1.spec`:
+Changed `build_files/DocMiner5.1.1.spec`:
 ```python
 target_arch='universal2'  # Was: target_arch=None
 ```
@@ -41,7 +41,7 @@ For Universal Binary builds on macOS, you need:
 To verify Universal Binary:
 ```bash
 # Check architecture support
-file dist/ResearchBuddy5.1.1.app/Contents/MacOS/ResearchBuddy5.1.1
+file dist/DocMiner5.1.1.app/Contents/MacOS/DocMiner5.1.1
 
 # Should show: Mach-O universal binary with 2 architectures
 # Or: Mach-O 64-bit executable x86_64 and arm64
@@ -50,8 +50,8 @@ file dist/ResearchBuddy5.1.1.app/Contents/MacOS/ResearchBuddy5.1.1
 ### 5. Alternative: Build for Both Architectures Separately
 
 If Universal Binary doesn't work, we can:
-1. Build on Intel Mac → `ResearchBuddy-5.1.1-intel.dmg`
-2. Build on Apple Silicon → `ResearchBuddy-5.1.1-apple-silicon.dmg`
+1. Build on Intel Mac → `DocMiner-5.1.1-intel.dmg`
+2. Build on Apple Silicon → `DocMiner-5.1.1-apple-silicon.dmg`
 3. Let users download the right version
 
 ## Action Required

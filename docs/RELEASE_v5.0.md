@@ -1,8 +1,8 @@
-# Research Buddy v5.0 - Production Release
+# DocMiner v5.0 - Production Release
 
 ## 🎉 **Ready for Graduate Assistants!**
 
-This is the **final production version** of Research Buddy with all user experience improvements and security features implemented.
+This is the **final production version** of DocMiner with all user experience improvements and security features implemented.
 
 ## 📦 **What's New in v5.0**
 
@@ -36,7 +36,7 @@ This is the **final production version** of Research Buddy with all user experie
 ## 🔧 **For Graduate Assistants**
 
 ### **First Time Setup:**
-1. **Download** `ResearchBuddy5.0.app` (644MB)
+1. **Download** `DocMiner5.0.app` (644MB)
 2. **Double-click** to open (no installation needed)
 3. **Select PDF folder** to analyze
 4. **Start analyzing!** (Export Evidence works immediately)

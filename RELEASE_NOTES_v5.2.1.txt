@@ -1,4 +1,4 @@
-# 🚀 Research Buddy 5.2.1 - Critical AI Fix & 93% Size Reduction
+# 🚀 DocMiner 5.2.1 - Critical AI Fix & 93% Size Reduction
 
 **Emergency patch with working AI analysis and massive optimization!**
 
@@ -19,16 +19,16 @@
 ## 📥 Downloads
 
 ### macOS 🍎 (81 MB)
-Download **ResearchBuddy-5.2.1-macos.dmg**
+Download **DocMiner-5.2.1-macos.dmg**
 - Works on Intel & Apple Silicon Macs
-- If blocked: Right-click → Open, or `xattr -cr ResearchBuddy5.2.1.app`
+- If blocked: Right-click → Open, or `xattr -cr DocMiner5.2.1.app`
 
 ### Linux 🐧 (Coming via Actions)
-**ResearchBuddy-5.2.1-x86_64.AppImage** 
+**DocMiner-5.2.1-x86_64.AppImage** 
 - Universal Linux executable
 
 ### Windows 🪟 (Coming via Actions)
-**ResearchBuddy-5.2.1-windows.zip**
+**DocMiner-5.2.1-windows.zip**
 - If Defender warns: "More info" → "Run anyway"
 
 ## ✨ What's New
@@ -53,6 +53,6 @@ Download **ResearchBuddy-5.2.1-macos.dmg**
 
 ---
 
-**Last ResearchBuddy release before DocMiner 6.0!** 🚀
+**Last DocMiner release before DocMiner 6.0!** 🚀
 
 📜 License: CC BY-NC 4.0 | © 2025 Michael Todd Edwards

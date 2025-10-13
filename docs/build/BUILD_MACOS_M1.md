@@ -2,7 +2,7 @@
 
 ## 📋 Quick Reference
 
-**Goal:** Build a Universal macOS executable for Research Buddy 5.1.1 that works on both Intel and Apple Silicon Macs.
+**Goal:** Build a Universal macOS executable for DocMiner 5.1.1 that works on both Intel and Apple Silicon Macs.
 
 **Location:** M1 Mac Mini (downstairs)
 
@@ -23,14 +23,14 @@ Before you start, make sure:
 
 ```bash
 cd ~/
-git clone https://github.com/OhioMathTeacher/research-buddy.git
-cd research-buddy
+git clone https://github.com/OhioMathTeacher/docminer.git
+cd docminer
 ```
 
 If you already have it cloned:
 
 ```bash
-cd ~/research-buddy
+cd ~/docminer
 git fetch --all
 git pull origin main
 ```
@@ -48,7 +48,7 @@ brew install python@3.11
 ### 3. Create Virtual Environment
 
 ```bash
-# From research-buddy directory
+# From docminer directory
 python3 -m venv .venv
 source .venv/bin/activate
 ```
@@ -65,19 +65,19 @@ pip install pyinstaller
 
 ```bash
 # Clean any previous builds
-rm -rf dist/ResearchBuddy5.1.1 build/ResearchBuddy5.1.1
+rm -rf dist/DocMiner5.1.1 build/DocMiner5.1.1
 
 # Build using the spec file
-python -m PyInstaller build_files/ResearchBuddy5.1.1.spec --distpath ./dist --workpath ./build --clean
+python -m PyInstaller build_files/DocMiner5.1.1.spec --distpath ./dist --workpath ./build --clean
 ```
 
-**Expected outcome:** This will create `dist/ResearchBuddy5.1.1/` folder with the executable.
+**Expected outcome:** This will create `dist/DocMiner5.1.1/` folder with the executable.
 
 ### 6. Test the Executable
 
 ```bash
 # Run the executable to make sure it works
-./dist/ResearchBuddy5.1.1/ResearchBuddy5.1.1
+./dist/DocMiner5.1.1/DocMiner5.1.1
 ```
 
 **What to check:**
@@ -94,11 +94,11 @@ mkdir -p releases
 
 # Package as tar.gz
 cd dist
-tar -czf ../releases/ResearchBuddy5.1.1-macos.tar.gz ResearchBuddy5.1.1
+tar -czf ../releases/DocMiner5.1.1-macos.tar.gz DocMiner5.1.1
 cd ..
 
 # Check the file was created
-ls -lh releases/ResearchBuddy5.1.1-macos.tar.gz
+ls -lh releases/DocMiner5.1.1-macos.tar.gz
 ```
 
 **Expected size:** ~250-300MB
@@ -106,9 +106,9 @@ ls -lh releases/ResearchBuddy5.1.1-macos.tar.gz
 ### 8. Upload to GitHub Release
 
 **Option A: Using GitHub Web Interface (Easiest)**
-1. Go to: https://github.com/OhioMathTeacher/research-buddy/releases/tag/v5.1.1
+1. Go to: https://github.com/OhioMathTeacher/docminer/releases/tag/v5.1.1
 2. Click "Edit release"
-3. Drag and drop `releases/ResearchBuddy5.1.1-macos.tar.gz` into the assets area
+3. Drag and drop `releases/DocMiner5.1.1-macos.tar.gz` into the assets area
 4. Click "Update release"
 
 **Option B: Using Command Line (if you have GitHub CLI)**
@@ -120,7 +120,7 @@ brew install gh
 gh auth login
 
 # Upload the release asset
-gh release upload v5.1.1 releases/ResearchBuddy5.1.1-macos.tar.gz
+gh release upload v5.1.1 releases/DocMiner5.1.1-macos.tar.gz
 ```
 
 ---
@@ -128,9 +128,9 @@ gh release upload v5.1.1 releases/ResearchBuddy5.1.1-macos.tar.gz
 ## 🎯 Expected Results
 
 After upload, the v5.1.1 release should have:
-- ✅ `ResearchBuddy5.1.1-linux.tar.gz` (~278MB) - Already there
-- ✅ `ResearchBuddy5.1.1-macos.tar.gz` (~250-300MB) - You just uploaded
-- ⏳ `ResearchBuddy5.1.1-windows.zip` - From GitHub Actions (if it works)
+- ✅ `DocMiner5.1.1-linux.tar.gz` (~278MB) - Already there
+- ✅ `DocMiner5.1.1-macos.tar.gz` (~250-300MB) - You just uploaded
+- ⏳ `DocMiner5.1.1-windows.zip` - From GitHub Actions (if it works)
 
 ---
 
@@ -146,12 +146,12 @@ pip install -r requirements.txt
 ### Executable crashes immediately
 ```bash
 # Run from terminal to see error messages
-./dist/ResearchBuddy5.1.1/ResearchBuddy5.1.1
+./dist/DocMiner5.1.1/DocMiner5.1.1
 ```
 
 ### "Permission denied" when running executable
 ```bash
-chmod +x dist/ResearchBuddy5.1.1/ResearchBuddy5.1.1
+chmod +x dist/DocMiner5.1.1/DocMiner5.1.1
 ```
 
 ### PyInstaller not found
@@ -177,10 +177,10 @@ The build on M1 will create an **ARM64** executable. To create a true Universal 
 - Subsequent builds: ~2-3 minutes (cached)
 
 ### File Locations
-- **Spec file:** `build_files/ResearchBuddy5.1.1.spec`
-- **Build output:** `dist/ResearchBuddy5.1.1/`
-- **Release package:** `releases/ResearchBuddy5.1.1-macos.tar.gz`
-- **Build cache:** `build/ResearchBuddy5.1.1/`
+- **Spec file:** `build_files/DocMiner5.1.1.spec`
+- **Build output:** `dist/DocMiner5.1.1/`
+- **Release package:** `releases/DocMiner5.1.1-macos.tar.gz`
+- **Build cache:** `build/DocMiner5.1.1/`
 
 ---
 
@@ -188,17 +188,17 @@ The build on M1 will create an **ARM64** executable. To create a true Universal 
 
 ```bash
 # Complete build in one go (copy-paste friendly)
-cd ~/research-buddy
+cd ~/docminer
 git pull origin main
 source .venv/bin/activate
 pip install -r requirements.txt
 pip install pyinstaller
-rm -rf dist/ResearchBuddy5.1.1 build/ResearchBuddy5.1.1
-python -m PyInstaller build_files/ResearchBuddy5.1.1.spec --distpath ./dist --workpath ./build --clean
+rm -rf dist/DocMiner5.1.1 build/DocMiner5.1.1
+python -m PyInstaller build_files/DocMiner5.1.1.spec --distpath ./dist --workpath ./build --clean
 cd dist
-tar -czf ../releases/ResearchBuddy5.1.1-macos.tar.gz ResearchBuddy5.1.1
+tar -czf ../releases/DocMiner5.1.1-macos.tar.gz DocMiner5.1.1
 cd ..
-ls -lh releases/ResearchBuddy5.1.1-macos.tar.gz
+ls -lh releases/DocMiner5.1.1-macos.tar.gz
 ```
 
 Then upload via GitHub web interface!
@@ -206,5 +206,5 @@ Then upload via GitHub web interface!
 ---
 
 **Created:** October 7, 2025  
-**For:** Research Buddy v5.1.1 macOS Build  
+**For:** DocMiner v5.1.1 macOS Build  
 **Platform:** M1 Mac Mini (Apple Silicon)

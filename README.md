@@ -1,4 +1,4 @@
-# Research Buddy 5.2.1 - Professional Positionality Analysis Interface
+# DocMiner 5.2.1 - Professional Positionality Analysis Interface
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
@@ -11,16 +11,16 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 **No Python, no setup, no terminal commands - just download and double-click!**
 
 ### **macOS** ⭐ **NEW v5.2.1 - AI Fixed + 93% Smaller!**
-🍎 [**Download ResearchBuddy-5.2.1-macos.dmg**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2.1/ResearchBuddy-5.2.1-macos.dmg) **(81 MB)**
+🍎 [**Download DocMiner-5.2.1-macos.dmg**](https://github.com/OhioMathTeacher/docminer/releases/download/v5.2.1/DocMiner-5.2.1-macos.dmg) **(81 MB)**
 - **CRITICAL FIX**: AI positionality analysis now works! 
 - **93% smaller**: 81 MB (was 1.1 GB)
-- Download → Double-click the DMG → Drag `ResearchBuddy5.2.1.app` to Applications
+- Download → Double-click the DMG → Drag `DocMiner5.2.1.app` to Applications
 - **Includes sample PDF with JSTOR article links for testing**
 - **Works on both Intel and Apple Silicon Macs** (Intel via Rosetta 2)
 
 **First-time setup (security bypass):**
 1. Try to open the app (it will show security warning)
-2. Open Terminal and run: `xattr -cr /Applications/ResearchBuddy5.2.1.app`
+2. Open Terminal and run: `xattr -cr /Applications/DocMiner5.2.1.app`
 3. Now double-click the app - it will open!
 
 **Alternative (no Terminal):**
@@ -29,25 +29,25 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 **Note:** First launch stores your API keys and GitHub settings securely in `~/.research_buddy/` - you only configure once!
 
 ### **Windows**  
-🪟 [**Download ResearchBuddy-windows.zip**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-windows.zip)
-- Download → Extract → Double-click `ResearchBuddy5.2.exe`
+🪟 [**Download DocMiner-windows.zip**](https://github.com/OhioMathTeacher/docminer/releases/download/v5.2/DocMiner-windows.zip)
+- Download → Extract → Double-click `DocMiner5.2.exe`
 - If Windows Defender blocks: Click "More info" → "Run anyway"
 - **Note:** v5.2.1 with AI fix coming soon via GitHub Actions
 
 ### **Linux**
-🐧 [**Download ResearchBuddy-5.2-x86_64.AppImage**](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-5.2-x86_64.AppImage) **(Recommended)**
+🐧 [**Download DocMiner-5.2-x86_64.AppImage**](https://github.com/OhioMathTeacher/docminer/releases/download/v5.2/DocMiner-5.2-x86_64.AppImage) **(Recommended)**
 
 **Easiest way - just 2 steps:**
 1. Download the AppImage file
 2. Make it executable and run:
    ```bash
-   chmod +x ResearchBuddy-5.2-x86_64.AppImage
-   ./ResearchBuddy-5.2-x86_64.AppImage
+   chmod +x DocMiner-5.2-x86_64.AppImage
+   ./DocMiner-5.2-x86_64.AppImage
    ```
 
-**Alternative:** [Download ResearchBuddy-linux.tar.gz](https://github.com/OhioMathTeacher/research-buddy/releases/download/v5.2/ResearchBuddy-linux.tar.gz)
-- Extract: `tar -xzf ResearchBuddy-linux.tar.gz`
-- Run: `cd release && ./ResearchBuddy`
+**Alternative:** [Download DocMiner-linux.tar.gz](https://github.com/OhioMathTeacher/docminer/releases/download/v5.2/DocMiner-linux.tar.gz)
+- Extract: `tar -xzf DocMiner-linux.tar.gz`
+- Run: `cd release && ./DocMiner`
 
 **That's it!** The app will launch. AppImage is portable - just move the file anywhere and double-click to run.
 
@@ -58,7 +58,7 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ## 🎥 **Video Tutorial - Quick Start Guide**
 
-**New to Research Buddy? Watch this 8-minute walkthrough:**
+**New to DocMiner? Watch this 8-minute walkthrough:**
 
 [**📺 Watch Video Tutorial**](https://youtu.be/Y3nX3kSQsXU)
 
@@ -87,8 +87,8 @@ Learn how to:
 
 ### Running from Source
 ```bash
-git clone https://github.com/OhioMathTeacher/research-buddy.git
-cd research-buddy
+git clone https://github.com/OhioMathTeacher/docminer.git
+cd docminer
 pip install -r requirements.txt
 python3 run_research_buddy.py  # On Windows, use 'python'
 ```
@@ -110,7 +110,7 @@ python -m pytest tests/
 ## 📁 **Project Structure**
 
 ```
-research-buddy/
+docminer/
 ├── run_research_buddy.py          # Main entry point
 ├── enhanced_training_interface.py # Core application
 ├── configuration_dialog.py        # Settings interface  
@@ -139,4 +139,4 @@ See `legal/` directory for full license terms.
 
 ---
 
-**Research Buddy** – Making positionality analysis accessible to everyone in academia.
+**DocMiner** – Making positionality analysis accessible to everyone in academia.

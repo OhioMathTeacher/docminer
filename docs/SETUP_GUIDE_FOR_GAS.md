@@ -1,8 +1,8 @@
-# Research Buddy - Quick Setup Guide for Graduate Assistants
+# DocMiner - Quick Setup Guide for Graduate Assistants
 
 ## One-Time Setup (15 minutes)
 
-### Step 1: Download Research Buddy
+### Step 1: Download DocMiner
 - Download the appropriate version for your OS from the releases page
 - macOS: `.dmg` file → Drag to Applications
 - Windows: `.zip` file → Extract and run `.exe`
@@ -21,7 +21,7 @@ Your supervisor will provide you with two tokens. Keep them secure!
 2. Run: `nano ~/.bashrc` (or `nano ~/.zshrc` on macOS)
 3. Add these lines at the bottom (paste your actual tokens):
    ```bash
-   # Research Buddy Configuration
+   # DocMiner Configuration
    export RESEARCH_BUDDY_OPENAI_API_KEY="sk-your-key-here"
    export RESEARCH_BUDDY_GITHUB_TOKEN="ghp-your-token-here"
    ```
@@ -39,9 +39,9 @@ Your supervisor will provide you with two tokens. Keep them secure!
 
 ### Step 4: First Launch Configuration
 
-When you first run Research Buddy, you'll see a dialog asking for:
+When you first run DocMiner, you'll see a dialog asking for:
 - **Owner**: `OhioMathTeacher`
-- **Repository**: `research-buddy`
+- **Repository**: `docminer`
 
 Enter these exactly as shown, click OK. You'll only see this once!
 
@@ -49,11 +49,11 @@ Enter these exactly as shown, click OK. You'll only see this once!
 
 ## Daily Usage
 
-### Starting Research Buddy
+### Starting DocMiner
 
 **macOS/Linux (from source):**
 ```bash
-cd ~/research-buddy
+cd ~/docminer
 ./start_research_buddy.sh
 ```
 
@@ -77,7 +77,7 @@ cd ~/research-buddy
 - Make sure you ran `source ~/.bashrc` after editing
 
 ### "GitHub Repository Not Configured" dialog
-- Enter: Owner = `OhioMathTeacher`, Repository = `research-buddy`
+- Enter: Owner = `OhioMathTeacher`, Repository = `docminer`
 - This only happens once
 
 ### App prompts for credentials every time

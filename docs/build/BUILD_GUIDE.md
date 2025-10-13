@@ -1,6 +1,6 @@
-# Research Buddy Build Guide
+# DocMiner Build Guide
 
-This guide explains how to build Research Buddy executables for different platforms.
+This guide explains how to build DocMiner executables for different platforms.
 
 ## Prerequisites
 
@@ -14,12 +14,12 @@ This guide explains how to build Research Buddy executables for different platfo
 
 We provide **two separate macOS builds**:
 
-1. **Apple Silicon (ARM64)** - `ResearchBuddy-5.1.1.dmg`
+1. **Apple Silicon (ARM64)** - `DocMiner-5.1.1.dmg`
    - Native ARM64 build for M1/M2/M3 Macs
    - Build script: `./build_local.sh`
    - Best performance on Apple Silicon
 
-2. **Intel (x86_64)** - `ResearchBuddy-5.1.1-macos-intel.dmg`
+2. **Intel (x86_64)** - `DocMiner-5.1.1-macos-intel.dmg`
    - Native x86_64 build for Intel Macs
    - Build script: `./build_intel_macos.sh`
    - Required for older Intel Macs
@@ -37,7 +37,7 @@ pip3 install -r requirements.txt
 # Build the DMG
 ./build_local.sh
 
-# Output: releases/ResearchBuddy-5.1.1.dmg
+# Output: releases/DocMiner-5.1.1.dmg
 ```
 
 ### Intel (x86_64) Build
@@ -49,7 +49,7 @@ pip3 install -r requirements.txt
 # Build the DMG
 ./build_intel_macos.sh
 
-# Output: releases-intel/ResearchBuddy-5.1.1-macos-intel.dmg
+# Output: releases-intel/DocMiner-5.1.1-macos-intel.dmg
 ```
 
 ## GitHub Actions Builds
@@ -65,7 +65,7 @@ Triggered by:
 
 ## Key Build Configuration
 
-### Spec File: `build_files/ResearchBuddy5.1.1.spec`
+### Spec File: `build_files/DocMiner5.1.1.spec`
 
 Critical settings:
 - `target_arch=None` - Builds for native architecture
@@ -110,7 +110,7 @@ pip3 list | grep pdfplumber  # Should show version
 
 Check the architecture:
 ```bash
-file dist/ResearchBuddy5.1.1.app/Contents/MacOS/ResearchBuddy5.1.1
+file dist/DocMiner5.1.1.app/Contents/MacOS/DocMiner5.1.1
 ```
 
 Should show either:
@@ -126,7 +126,7 @@ On first launch:
 
 Or use Terminal:
 ```bash
-open /path/to/ResearchBuddy-5.1.1.dmg
+open /path/to/DocMiner-5.1.1.dmg
 # Then double-click the app in the mounted volume
 ```
 
@@ -135,10 +135,10 @@ open /path/to/ResearchBuddy-5.1.1.dmg
 Using GitHub CLI:
 ```bash
 # Upload Apple Silicon version
-gh release upload v5.1.1 releases/ResearchBuddy-5.1.1.dmg --clobber
+gh release upload v5.1.1 releases/DocMiner-5.1.1.dmg --clobber
 
 # Upload Intel version
-gh release upload v5.1.1 releases-intel/ResearchBuddy-5.1.1-macos-intel.dmg --clobber
+gh release upload v5.1.1 releases-intel/DocMiner-5.1.1-macos-intel.dmg --clobber
 ```
 
 ## Version Updates

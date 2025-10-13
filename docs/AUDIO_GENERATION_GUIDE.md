@@ -14,7 +14,7 @@
 - **Tone:** Warm, authoritative, professorial
 - **Files:** 7 clips
 
-### Character 2: Research Buddy
+### Character 2: DocMiner
 - **Voice:** Josh or Arnold
 - **Tone:** Friendly, helpful, enthusiastic
 - **Files:** 7 clips
@@ -32,14 +32,14 @@
 **Voice:** Professor Todd  
 **Text to paste:**
 ```
-Welcome to Research Buddy! I'm Professor Todd, and I've been researching positionality statements in academic writing for years.
+Welcome to DocMiner! I'm Professor Todd, and I've been researching positionality statements in academic writing for years.
 ```
 
 ### File: `scene1_buddy.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
-And I'm Research Buddy, your AI-powered assistant! I'm here to help you identify and analyze positionality statements efficiently.
+And I'm DocMiner, your AI-powered assistant! I'm here to help you identify and analyze positionality statements efficiently.
 ```
 
 ### File: `scene1_maya.mp3`
@@ -68,7 +68,7 @@ Great question, Maya! Let's go through each field. First, you'll need an OpenAI 
 ```
 
 ### File: `scene2_buddy_01.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
 The API key lets me access ChatGPT to help analyze text and identify positionality patterns. You can get one from platform.openai.com.
@@ -89,7 +89,7 @@ So the API key is for the AI analysis, and the GitHub token is for uploading our
 ```
 
 ### File: `scene2_buddy_02.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
 Exactly! Now, let's talk about the GitHub username and repository fields.
@@ -99,7 +99,7 @@ Exactly! Now, let's talk about the GitHub username and repository fields.
 **Voice:** Professor Todd  
 **Text to paste:**
 ```
-Enter 'OhioMathTeacher' as the username - that's my GitHub account. And 'research-buddy' as the repository name.
+Enter 'OhioMathTeacher' as the username - that's my GitHub account. And 'docminer' as the repository name.
 ```
 
 ### File: `scene2_maya_03.mp3`
@@ -110,7 +110,7 @@ So all graduate assistants will upload to the same repository? That makes it eas
 ```
 
 ### File: `scene2_buddy_03.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
 Precisely! All training data goes to one central location. Now click 'Save Configuration' and we're ready to analyze some papers!
@@ -135,7 +135,7 @@ Exactly! Your name helps us track which graduate assistant reviewed which papers
 ```
 
 ### File: `scene3_buddy_01.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
 I see you've selected a folder with academic papers. Great! I'll load them in the order they appear. You can navigate through them using 'Next' and 'Previous' buttons.
@@ -167,7 +167,7 @@ I found something! This author says 'As a White researcher working in communitie
 ```
 
 ### File: `scene4_buddy_01.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
 Great find! Simply click and drag to select the text. I'll copy it to the 'Selected Text for Evidence' panel on the right.
@@ -199,7 +199,7 @@ I notice there's a button called 'Run Initial Analysis with AI'. Should I use th
 ```
 
 ### File: `scene5_buddy_01.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
 Absolutely! I can pre-scan the entire document and suggest passages that might contain positionality statements. It's a huge time-saver!
@@ -220,7 +220,7 @@ Okay, I clicked it. Wow! It found three potential passages and displayed them wi
 ```
 
 ### File: `scene5_buddy_02.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
 I found patterns like 'first-person reflexivity' and 'identity disclosure'. These are common markers of positionality statements.
@@ -252,7 +252,7 @@ You have four judgment options: Positive Explicit, Positive Implicit, Negative, 
 ```
 
 ### File: `scene6_buddy_01.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
 Positive Explicit means the author clearly and directly states their positionality. Implicit would be more subtle references. Negative means no positionality statement found.
@@ -284,7 +284,7 @@ I'll note 'Clear acknowledgment of racial identity and privilege in research con
 ## Scene 7: Uploading and Wrap-Up (1 minute)
 
 ### File: `scene7_buddy_01.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
 Great work, Maya! You've analyzed five papers. Now let's upload your decisions to the GitHub repository.
@@ -301,11 +301,11 @@ I see an 'Upload Decision' button. When I click it, what happens?
 **Voice:** Professor Todd  
 **Text to paste:**
 ```
-Your analysis gets converted to both JSON and Markdown formats, then uploaded to the research-buddy repository under the training_reports folder.
+Your analysis gets converted to both JSON and Markdown formats, then uploaded to the docminer repository under the training_reports folder.
 ```
 
 ### File: `scene7_buddy_02.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
 The filename includes your name, the paper title, your judgment, and a timestamp. For example: Maya_Armstrong_positive_20251010.json
@@ -322,11 +322,11 @@ Perfect! I see a success message. My work is saved and shared with the team. Thi
 **Voice:** Professor Todd  
 **Text to paste:**
 ```
-That's the power of Research Buddy - combining AI efficiency with human expertise. Thanks for joining us today!
+That's the power of DocMiner - combining AI efficiency with human expertise. Thanks for joining us today!
 ```
 
 ### File: `scene7_buddy_03.mp3`
-**Voice:** Research Buddy  
+**Voice:** DocMiner  
 **Text to paste:**
 ```
 Happy analyzing! Remember, I'm here to help, but you're the expert making the final decisions. See you next time!

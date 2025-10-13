@@ -1,4 +1,4 @@
-# 📥 Download Research Buddy - Ready to Run!
+# 📥 Download DocMiner - Ready to Run!
 
 **NO Python, NO setup, NO command line - Just download and double-click!**
 
@@ -18,23 +18,23 @@
 ## 📝 How to Use (Once Downloaded)
 
 ### Windows:
-1. Download `ResearchBuddy-Windows.zip`
+1. Download `DocMiner-Windows.zip`
 2. Right-click → "Extract All"
 3. Open the extracted folder
-4. Double-click `ResearchBuddy.exe`
+4. Double-click `DocMiner.exe`
 
 ### macOS:
-1. Download `ResearchBuddy-macOS.zip`
+1. Download `DocMiner-macOS.zip`
 2. Double-click to extract
-3. Double-click `ResearchBuddy.app`
+3. Double-click `DocMiner.app`
 4. If Mac says "unidentified developer":
    - Right-click the app → "Open"
    - Click "Open" in the dialog
 
 ### Linux:
-1. Download `ResearchBuddy-Linux.tar.gz`
-2. Extract: `tar -xzf ResearchBuddy-Linux.tar.gz`
-3. Run: `./ResearchBuddy`
+1. Download `DocMiner-Linux.tar.gz`
+2. Extract: `tar -xzf DocMiner-Linux.tar.gz`
+3. Run: `./DocMiner`
 
 ---
 
@@ -42,7 +42,7 @@
 
 **While executables are being built, use this ZERO-INSTALL option:**
 
-1. Go to https://github.com/OhioMathTeacher/research-buddy
+1. Go to https://github.com/OhioMathTeacher/docminer
 2. Click green **"Code"** button
 3. Click **"Codespaces"** tab
 4. Click **"Create codespace"**
@@ -61,4 +61,4 @@
 
 **Need help?**
 Contact your instructor or open an issue at:
-https://github.com/OhioMathTeacher/research-buddy/issues
+https://github.com/OhioMathTeacher/docminer/issues

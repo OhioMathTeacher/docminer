@@ -24,7 +24,7 @@ def create_readme_pdf(output_path):
     y_pos = height - margin
     
     # Title
-    title_text = "🎓 Research Buddy 2.0 Training Interface"
+    title_text = "🎓 DocMiner 2.0 Training Interface"
     title_rect = fitz.Rect(margin, y_pos - 30, width - margin, y_pos)
     page.insert_text(title_rect.tl, title_text, fontsize=20, fontname=font_title, color=(0, 0, 1))
     y_pos -= 50
@@ -38,7 +38,7 @@ def create_readme_pdf(output_path):
     # Content sections
     sections = [
         {
-            "title": "🚀 Welcome to Research Buddy 2.0!",
+            "title": "🚀 Welcome to DocMiner 2.0!",
             "content": [
                 "This is Training Buddy - your AI-assisted interface for training the positionality",
                 "detection system. You're viewing this guide in the integrated PDF viewer that",

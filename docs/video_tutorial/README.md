@@ -12,7 +12,7 @@ Generated voice-over files from ElevenLabs
 ### images/
 Character avatars and graphics
 - `professor_todd.png` - Still image of Professor Todd
-- `research_buddy.png` - Still image of Research Buddy character
+- `research_buddy.png` - Still image of DocMiner character
 - `maya.png` - Still image of Maya
 - `title_card.png` - Opening title
 - `closing_card.png` - End credits

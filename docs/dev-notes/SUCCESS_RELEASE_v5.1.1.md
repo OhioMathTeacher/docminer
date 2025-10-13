@@ -2,23 +2,23 @@
 
 ## ✅ Confirmed Working
 
-**Release Page:** https://github.com/OhioMathTeacher/research-buddy/releases/tag/v5.1.1
+**Release Page:** https://github.com/OhioMathTeacher/docminer/releases/tag/v5.1.1
 
 **Status:** ✅ **3 Assets Successfully Uploaded!**
 
 ## 📦 Available Downloads
 
 ### macOS 🍎
-- **ResearchBuddy-5.1.1-macos.dmg** (257 MB)
+- **DocMiner-5.1.1-macos.dmg** (257 MB)
 - ARM64 native build (Apple Silicon)
 - Works on Intel Macs via Rosetta 2
 
 ### Windows 🪟
-- **ResearchBuddy-5.1.1-windows.zip** (230 MB)
+- **DocMiner-5.1.1-windows.zip** (230 MB)
 - Ready-to-run executable
 
 ### Linux 🐧
-- **ResearchBuddy-5.1.1-linux.tar.gz** (282 MB)
+- **DocMiner-5.1.1-linux.tar.gz** (282 MB)
 - Universal Linux binary
 
 ## 🔧 What We Fixed
@@ -54,28 +54,28 @@
 
 Graduate Assistants can now:
 
-1. Visit: https://github.com/OhioMathTeacher/research-buddy/releases/latest
+1. Visit: https://github.com/OhioMathTeacher/docminer/releases/latest
 2. Download the file for their platform
 3. Install and run - **no Python, no terminal, no setup!**
 
 ### Installation Instructions:
 
 **macOS:**
-- Download `ResearchBuddy-5.1.1-macos.dmg`
+- Download `DocMiner-5.1.1-macos.dmg`
 - Double-click DMG
 - Drag app to Applications folder
 - Done!
 
 **Windows:**
-- Download `ResearchBuddy-5.1.1-windows.zip`
+- Download `DocMiner-5.1.1-windows.zip`
 - Extract ZIP
 - Double-click `.exe`
 - If Windows Defender warns: "More info" → "Run anyway"
 
 **Linux:**
-- Download `ResearchBuddy-5.1.1-linux.tar.gz`
-- Extract: `tar -xzf ResearchBuddy-5.1.1-linux.tar.gz`
-- Run: `./ResearchBuddy5.1.1/ResearchBuddy5.1.1`
+- Download `DocMiner-5.1.1-linux.tar.gz`
+- Extract: `tar -xzf DocMiner-5.1.1-linux.tar.gz`
+- Run: `./DocMiner5.1.1/DocMiner5.1.1`
 
 ## 🏆 Final Commits
 
