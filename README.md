@@ -1,4 +1,4 @@
-# DocMiner 5.2.1 - Professional Positionality Analysis Interface
+# DocMiner 6.1.0 - Professional Positionality Analysis Interface
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
@@ -6,11 +6,44 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ---
 
+## 🆕 **What's New in v6.1.0** (October 2025)
+
+**Enhanced Training Interface with Visual Progress Tracking:**
+- 🟢 🟡 🔴 **Status Dots**: Real-time visual indicators showing analysis state for each PDF
+- 📊 **Position Counter**: "X of Y" display shows your progress through papers
+- 💾 **Full Session Persistence**: All evidence, decisions, and progress automatically saved
+- 📁 **Smart Folder Memory**: Remembers your last working folder across sessions
+- 🎯 **Never Lose Work**: Pick up exactly where you left off
+
+---
+
 ## 📥 **DOWNLOAD EXECUTABLES - Just Click and Run!**
 
 **No Python, no setup, no terminal commands - just download and double-click!**
 
-### **macOS** ⭐ **NEW v5.2.1 - AI Fixed + 93% Smaller!**
+### **Coming Soon: v6.1.0 Builds**
+*Executables are currently building via GitHub Actions and will be available shortly at:*
+- 🍎 **macOS**: [Releases Page](https://github.com/OhioMathTeacher/docminer/releases/latest)
+- 🪟 **Windows**: [Releases Page](https://github.com/OhioMathTeacher/docminer/releases/latest)
+- 🐧 **Linux**: [Releases Page](https://github.com/OhioMathTeacher/docminer/releases/latest)
+
+*Check the [Releases](https://github.com/OhioMathTeacher/docminer/releases) page for the latest builds!*
+
+*For immediate access to v6.1.0 features, run from source (instructions below).*
+
+---
+
+## 🎥 **Video Tutorial - Quick Start Guide**
+
+---
+
+## �📥 **DOWNLOAD EXECUTABLES - Just Click and Run!**
+
+**No Python, no setup, no terminal commands - just download and double-click!**
+
+*Current builds are v5.2.1 - for latest v6.1.0 features, run from source (instructions below)*
+
+### **macOS** ⭐ **v5.2.1 - AI Fixed + 93% Smaller!**
 🍎 [**Download DocMiner-5.2.1-macos.dmg**](https://github.com/OhioMathTeacher/docminer/releases/download/v5.2.1/DocMiner-5.2.1-macos.dmg) **(81 MB)**
 - **CRITICAL FIX**: AI positionality analysis now works! 
 - **93% smaller**: 81 MB (was 1.1 GB)

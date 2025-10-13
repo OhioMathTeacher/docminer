@@ -1165,7 +1165,7 @@ class PDFViewer(QWidget):
 class EnhancedTrainingInterface(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("DocMiner 6.0.1 - Professional Positionality Analysis Interface")
+        self.setWindowTitle("DocMiner 6.1.0 - Professional Positionality Analysis Interface")
         # Set reasonable default size but allow user to resize
         self.resize(1200, 800)  # Default size - user can resize as needed
         
@@ -1183,9 +1183,9 @@ class EnhancedTrainingInterface(QMainWindow):
         self.readme_pdf_path = self.default_pdf_folder / "aboutDM.pdf"
         
         # Settings file in user's config directory (works with AppImage)
-        config_dir = Path.home() / ".research_buddy"
+        config_dir = Path.home() / ".docminer"
         config_dir.mkdir(parents=True, exist_ok=True)
-        self.settings_file = config_dir / "interface_settings.json"
+        self.settings_file = config_dir / "ui_settings.json"
         
         # Initialize without loading any local training data
         # Each session starts fresh - decisions go directly to GitHub
@@ -1349,8 +1349,8 @@ class EnhancedTrainingInterface(QMainWindow):
     
     def show_about(self):
         """Show about dialog"""
-        QMessageBox.about(self, "About DocMiner 6.0.1", 
-                         "🎓 DocMiner 6.0.1\n\n"
+        QMessageBox.about(self, "About DocMiner 6.0.2", 
+                         "🎓 DocMiner 6.0.2\n\n"
                          "Professional Positionality Analysis Interface\n\n"
                          "Features:\n"
                          "• Paper state persistence\n"
@@ -1443,11 +1443,24 @@ class EnhancedTrainingInterface(QMainWindow):
         # Remove maximum width to let it expand naturally
         pdf_layout = QVBoxLayout(pdf_panel)
         
-        # Paper info
+        # Paper info + status dot
+        paper_info_layout = QHBoxLayout()
+        paper_info_layout.setContentsMargins(0, 0, 0, 0)
+        paper_info_layout.setSpacing(8)
+
         self.paper_info = QLabel("No paper selected")
         self.paper_info.setFont(QFont("Courier New", 11, QFont.Bold))
         self.paper_info.setStyleSheet("QLabel { padding: 4px; background: white; border: 1px solid #666666; color: black; }")
-        pdf_layout.addWidget(self.paper_info)
+        paper_info_layout.addWidget(self.paper_info, 1)
+
+        # Small colored status dot: red/yellow/green depending on paper state
+        self.pdf_status_dot = QLabel("")
+        self.pdf_status_dot.setFixedSize(12, 12)
+        self.pdf_status_dot.setStyleSheet("QLabel { background-color: #d32f2f; border-radius: 6px; border: 1px solid #aaa; }")
+        self.pdf_status_dot.setToolTip("Paper status")
+        paper_info_layout.addWidget(self.pdf_status_dot)
+
+        pdf_layout.addLayout(paper_info_layout)
         
         # Note about PDF functionality
         pdf_note = QLabel("� PDF displays with zoom and text selection built-in")
@@ -1601,6 +1614,14 @@ class EnhancedTrainingInterface(QMainWindow):
         self.evidence_tabs.addTab(ai_tab, "AI Input")
 
         right_layout.addWidget(self.evidence_tabs)
+
+        # Update paper status when human/AI input changes
+        # (connect here because widgets have been created)
+        try:
+            self.human_input.textChanged.connect(self.update_current_paper_status)
+            self.ai_input.textChanged.connect(self.update_current_paper_status)
+        except Exception:
+            pass
         
         splitter.addWidget(training_panel)
         
@@ -1623,6 +1644,11 @@ class EnhancedTrainingInterface(QMainWindow):
         skip_btn = QPushButton("⏭️ Next Paper")
         skip_btn.clicked.connect(self.next_paper)
         button_layout.addWidget(skip_btn)
+        
+        # Paper position counter (e.g., "3 of 12")
+        self.paper_position = QLabel("")
+        self.paper_position.setStyleSheet("QLabel { color: #333; font-weight: bold; margin-left: 10px; }")
+        button_layout.addWidget(self.paper_position)
         
         button_layout.addStretch()
         
@@ -1778,6 +1804,11 @@ class EnhancedTrainingInterface(QMainWindow):
         
         total = len(self.papers_list)
         self.papers_completed.setText(f"{processed_count} of {total} papers processed")
+        # Also refresh the current paper status dot
+        try:
+            self.update_current_paper_status()
+        except Exception:
+            pass
         
     def update_processing_animation(self):
         """Update the animated Robbie processing indicator"""
@@ -1828,8 +1859,13 @@ class EnhancedTrainingInterface(QMainWindow):
         filename = self.papers_list[self.current_paper_index]
         filepath = os.path.join(self.pdf_folder, filename)
         
-        # Update paper info
+        # Update paper info (just filename, no counter)
         self.paper_info.setText(f"📄 {filename}")
+        
+        # Update position counter at bottom
+        current_index = self.current_paper_index + 1  # 1-based for display
+        total_papers = len(self.papers_list)
+        self.paper_position.setText(f"{current_index} of {total_papers}")
         
         # Load PDF in embedded viewer
         success = self.pdf_viewer.load_pdf(filepath)
@@ -1839,13 +1875,24 @@ class EnhancedTrainingInterface(QMainWindow):
         # NOTE: Removed automatic AI analysis here - it blocks the UI thread!
         # Users should click "Run AI Analysis" button to run analysis asynchronously
         
-        # Clear previous inputs
-        self.clear_inputs()
+        # Clear previous inputs ONLY if no saved state exists
+        # This preserves user's work when navigating back to a paper
+        if filename not in self.paper_states or not any([
+            self.paper_states[filename].get('human_text'),
+            self.paper_states[filename].get('ai_text'),
+            self.paper_states[filename].get('decision')
+        ]):
+            self.clear_inputs()
         
-        # Always start fresh - no loading of previous decisions
-        # Each session focuses on current analysis only
+        # Load saved state for this paper (if it exists)
+        self.load_current_paper_state()
         
-        self.statusBar().showMessage(f"Loaded: {filename} - Text selection available in PDF viewer", 3000)
+        self.statusBar().showMessage(f"Loaded: {filename} ({current_index}/{total_papers}) - Text selection available in PDF viewer", 3000)
+        # Update status dot for the newly loaded paper
+        try:
+            self.update_current_paper_status()
+        except Exception:
+            pass
         
     def clear_inputs(self):
         """Clear all input fields"""
@@ -2215,26 +2262,43 @@ class EnhancedTrainingInterface(QMainWindow):
         # Copy README PDF to default folder if it doesn't exist
         self.ensure_readme_exists()
         
-        # Set default folder as current folder
-        self.pdf_folder = str(self.default_pdf_folder)
-        
-        # Load PDFs from default folder (including README)
-        self.load_folder(self.pdf_folder)
-        
-        # Find and display README first if available
-        readme_index = self.find_readme_index()
-        if readme_index >= 0:
-            self.current_paper_index = readme_index
-            self.load_current_paper()
-            self.statusBar().showMessage("📖 Welcome! Reading the Getting Started guide. Add your PDFs to ExtractorPDFs folder.", 5000)
-        else:
-            # No README found, show first PDF or empty state
-            if self.papers_list:
-                self.current_paper_index = 0
+        # Only use default folder if no folder was restored from settings
+        if not self.pdf_folder or self.pdf_folder == str(self.default_pdf_folder):
+            # Set default folder as current folder
+            self.pdf_folder = str(self.default_pdf_folder)
+            
+            # Load PDFs from default folder (including README)
+            self.load_folder(self.pdf_folder)
+            
+            # Find and display README first if available
+            readme_index = self.find_readme_index()
+            if readme_index >= 0:
+                self.current_paper_index = readme_index
                 self.load_current_paper()
-                self.statusBar().showMessage(f"Loaded {len(self.papers_list)} PDFs from ExtractorPDFs folder", 3000)
+                self.statusBar().showMessage("📖 Welcome! Reading the Getting Started guide. Add your PDFs to ExtractorPDFs folder.", 5000)
             else:
-                self.statusBar().showMessage("� Add PDF files to your ~/ExtractorPDFs folder to begin training", 5000)
+                # No README found, show first PDF or empty state
+                if self.papers_list:
+                    self.current_paper_index = 0
+                    self.load_current_paper()
+                    self.statusBar().showMessage(f"Loaded {len(self.papers_list)} PDFs from ExtractorPDFs folder", 3000)
+                else:
+                    self.statusBar().showMessage("📁 Add PDF files to your ~/ExtractorPDFs folder to begin training", 5000)
+        else:
+            # Folder was restored from settings - load it and restore position
+            if os.path.exists(self.pdf_folder):
+                self.load_folder(self.pdf_folder)
+                # current_paper_index was already restored by load_settings
+                if self.papers_list and self.current_paper_index < len(self.papers_list):
+                    self.load_current_paper()
+                    self.statusBar().showMessage(f"Restored session: {len(self.papers_list)} PDFs from {Path(self.pdf_folder).name}", 3000)
+                else:
+                    self.statusBar().showMessage(f"Restored folder: {Path(self.pdf_folder).name}", 3000)
+            else:
+                # Saved folder doesn't exist anymore - fall back to default
+                self.pdf_folder = str(self.default_pdf_folder)
+                self.load_folder(self.pdf_folder)
+                self.statusBar().showMessage("Previous folder not found. Loaded default folder.", 3000)
     
     def ensure_readme_exists(self):
         """Ensure the README PDF exists in the default folder"""
@@ -2284,31 +2348,62 @@ class EnhancedTrainingInterface(QMainWindow):
         return -1
     
     def load_settings(self):
-        """Load interface settings from file"""
+        """Load UI settings from file (window geometry, folder, progress)"""
+        # Migration: Check for old config file
+        old_config_path = Path.home() / ".research_buddy" / "interface_settings.json"
+        if not self.settings_file.exists() and old_config_path.exists():
+            try:
+                with open(old_config_path, 'r') as f:
+                    old_settings = json.load(f)
+                    # Extract only UI settings (not credentials)
+                    self.pdf_folder = old_settings.get("pdf_folder", str(self.default_pdf_folder))
+                    # Restore window geometry and paper states if present
+                    window_geometry = old_settings.get("window_geometry")
+                    if window_geometry:
+                        self.setGeometry(
+                            window_geometry.get("x", 100),
+                            window_geometry.get("y", 100),
+                            window_geometry.get("width", 1200),
+                            window_geometry.get("height", 800)
+                        )
+                    if "paper_states" in old_settings:
+                        self.paper_states = old_settings["paper_states"]
+                    if "current_paper_index" in old_settings:
+                        self.current_paper_index = old_settings["current_paper_index"]
+                print("Migrated UI settings from old config file")
+                return
+            except Exception as e:
+                print(f"Error migrating UI settings: {e}")
+        
+        # Load from new UI settings file
         try:
             if self.settings_file.exists():
                 with open(self.settings_file, 'r') as f:
                     settings = json.load(f)
                     self.pdf_folder = settings.get("pdf_folder", str(self.default_pdf_folder))
                     
-                    # Don't restore window geometry - always use default size
-                    # This prevents full-screen windows on subsequent launches
+                    # Restore window geometry
+                    window_geometry = settings.get("window_geometry")
+                    if window_geometry:
+                        self.setGeometry(
+                            window_geometry.get("x", 100),
+                            window_geometry.get("y", 100),
+                            window_geometry.get("width", 1200),
+                            window_geometry.get("height", 800)
+                        )
+                    
+                    # Restore paper states and current index
+                    if "paper_states" in settings:
+                        self.paper_states = settings["paper_states"]
+                    if "current_paper_index" in settings:
+                        self.current_paper_index = settings["current_paper_index"]
         except Exception as e:
             print(f"Could not load settings: {e}")
             self.pdf_folder = str(self.default_pdf_folder)
-    
+
     def save_settings(self):
-        """Save interface settings to file"""
+        """Save UI settings to file (window geometry, folder, progress)"""
         try:
-            # Load existing settings to preserve ALL configuration
-            existing_settings = {}
-            if os.path.exists(self.settings_file):
-                try:
-                    with open(self.settings_file, 'r') as f:
-                        existing_settings = json.load(f)
-                except (json.JSONDecodeError, IOError):
-                    pass
-            
             # Get current window geometry
             geometry = self.geometry()
             settings = {
@@ -2319,22 +2414,19 @@ class EnhancedTrainingInterface(QMainWindow):
                     "width": geometry.width(),
                     "height": geometry.height()
                 },
+                "current_paper_index": self.current_paper_index,
+                "paper_states": self.paper_states,
                 "last_updated": datetime.now().isoformat()
             }
-            
-            # Preserve all other configuration (github, API keys, etc.)
-            for key in existing_settings:
-                if key not in settings:
-                    settings[key] = existing_settings[key]
             
             with open(self.settings_file, 'w') as f:
                 json.dump(settings, f, indent=2)
             
-            # Set file permissions to user-only (600) for security
+            # Set file permissions to user-only (600)
             os.chmod(self.settings_file, 0o600)
         except Exception as e:
             print(f"Could not save settings: {e}")
-    
+
     def on_text_selected(self, selected_text):
         """Handle text selection from PDF viewer"""
         print(f"DEBUG - on_text_selected called with: '{selected_text[:100] if selected_text else 'EMPTY'}'")
@@ -2664,26 +2756,32 @@ class EnhancedTrainingInterface(QMainWindow):
         human_text = self.human_input.toPlainText().strip()
         ai_text = self.ai_input.toPlainText().strip()
         
-        # Get current decision from radio buttons
+        # Get current decision from radio buttons (using actual judgment_buttons)
         decision = None
-        if hasattr(self, 'evidence_strong_radio') and self.evidence_strong_radio.isChecked():
-            decision = 'strong'
-        elif hasattr(self, 'evidence_moderate_radio') and self.evidence_moderate_radio.isChecked():
-            decision = 'moderate'
-        elif hasattr(self, 'evidence_minimal_radio') and self.evidence_minimal_radio.isChecked():
-            decision = 'minimal'
-        elif hasattr(self, 'evidence_none_radio') and self.evidence_none_radio.isChecked():
-            decision = 'none'
+        for key, btn in self.judgment_buttons.items():
+            if btn.isChecked():
+                decision = key
+                break
         
-        # Save to paper_states
+        # Save to paper_states (preserve uploaded flag if it exists)
         if filename not in self.paper_states:
             self.paper_states[filename] = {}
+        
+        # Preserve uploaded status when updating state
+        uploaded_status = self.paper_states[filename].get('uploaded', False)
         
         self.paper_states[filename].update({
             'human_text': human_text,
             'ai_text': ai_text,
-            'decision': decision
+            'decision': decision,
+            'uploaded': uploaded_status  # Preserve uploaded flag
         })
+        
+        # Persist to disk immediately for safety
+        self.save_settings()
+        
+        # Refresh status dot when state is saved
+        self.update_current_paper_status()
     
     def load_current_paper_state(self):
         """Load the saved state for current paper"""
@@ -2699,30 +2797,27 @@ class EnhancedTrainingInterface(QMainWindow):
             self.human_input.setPlainText(state.get('human_text', ''))
             self.ai_input.setPlainText(state.get('ai_text', ''))
             
-            # Restore decision radio buttons
+            # Restore decision radio buttons (using actual judgment_buttons)
             decision = state.get('decision')
-            if hasattr(self, 'evidence_strong_radio'):
-                self.evidence_strong_radio.setChecked(decision == 'strong')
-            if hasattr(self, 'evidence_moderate_radio'):
-                self.evidence_moderate_radio.setChecked(decision == 'moderate')
-            if hasattr(self, 'evidence_minimal_radio'):
-                self.evidence_minimal_radio.setChecked(decision == 'minimal')
-            if hasattr(self, 'evidence_none_radio'):
-                self.evidence_none_radio.setChecked(decision == 'none')
+            
+            # Clear all buttons first
+            for btn in self.judgment_buttons.values():
+                btn.setChecked(False)
+            
+            # Set the correct button if decision exists
+            if decision and decision in self.judgment_buttons:
+                self.judgment_buttons[decision].setChecked(True)
         else:
             # Clear content for new paper
             self.human_input.clear()
             self.ai_input.clear()
             
             # Clear radio button selections
-            if hasattr(self, 'evidence_strong_radio'):
-                self.evidence_strong_radio.setChecked(False)
-            if hasattr(self, 'evidence_moderate_radio'):
-                self.evidence_moderate_radio.setChecked(False)
-            if hasattr(self, 'evidence_minimal_radio'):
-                self.evidence_minimal_radio.setChecked(False)
-            if hasattr(self, 'evidence_none_radio'):
-                self.evidence_none_radio.setChecked(False)
+            for btn in self.judgment_buttons.values():
+                btn.setChecked(False)
+        
+        # Update status dot to reflect loaded state
+        self.update_current_paper_status()
     
     def mark_paper_uploaded(self, filename):
         """Mark a paper as uploaded/processed"""
@@ -2731,6 +2826,50 @@ class EnhancedTrainingInterface(QMainWindow):
         
         self.paper_states[filename]['uploaded'] = True
         self.update_progress()  # Refresh the status indicators
+        # Update the current paper status dot as it's been uploaded
+        self.update_current_paper_status()
+
+    def get_current_paper_status(self):
+        """Compute current paper status: 'green' (submitted), 'yellow' (partial), 'red' (none)"""
+        # Default to red (no analysis)
+        status = 'red'
+
+        if not self.papers_list or self.current_paper_index >= len(self.papers_list):
+            return status
+
+        filename = self.papers_list[self.current_paper_index]
+
+        # If uploaded marker present -> green
+        state = self.paper_states.get(filename, {})
+        if state.get('uploaded'):
+            return 'green'
+
+        # Check for any human or AI evidence or judgment
+        human = state.get('human_text', '') or self.human_input.toPlainText().strip()
+        ai = state.get('ai_text', '') or self.ai_input.toPlainText().strip()
+
+        # If there's evidence or partial data -> yellow
+        if human or ai:
+            return 'yellow'
+
+        # Otherwise no data -> red
+        return 'red'
+
+    def update_current_paper_status(self):
+        """Update the small colored dot reflecting current paper status"""
+        try:
+            color_map = {'green': '#2e7d32', 'yellow': '#f9a825', 'red': '#d32f2f'}
+            status = self.get_current_paper_status()
+            color = color_map.get(status, '#d32f2f')
+            self.pdf_status_dot.setStyleSheet(f"QLabel {{ background-color: {color}; border-radius: 6px; border: 1px solid #aaa; }}")
+            tip_map = {
+                'green': 'Submitted — uploaded to GitHub',
+                'yellow': 'Partial — evidence or AI analysis entered but not submitted',
+                'red': 'No analysis yet — no human or AI evidence'
+            }
+            self.pdf_status_dot.setToolTip(tip_map.get(status, 'No analysis yet'))
+        except Exception as e:
+            print(f"Could not update paper status dot: {e}")
     
     def closeEvent(self, event):
         """Save settings when closing"""

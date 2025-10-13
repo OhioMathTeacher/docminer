@@ -119,7 +119,7 @@ jobs:
     
     - name: 🔨 Build executable
       run: |
-        python -m PyInstaller build_files/DocMiner6.0.spec --distpath ./dist --workpath ./build --clean --noconfirm
+        python -m PyInstaller build_files/DocMiner6.1.spec --distpath ./dist --workpath ./build --clean --noconfirm
     
     - name: 📁 Prepare release files
       shell: bash
@@ -130,7 +130,7 @@ jobs:
         mkdir -p release-files
         
         if [ "${{ matrix.platform }}" == "windows" ]; then
-          cd dist/DocMiner6.0
+          cd dist/DocMiner6.1
           powershell -Command "Compress-Archive -Path * -DestinationPath ../../release-files/DocMiner-${VERSION_NUM}-windows.zip"
         elif [ "${{ matrix.platform }}" == "macos" ]; then
           # Install create-dmg
@@ -144,11 +144,11 @@ jobs:
             --icon-size 100 \
             --app-drop-link 425 120 \
             "release-files/DocMiner-${VERSION_NUM}-macOS.dmg" \
-            "dist/DocMiner6.0.app"
+            "dist/DocMiner6.1.app"
         else
           # Linux - create both tar.gz and AppImage
           cd dist
-          tar -czf ../release-files/DocMiner-${VERSION_NUM}-linux.tar.gz DocMiner6.0/
+          tar -czf ../release-files/DocMiner-${VERSION_NUM}-linux.tar.gz DocMiner6.1/
           
           # Build AppImage if script exists
           if [ -f "../build_files/create_appimage.sh" ]; then

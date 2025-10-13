@@ -1,0 +1,79 @@
+DocMiner 6.1.0 Release Notes
+============================
+Released: October 12, 2025
+
+## 🎉 Major New Features
+
+### Visual Status Indicators
+- **Status Dots**: Each PDF now displays a colored status indicator:
+  - 🔴 Red: No analysis started
+  - 🟡 Yellow: Partial analysis (has evidence or AI text, not yet uploaded)
+  - 🟢 Green: Analysis complete and uploaded
+- Dots update in real-time as you work
+- Instant visual feedback on analysis progress
+
+### Enhanced Navigation & Progress Tracking
+- **Position Counter**: "X of Y" display shows current paper position
+  - Positioned at bottom right next to "Next Paper" button
+  - Cleaner layout - no longer clutters long PDF filenames
+- **Paper Info**: PDF filename display now has more room for long names
+
+### Complete Session Persistence
+- **Full State Restoration**: All your work is automatically saved and restored:
+  - Last working folder remembered across sessions
+  - Current PDF position restored on reopen
+  - All evidence text (human and AI) preserved
+  - All radio button decisions saved
+  - Upload status maintained
+  - Status dots reflect saved state on startup
+- **Smart Fallback**: If saved folder is deleted, gracefully defaults to ExtractorPDFs
+- **No Data Loss**: Everything saves automatically when navigating or closing
+
+## 🔧 Technical Improvements
+
+### State Management
+- Enhanced `save_current_paper_state()` to preserve all analysis data
+- Improved `load_current_paper_state()` to restore complete UI state
+- Added real-time status dot updates on text changes
+- Immediate settings persistence for data safety
+
+### Session Recovery
+- Modified `initialize_with_readme()` to check for saved sessions
+- Added folder existence validation with automatic fallback
+- Preserved paper index restoration for seamless continuation
+
+### User Experience
+- Status changes reflect immediately in the UI
+- Tooltips explain dot colors
+- Clear status messages on session restoration
+- Smoother workflow - never lose your place
+
+## 📝 Bug Fixes
+- Fixed radio button decision persistence (was using non-existent attributes)
+- Corrected judgment state save/load using proper `judgment_buttons` dict
+- Added uploaded flag preservation in state updates
+
+## 🎯 Use Cases Enhanced
+- **Long Review Sessions**: Pick up exactly where you left off
+- **Multiple Sessions**: Work across days without losing progress
+- **Quick Status Checks**: Visual dots show at-a-glance paper status
+- **Better Organization**: Always know which papers need attention
+
+## 🔄 Migration Notes
+- Existing `~/.docminer/ui_settings.json` automatically enhanced with new fields
+- No user action required - upgrade is seamless
+- Previous sessions will restore with all available state data
+
+## 👨‍💻 Developer Notes
+- Added `self.pdf_status_dot` QLabel widget (12x12 colored circle)
+- New `get_current_paper_status()` method: returns 'red'/'yellow'/'green'
+- New `update_current_paper_status()` method: updates dot color and tooltip
+- Connected `textChanged` signals to status updates
+- Enhanced settings schema to include comprehensive paper states
+
+---
+
+Version 6.1.0 represents a significant improvement in user experience and data persistence,
+making DocMiner more reliable and easier to use for long-term research projects.
+
+Enjoy the enhanced workflow! 🚀
