@@ -21,15 +21,34 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 **No Python, no setup, no terminal commands - just download and double-click!**
 
-### **Coming Soon: v6.1.0 Builds**
-*Executables are currently building via GitHub Actions and will be available shortly at:*
-- 🍎 **macOS**: [Releases Page](https://github.com/OhioMathTeacher/docminer/releases/latest)
-- 🪟 **Windows**: [Releases Page](https://github.com/OhioMathTeacher/docminer/releases/latest)
-- 🐧 **Linux**: [Releases Page](https://github.com/OhioMathTeacher/docminer/releases/latest)
+### **v6.1.0 - Latest Release**
 
-*Check the [Releases](https://github.com/OhioMathTeacher/docminer/releases) page for the latest builds!*
+Choose your platform and download:
 
-*For immediate access to v6.1.0 features, run from source (instructions below).*
+- 🍎 **macOS** (Intel & Apple Silicon): [DocMiner-6.1.0-macOS.dmg](https://github.com/OhioMathTeacher/docminer/releases/download/v6.1.0/DocMiner-6.1.0-macOS.dmg) (70 MB)
+- 🪟 **Windows** (64-bit): [DocMiner-6.1.0-Windows.zip](https://github.com/OhioMathTeacher/docminer/releases/download/v6.1.0/DocMiner-6.1.0-Windows.zip) (78 MB)
+- 🐧 **Linux** (x86_64): [DocMiner-6.1.0-x86_64.AppImage](https://github.com/OhioMathTeacher/docminer/releases/download/v6.1.0/DocMiner-6.1.0-x86_64.AppImage) (110 MB)
+
+### **Installation Instructions**
+
+**macOS:**
+1. Download the DMG file
+2. Double-click to open
+3. Drag DocMiner to your Applications folder
+4. If blocked by security: Open Terminal and run: `xattr -cr /Applications/DocMiner6.1.app`
+
+**Windows:**
+1. Download the ZIP file
+2. Right-click → "Extract All..."
+3. Open the extracted folder
+4. Double-click `DocMiner6.1.exe`
+
+**Linux:**
+1. Download the AppImage file
+2. Make it executable: `chmod +x DocMiner-6.1.0-x86_64.AppImage`
+3. Run it: `./DocMiner-6.1.0-x86_64.AppImage`
+
+*See all releases at: [Releases Page](https://github.com/OhioMathTeacher/docminer/releases)*
 
 ---
 
