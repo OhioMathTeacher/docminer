@@ -1,0 +1,54 @@
+# Training Session Report
+
+## Session Information
+- **GA Name**: Todd
+- **Session ID**: 20251012_2312
+- **Timestamp**: 2025-10-12T23:12:09.665249
+- **Papers Analyzed**: 1
+
+## Summary Statistics
+
+### Judgment Distribution
+- **positive_subtle**: 1 papers (100.0%)
+
+### Pattern Analysis
+- **Total Evidence Quotes**: 1
+- **Average Confidence**: 3.0/5
+
+## Evidence Examples
+
+
+### Example 1: NECycyk.pdf
+- **Confidence**: 3/5
+- **Patterns**: None specified
+- **Evidence**: "Jimenez et al., 2014; McManus et al., 2020). Ethnic/language a parental referral. This difference is notable because our find-
+differences were also noted for general ECSE placement for chil- ings sho..."
+
+## Pattern Suggestions
+
+No pattern suggestions provided.
+
+## Next Steps for Analysis
+
+1. **Pattern Discovery**: Analyze evidence quotes for new regex patterns
+2. **False Negative Review**: Check papers marked negative for missed statements  
+3. **Validation Testing**: Test discovered patterns on validation set
+4. **System Integration**: Add successful patterns to detection engine
+
+## Raw Data
+
+```json
+[
+  {
+    "filename": "NECycyk.pdf",
+    "timestamp": "2025-10-12T23:12:09.657825",
+    "judgment": "positive_subtle",
+    "evidence": "Jimenez et al., 2014; McManus et al., 2020). Ethnic/language a parental referral. This difference is notable because our find-\ndifferences were also noted for general ECSE placement for chil- ings show that referral source is a strong mediator of evaluation\ndren who were Latino/a Spanish speakers and those who were \u00adcompletion and ultimate placement\u2014parent referrals are more\nnon-Latino/a other language speakers. No differences were likely to be evaluated than other referral types in EI and ECSE,\nnoted in referrals, evaluation, or general placement for Latino/a and parent referrals are more likely to result in placement in\nchildren from homes where English was spoken (Latino/a ECSE. Parents who have concerns and make referrals directly\nEnglish and Latino/a bilingual) compared to non-Latino/a may be intrinsically motivated to pursue services. This may not be\nEnglish speakers, suggesting a systemic bias favoring English the case when other sources make the referral. It is not clear why\nspeakers regardless of ethnicity. Yet, disproportionality in EI and Latino/a families are less likely to self-refer to EI/ECSE. Some\nECSE placement for a language or an articulation delay was possibilities include limited familiarity with EI/ECSE, differing\nnoted for all Latino/a groups regardless of home language, point- trust and empowerment in educational or medical \u00adsystems, lack\ning toward a more general effect of ethnicity on equity at this of information sharing by providers about the reason for referral\npoint in the system. With the level of detail available through or how to follow up on the referral with EI/ECSE (including in\nintersectional analyses, state policies and interventions for out- families\u2019 home languages), and/or varied information about and/\nreach and evaluation can be finely tuned to build equity in par- or cultural perspectives on development and disability in early\nticular communities. childhood (Jimenez et al., 2012, 2014; Magnusson et al., 2017).\nIrrespective of the reason, ethnic differences in referral source",
+    "ai_analysis": "AI Analysis for NECycyk.pdf\n\nConfidence Level: High (0.800)\nRecommendation: Explicit positionality detected\nPatterns Detected: Subtle Positionality\n\n\nEvidence Excerpts Found: #1 - Ai Explanation\nLikely Location: Introduction/Background\nSTRONG positionality detected (Confidence: 0.80) Patterns identified: subtle_positionality Key evidence: \u2022 subtle: Relevant passages and explanations: 1. **\"Our findings suggest that attending to children\u2019s intersecting ethnicity and language backgrounds in refer....\n\n\n#2 - Final Assessment\nLikely Location: Results/Findings\nThe preliminary findings indicate a nuanced understanding of the interplay between ethnicity, language, and access to early intervention and special education services. The evidence suggests that subtle positionality is present, particularly in how children's intersecting identities influence their experiences within these systems....\n\n\n#3 - Subtle\nLikely Location: Introduction/Background\nRelevant passages and explanations: 1. **\"Our findings suggest that attending to children\u2019s intersecting ethnicity and language backgrounds in referral, evaluation, and placement add nuance to examinations of disproportionality.\"** - This statement indicates an awareness of the complexity of identity and how it affects the research outcomes....\n\n\n\nAI Recommendation:\nStrong evidence of explicit positionality statements. Recommend categorizing as Explicit.",
+    "pattern_types": [],
+    "confidence": 3,
+    "explanation": "",
+    "pattern_suggestions": ""
+  }
+]
+```
