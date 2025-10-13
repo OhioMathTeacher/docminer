@@ -203,3 +203,6 @@ trigger_build.sh
 
 # User configuration (should only be in ~/.research_buddy/)
 interface_settings.json
+AppDir/
+dist/
+build/
