@@ -1,0 +1,13 @@
+[
+  {
+    "filename": "NECycyk.pdf",
+    "timestamp": "2025-10-12T21:44:20.874492",
+    "judgment": "positive_subtle",
+    "evidence": "This study examined Oregon\u2019s early intervention (EI) and early childhood special education (ECSE) pipelines as a function\nof children\u2019s intersecting ethnicity and home language(s) with a focus on children from Latino/a backgrounds with\ncommunication disorders. We found differences in children\u2019s referral source and age of referral, likelihood of evaluation\nand placement, and type of placement for conditions related to communication, including autism spectrum disorder and\nhearing impairment. Results showed differences in EI and ECSE; however, disproportionality appeared greatest among\nSpanish-speaking Latino/a children and non-Latino/a children who spoke languages other than English compared to\nnon-Latino/a English-speaking counterparts. Our findings suggest that attending to children\u2019s intersecting ethnicity and\nlanguage backgrounds in referral, evaluation, and placement add nuance to examinations of disproportionality. Results also",
+    "ai_analysis": "AI Analysis for NECycyk.pdf\n\nConfidence Level: High (0.800)\nRecommendation: Explicit positionality detected\nPatterns Detected: Subtle Positionality\n\n\nEvidence Excerpts Found: #1 - Ai Explanation\nLikely Location: Introduction/Background\nSTRONG positionality detected (Confidence: 0.80) Patterns identified: subtle_positionality Key evidence: \u2022 subtle: Relevant passages and explanations: 1. **\"Our findings suggest that attending to children\u2019s intersecting ethnicity and language backgrounds in refer....\n\n\n#2 - Final Assessment\nLikely Location: Introduction/Background\nThe preliminary findings indicate a nuanced understanding of how children's intersecting ethnicity and language backgrounds impact their experiences within early intervention (EI) and early childhood special education (EcSE) systems. The evidence suggests that subtle positionality is present, particularly in how these factors influence referral sources, evaluation likelihood, and placement types....\n\n\n#3 - Subtle\nLikely Location: Introduction/Background\nRelevant passages and explanations: 1. **\"Our findings suggest that attending to children\u2019s intersecting ethnicity and language backgrounds in referral, evaluation, and placement add nuance to examinations of disproportionality.\"** - This statement indicates an awareness of the complexity of identity and how it affects the research outcomes....\n\n\n\nAI Recommendation:\nStrong evidence of explicit positionality statements. Recommend categorizing as Explicit.",
+    "pattern_types": [],
+    "confidence": 3,
+    "explanation": "",
+    "pattern_suggestions": ""
+  }
+]
