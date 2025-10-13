@@ -35,62 +35,6 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ## 🎥 **Video Tutorial - Quick Start Guide**
 
----
-
-## �📥 **DOWNLOAD EXECUTABLES - Just Click and Run!**
-
-**No Python, no setup, no terminal commands - just download and double-click!**
-
-*Current builds are v5.2.1 - for latest v6.1.0 features, run from source (instructions below)*
-
-### **macOS** ⭐ **v5.2.1 - AI Fixed + 93% Smaller!**
-🍎 [**Download DocMiner-5.2.1-macos.dmg**](https://github.com/OhioMathTeacher/docminer/releases/download/v5.2.1/DocMiner-5.2.1-macos.dmg) **(81 MB)**
-- **CRITICAL FIX**: AI positionality analysis now works! 
-- **93% smaller**: 81 MB (was 1.1 GB)
-- Download → Double-click the DMG → Drag `DocMiner5.2.1.app` to Applications
-- **Includes sample PDF with JSTOR article links for testing**
-- **Works on both Intel and Apple Silicon Macs** (Intel via Rosetta 2)
-
-**First-time setup (security bypass):**
-1. Try to open the app (it will show security warning)
-2. Open Terminal and run: `xattr -cr /Applications/DocMiner5.2.1.app`
-3. Now double-click the app - it will open!
-
-**Alternative (no Terminal):**
-- Right-click the .app → Open → Open (may need to do this twice)
-
-**Note:** First launch stores your API keys and GitHub settings securely in `~/.research_buddy/` - you only configure once!
-
-### **Windows**  
-🪟 [**Download DocMiner-windows.zip**](https://github.com/OhioMathTeacher/docminer/releases/download/v5.2/DocMiner-windows.zip)
-- Download → Extract → Double-click `DocMiner5.2.exe`
-- If Windows Defender blocks: Click "More info" → "Run anyway"
-- **Note:** v5.2.1 with AI fix coming soon via GitHub Actions
-
-### **Linux**
-🐧 [**Download DocMiner-5.2-x86_64.AppImage**](https://github.com/OhioMathTeacher/docminer/releases/download/v5.2/DocMiner-5.2-x86_64.AppImage) **(Recommended)**
-
-**Easiest way - just 2 steps:**
-1. Download the AppImage file
-2. Make it executable and run:
-   ```bash
-   chmod +x DocMiner-5.2-x86_64.AppImage
-   ./DocMiner-5.2-x86_64.AppImage
-   ```
-
-**Alternative:** [Download DocMiner-linux.tar.gz](https://github.com/OhioMathTeacher/docminer/releases/download/v5.2/DocMiner-linux.tar.gz)
-- Extract: `tar -xzf DocMiner-linux.tar.gz`
-- Run: `cd release && ./DocMiner`
-
-**That's it!** The app will launch. AppImage is portable - just move the file anywhere and double-click to run.
-
-- **Universal Linux executable - works on all distros** (Ubuntu, Fedora, Arch, Debian, Linux Mint, etc.)
-- **Note:** v5.2.1 with AI fix coming soon via GitHub Actions
-
----
-
-## 🎥 **Video Tutorial - Quick Start Guide**
-
 **New to DocMiner? Watch this 8-minute walkthrough:**
 
 [**📺 Watch Video Tutorial**](https://youtu.be/Y3nX3kSQsXU)
@@ -113,30 +57,6 @@ Learn how to:
 * **Manual Analysis** – Works immediately without any API keys
 * **Training Data** – Export reviewer decisions for analysis
 * **GitHub Integration** – Upload results automatically (optional)
-
----
-
-## 🛠️ **For Developers**
-
-### Running from Source
-```bash
-git clone https://github.com/OhioMathTeacher/docminer.git
-cd docminer
-pip install -r requirements.txt
-python3 run_research_buddy.py  # On Windows, use 'python'
-```
-
-### Building Executables
-```bash
-python build_files/build.py
-```
-
-Built executables will be in the `dist/` directory.
-
-### Running Tests
-```bash
-python -m pytest tests/
-```
 
 ---
 
