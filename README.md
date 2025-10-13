@@ -29,8 +29,6 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 *Check the [Releases](https://github.com/OhioMathTeacher/docminer/releases) page for the latest builds!*
 
-*For immediate access to v6.1.0 features, run from source (instructions below).*
-
 ---
 
 ## 🎥 **Video Tutorial - Quick Start Guide**
