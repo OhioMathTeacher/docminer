@@ -1,12 +1,13 @@
 # -*- mode: python ; coding: utf-8 -*-
-# PyInstaller spec file for Research Buddy 5.1.1
+# PyInstaller spec file for Research Buddy 5.2
 # Updated to include utils directory and handle recent changes
 
 import os
+import sys
 from pathlib import Path
 
-# Get the project root directory
-project_root = os.path.dirname(os.path.abspath(SPEC))
+# Get the project root directory (parent of build_files)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(SPEC)))
 
 a = Analysis(
     ['../enhanced_training_interface.py'],
@@ -74,7 +75,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='ResearchBuddy5.1.1',
+    name='ResearchBuddy5.2',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -85,7 +86,7 @@ exe = EXE(
     target_arch=None,  # Native architecture (ARM64 on GH Actions, works on Intel via Rosetta 2)
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # Add icon path when available
+    icon=os.path.join(project_root, 'build_files', 'icon.ico') if sys.platform == 'win32' else os.path.join(project_root, 'build_files', 'icon.icns') if sys.platform == 'darwin' else None,
 )
 
 coll = COLLECT(
@@ -95,14 +96,14 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='ResearchBuddy5.1.1',
+    name='ResearchBuddy5.2',
 )
 
 # macOS App Bundle (only created on macOS)
 app = BUNDLE(
     coll,
-    name='ResearchBuddy5.1.1.app',
-    icon=None,
+    name='ResearchBuddy5.2.app',
+    icon=os.path.join(project_root, 'build_files', 'icon.icns'),
     bundle_identifier='edu.university.researchbuddy',
     info_plist={
         'NSHighResolutionCapable': 'True',

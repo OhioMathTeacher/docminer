@@ -1,0 +1,258 @@
+name: 🚀 Build Research Buddy Executables
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+  packages: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04  # Use older Ubuntu for maximum compatibility
+            platform: linux
+            name: ResearchBuddy-linux
+          - os: windows-latest
+            platform: windows  
+            name: ResearchBuddy-windows
+          - os: macos-latest
+            platform: macos
+            name: ResearchBuddy-macos
+
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: 📦 Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: 🔨 Build Windows Executable  
+      if: matrix.platform == 'windows'
+      run: |
+        python -m PyInstaller --onefile --noconsole --name "ResearchBuddy" enhanced_training_interface.py
+        mkdir release
+        copy dist\ResearchBuddy.exe release\
+        copy README.md release\
+        copy docs\QUICK_START_FOR_GAS.md release\
+
+    - name: 🔨 Build Linux Executable
+      if: matrix.platform == 'linux'
+      run: |
+        # Build standard executable
+        python -m PyInstaller --onefile --name "ResearchBuddy" enhanced_training_interface.py
+        
+        # Create release folder with tar.gz
+        mkdir release
+        cp dist/ResearchBuddy release/
+        cp README.md release/
+        cp docs/QUICK_START_FOR_GAS.md release/
+        chmod +x release/ResearchBuddy
+        
+        # Create AppImage
+        echo "Creating AppImage..."
+        
+        # Download appimagetool
+        wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+        chmod +x appimagetool-x86_64.AppImage
+        
+        # Create AppDir structure
+        mkdir -p ResearchBuddy.AppDir/usr/bin
+        cp dist/ResearchBuddy ResearchBuddy.AppDir/usr/bin/
+        
+        # Create AppRun script
+        cat > ResearchBuddy.AppDir/AppRun << 'EOF'
+        #!/bin/bash
+        SELF=$(readlink -f "$0")
+        HERE=${SELF%/*}
+        export LD_LIBRARY_PATH="${HERE}/usr/bin:${LD_LIBRARY_PATH}"
+        exec "${HERE}/usr/bin/ResearchBuddy" "$@"
+        EOF
+        chmod +x ResearchBuddy.AppDir/AppRun
+        
+        # Create desktop file
+        mkdir -p ResearchBuddy.AppDir/usr/share/applications
+        cat > ResearchBuddy.AppDir/usr/share/applications/researchbuddy.desktop << 'EOF'
+        [Desktop Entry]
+        Type=Application
+        Name=Research Buddy
+        Exec=ResearchBuddy
+        Icon=researchbuddy
+        Categories=Education;Office;
+        Terminal=false
+        EOF
+        
+        # Create simple icon (placeholder - you can replace with real icon later)
+        mkdir -p ResearchBuddy.AppDir/usr/share/icons/hicolor/256x256/apps
+        # Note: AppImage will work without icon, just won't show custom icon
+        
+        # Build AppImage
+        ARCH=x86_64 ./appimagetool-x86_64.AppImage ResearchBuddy.AppDir ResearchBuddy-x86_64.AppImage
+        
+        chmod +x ResearchBuddy-x86_64.AppImage
+        
+        echo "AppImage created successfully!"
+        ls -lh ResearchBuddy-x86_64.AppImage
+
+    - name: 🔨 Build macOS Executable (Apple Silicon)
+      if: matrix.platform == 'macos'
+      run: |
+        echo "Building optimized ResearchBuddy 5.2.1..."
+        python -m PyInstaller build_files/ResearchBuddy5.2.1.spec \
+          --distpath ./dist \
+          --workpath ./build \
+          --clean \
+          --noconfirm
+        
+        echo "Verifying architecture..."
+        file dist/ResearchBuddy5.2.1.app/Contents/MacOS/ResearchBuddy5.2.1
+        
+        echo "Checking size..."
+        du -sh dist/ResearchBuddy5.2.1.app
+        
+        echo "Creating DMG..."
+        hdiutil create \
+          -volname "Research Buddy 5.2.1" \
+          -srcfolder dist/ResearchBuddy5.2.1.app \
+          -ov -format UDZO \
+          ResearchBuddy-5.2.1-macos.dmg
+        
+        echo "DMG created successfully!"
+        ls -lh ResearchBuddy-5.2.1-macos.dmg
+
+    - name: 📦 Create Package
+      shell: bash
+      run: |
+        if [ "${{ matrix.platform }}" = "windows" ]; then
+          cd release
+          7z a "../${{ matrix.name }}.zip" *
+        elif [ "${{ matrix.platform }}" = "macos" ]; then
+          # DMG already created, just rename it
+          mv ResearchBuddy-5.2.1-macos.dmg ${{ matrix.name }}.dmg
+        else
+          # Linux: Create both tar.gz and keep AppImage
+          cd release
+          tar -czf "../${{ matrix.name }}.tar.gz" *
+          cd ..
+          # AppImage is already created as ResearchBuddy-x86_64.AppImage
+          mv ResearchBuddy-x86_64.AppImage ${{ matrix.name }}.AppImage
+        fi
+
+    - name: 📤 Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.name }}
+        path: |
+          ${{ matrix.name }}.*
+          **/*.AppImage
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: 📥 Checkout (for release notes)
+      uses: actions/checkout@v4
+    
+    - name: 📥 Download All Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: 📋 Prepare Release Files
+      run: |
+        mkdir -p release-files
+        # Find all actual files (not directories) in artifacts and copy them
+        find artifacts -type f -name "*.dmg" -exec cp {} release-files/ \;
+        find artifacts -type f -name "*.zip" -exec cp {} release-files/ \;
+        find artifacts -type f -name "*.tar.gz" -exec cp {} release-files/ \;
+        find artifacts -type f -name "*.AppImage" -exec cp {} release-files/ \;
+        echo "📋 Release files prepared:"
+        ls -lh release-files/
+
+    - name: 🏷️ Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        draft: false
+        prerelease: false
+        make_latest: true
+        files: release-files/*
+        fail_on_unmatched_files: true
+        generate_release_notes: false
+        body: |
+          # 🚀 Research Buddy 5.2 - Critical Upload Fix
+          
+          **Professional installers for all platforms with fixed GitHub upload functionality!**
+          
+          ## 📥 Downloads
+          
+          ### macOS 🍎
+          **ResearchBuddy-macos.dmg**
+          - Double-click DMG → Drag app to Applications → Done!
+          - Works on both Intel and Apple Silicon Macs
+          
+          ### Windows 🪟
+          **ResearchBuddy-windows.zip**
+          - Extract → Double-click `.exe` → Run!
+          - If Windows Defender warns: Click "More info" → "Run anyway"
+          
+          ### Linux 🐧
+          **ResearchBuddy-linux.tar.gz**
+          - Extract and run the executable
+          - Universal Linux executable - works on all distros!
+          
+          ---
+          
+          ## ✨ What's New in 5.2
+          
+          - 🔧 **CRITICAL FIX**: Upload now works in AppImage/executables (uses GitHub REST API instead of git commands)
+          - 📝 **Better filenames**: Training reports now named `Reviewer_Author_Decision_Timestamp`
+          - 🎨 **UI improvements**: Fixed truncated labels, removed duplicate dialogs
+          - ⚙️ **First-time setup**: Configuration dialog appears automatically on first launch
+          - 📚 **Better documentation**: Comprehensive setup guides for all platforms
+          
+          ## 🎯 Features
+          
+          - Professional PDF viewer with text selection
+          - AI-assisted positionality detection (optional - requires OpenAI API key)
+          - Manual analysis mode (works without any API keys)
+          - Evidence collection and quote extraction  
+          - GitHub integration for training reports (NOW WORKING IN EXECUTABLES!)
+          - Secure configuration management
+          
+          ## 📜 License
+          
+          Creative Commons Attribution-NonCommercial 4.0  
+          © 2025 Michael Todd Edwards (OhioMathTeacher)  
+          Academic and educational use freely permitted.
+          
+          ---
+          
+          **Perfect for Graduate Assistants - No Python, no terminal, no setup!**
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 📊 Release Summary
+      run: |
+        echo "🎉 Release Created Successfully!"
+        echo "📦 Files included:"
+        ls -lh release-files/
+        echo ""
+        echo "🔗 View release at: ${{ github.server_url }}/${{ github.repository }}/releases"
