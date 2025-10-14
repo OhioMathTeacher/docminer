@@ -1,15 +1,15 @@
 #!/bin/bash
-# Create an AppImage for ResearchBuddy on Linux
+# Create an AppImage for DocMiner on Linux
 # This creates a portable Linux application that runs on most distros
 
 set -e
 
-VERSION="5.2"
-APP_NAME="ResearchBuddy"
+VERSION="6.3"
+APP_NAME="DocMiner"
 APP_DIR="${APP_NAME}.AppDir"
 OUTPUT_DIR="."
 
-echo "🐧 Creating AppImage for ResearchBuddy ${VERSION}"
+echo "🐧 Creating AppImage for DocMiner ${VERSION}"
 echo "================================================"
 echo ""
 
@@ -17,8 +17,9 @@ echo ""
 mkdir -p "$OUTPUT_DIR"
 
 # Check if the executable exists
-if [ ! -f "dist/ResearchBuddy5.2/ResearchBuddy5.2" ]; then
-    echo "❌ Error: dist/ResearchBuddy5.2/ResearchBuddy5.2 not found"
+if [ ! -f "dist/DocMiner6.3/DocMiner6.3" ]; then
+    echo "❌ Error: dist/DocMiner6.3/DocMiner6.3 not found"
+    echo "Please run: python3 -m PyInstaller build_files/DocMiner6.3.spec --clean"
     exit 1
 fi
 
@@ -33,17 +34,17 @@ mkdir -p "$APP_DIR/usr/share/icons/hicolor/256x256/apps"
 echo "📦 Creating AppDir structure..."
 
 # Copy the entire dist folder contents
-cp -r dist/ResearchBuddy5.2/* "$APP_DIR/usr/bin/"
+cp -r dist/DocMiner6.3/* "$APP_DIR/usr/bin/"
 echo "   ✅ Copied application files"
 
 # Create desktop file
 cat > "$APP_DIR/${APP_NAME}.desktop" << 'EOF'
 [Desktop Entry]
 Type=Application
-Name=Research Buddy
+Name=DocMiner
 Comment=Professional Positionality Analysis Interface
-Exec=ResearchBuddy5.2
-Icon=researchbuddy
+Exec=DocMiner6.3
+Icon=docminer
 Categories=Education;Science;Office;
 Terminal=false
 EOF
@@ -53,15 +54,15 @@ echo "   ✅ Created desktop file"
 
 # Use the robot icon
 if [ -f "build_files/robot_icon_256x256.png" ]; then
-    cp "build_files/robot_icon_256x256.png" "$APP_DIR/researchbuddy.png"
-    cp "$APP_DIR/researchbuddy.png" "$APP_DIR/usr/share/icons/hicolor/256x256/apps/"
-    cp "$APP_DIR/researchbuddy.png" "$APP_DIR/.DirIcon"
+    cp "build_files/robot_icon_256x256.png" "$APP_DIR/docminer.png"
+    cp "$APP_DIR/docminer.png" "$APP_DIR/usr/share/icons/hicolor/256x256/apps/"
+    cp "$APP_DIR/docminer.png" "$APP_DIR/.DirIcon"
     echo "   ✅ Added robot icon"
 else
     # Fallback to placeholder if icon not found
-    echo 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' | base64 -d > "$APP_DIR/researchbuddy.png"
-    cp "$APP_DIR/researchbuddy.png" "$APP_DIR/usr/share/icons/hicolor/256x256/apps/"
-    cp "$APP_DIR/researchbuddy.png" "$APP_DIR/.DirIcon"
+    echo 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' | base64 -d > "$APP_DIR/docminer.png"
+    cp "$APP_DIR/docminer.png" "$APP_DIR/usr/share/icons/hicolor/256x256/apps/"
+    cp "$APP_DIR/docminer.png" "$APP_DIR/.DirIcon"
     echo "   ✅ Created placeholder icon"
 fi
 
@@ -72,7 +73,7 @@ SELF=$(readlink -f "$0")
 HERE=${SELF%/*}
 export LD_LIBRARY_PATH="${HERE}/usr/bin:${LD_LIBRARY_PATH}"
 export PATH="${HERE}/usr/bin:${PATH}"
-exec "${HERE}/usr/bin/ResearchBuddy5.2" "$@"
+exec "${HERE}/usr/bin/DocMiner6.3" "$@"
 EOF
 
 chmod +x "$APP_DIR/AppRun"
@@ -98,15 +99,15 @@ fi
 # Create the AppImage
 echo ""
 echo "🔨 Building AppImage..."
-ARCH=x86_64 ./squashfs-root/AppRun "$APP_DIR" "$OUTPUT_DIR/ResearchBuddy-${VERSION}-x86_64.AppImage"
+ARCH=x86_64 ./squashfs-root/AppRun "$APP_DIR" "$OUTPUT_DIR/DocMiner-${VERSION}-x86_64.AppImage"
 
-if [ -f "$OUTPUT_DIR/ResearchBuddy-${VERSION}-x86_64.AppImage" ]; then
-    chmod +x "$OUTPUT_DIR/ResearchBuddy-${VERSION}-x86_64.AppImage"
+if [ -f "$OUTPUT_DIR/DocMiner-${VERSION}-x86_64.AppImage" ]; then
+    chmod +x "$OUTPUT_DIR/DocMiner-${VERSION}-x86_64.AppImage"
     echo ""
     echo "🎉 SUCCESS! AppImage created!"
     echo "=============================================="
-    echo "   📦 File: $OUTPUT_DIR/ResearchBuddy-${VERSION}-x86_64.AppImage"
-    echo "   💾 Size: $(du -h $OUTPUT_DIR/ResearchBuddy-${VERSION}-x86_64.AppImage | cut -f1)"
+    echo "   📦 File: $OUTPUT_DIR/DocMiner-${VERSION}-x86_64.AppImage"
+    echo "   💾 Size: $(du -h $OUTPUT_DIR/DocMiner-${VERSION}-x86_64.AppImage | cut -f1)"
     echo ""
 else
     echo "❌ AppImage creation failed"
