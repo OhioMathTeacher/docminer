@@ -12,52 +12,45 @@ permissions:
 
 jobs:
   detect-version:
-    name: 🔍 Detect Version & Spec File
+    name: 🔍 Detect Version & Generate Spec File
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get_version.outputs.version }}
       version_number: ${{ steps.get_version.outputs.version_number }}
-      spec_file: ${{ steps.find_spec.outputs.spec_file }}
+      version_short: ${{ steps.get_version.outputs.version_short }}
+      spec_file: ${{ steps.get_version.outputs.spec_file }}
       
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
     
-    - name: 🔍 Extract version from tag
+    - name: 🔍 Extract version and generate spec file
       id: get_version
       run: |
-        # Tag is like refs/tags/v6.1.0
+        # Tag is like refs/tags/v6.3.0
         TAG_NAME="${GITHUB_REF#refs/tags/}"
-        VERSION_NUMBER="${TAG_NAME#v}"  # Remove 'v' prefix
+        VERSION_NUMBER="${TAG_NAME#v}"  # Remove 'v' prefix (e.g., "6.3.0")
         
-        echo "version=$TAG_NAME" >> $GITHUB_OUTPUT
-        echo "version_number=$VERSION_NUMBER" >> $GITHUB_OUTPUT
+        # Extract major.minor for spec naming (e.g., "6.3" from "6.3.0")
+        VERSION_SHORT=$(echo "$VERSION_NUMBER" | cut -d. -f1,2)
+        
+        # Generate spec file from template
+        SPEC_FILE="DocMiner${VERSION_SHORT}.spec"
         
         echo "📌 Building version: $TAG_NAME ($VERSION_NUMBER)"
-    
-    - name: 🔎 Find matching spec file
-      id: find_spec
-      run: |
-        VERSION_NUMBER="${{ steps.get_version.outputs.version_number }}"
+        echo "📝 Generating spec file: $SPEC_FILE"
         
-        # Extract major.minor (e.g., "6.1" from "6.1.0")
-        MAJOR_MINOR=$(echo "$VERSION_NUMBER" | cut -d. -f1,2)
+        # Replace placeholders in template
+        sed "s/{{VERSION}}/${VERSION_NUMBER}/g; s/{{VERSION_SHORT}}/${VERSION_SHORT}/g" \
+          build_files/DocMiner.spec.template > "build_files/${SPEC_FILE}"
         
-        # Look for exact match first (DocMiner6.1.0.spec), then major.minor (DocMiner6.1.spec)
-        if [ -f "build_files/DocMiner${VERSION_NUMBER}.spec" ]; then
-          SPEC_FILE="DocMiner${VERSION_NUMBER}.spec"
-          echo "✅ Found exact spec: $SPEC_FILE"
-        elif [ -f "build_files/DocMiner${MAJOR_MINOR}.spec" ]; then
-          SPEC_FILE="DocMiner${MAJOR_MINOR}.spec"
-          echo "✅ Found major.minor spec: $SPEC_FILE"
-        else
-          echo "❌ No spec file found for version $VERSION_NUMBER"
-          echo "   Looked for: DocMiner${VERSION_NUMBER}.spec or DocMiner${MAJOR_MINOR}.spec"
-          exit 1
-        fi
+        echo "✅ Generated spec file: build_files/${SPEC_FILE}"
         
+        # Output values
+        echo "version=$TAG_NAME" >> $GITHUB_OUTPUT
+        echo "version_number=$VERSION_NUMBER" >> $GITHUB_OUTPUT
+        echo "version_short=$VERSION_SHORT" >> $GITHUB_OUTPUT
         echo "spec_file=$SPEC_FILE" >> $GITHUB_OUTPUT
-        echo "🎯 Using spec file: build_files/$SPEC_FILE"
 
   build:
     name: 🔨 Build ${{ matrix.platform }}

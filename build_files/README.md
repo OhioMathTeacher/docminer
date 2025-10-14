@@ -1,15 +1,24 @@
 # Build Files
 
-This directory contains all files related to building and packaging Research Buddy 5.1.
+This directory contains all files related to building and packaging DocMiner.
+
+## 🚀 Quick Start - Automated Releases
+
+**Just push a tag - everything else is automatic!**
+
+```bash
+git tag v6.4.0
+git push origin v6.4.0
+```
+
+See [AUTOMATED_RELEASES.md](../docs/AUTOMATED_RELEASES.md) for complete documentation.
 
 ## Files:
 
-- **build.py** - Main build script for creating executables (updated for v5.1)
-- **\*.spec** - PyInstaller specification files for different versions
-  - `ResearchBuddy3.1.2.spec` - Legacy version
-  - `ResearchBuddy4.0.spec` - Version 4.0
-  - `ResearchBuddy5.0.spec` - Previous version
-  - `ResearchBuddy5.1.spec` - **Current version** (updated for tabbed dialog removal)
+- **DocMiner.spec.template** - 🎯 **Template for all versions** (auto-generates spec files)
+- **\*.spec** - PyInstaller specification files (legacy - kept for reference)
+  - Most spec files are now auto-generated from the template
+  - To modify build settings, edit `DocMiner.spec.template`
 
 ## Quick Build:
 
