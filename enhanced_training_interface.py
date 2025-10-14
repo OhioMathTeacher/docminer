@@ -161,7 +161,7 @@ def get_pdf_page_info(pdf_path, page_num=0):
 
 class SelectablePDFLabel(QLabel):
     """Custom QLabel with text editor-style line-based text selection"""
-    text_selected = Signal(str)
+    text_selected = Signal(str)  # text only - page handled separately
     
     def __init__(self):
         super().__init__()
@@ -172,7 +172,11 @@ class SelectablePDFLabel(QLabel):
         self.selection_end = None
         self.selection_rect = None
         self.selecting = False
-        self.highlighted_lines = []  # Lines that should be highlighted
+        self.highlighted_lines = []  # Lines to highlight during active selection only
+        
+        # User-adjustable settings
+        self.column_mode = "Auto"  # "Auto", "Single", or "Two-Column"
+        self.selection_tolerance = 0.5  # Default 50% tolerance (adjustable via slider)
         
         # Style for better visual feedback
         self.setStyleSheet("""
@@ -278,21 +282,20 @@ class SelectablePDFLabel(QLabel):
         return [min_x, min_y, max_x, max_y]
         
     def mousePressEvent(self, event):
-        """Start text selection with line-based behavior"""
+        """Start text selection"""
         if event.button() == Qt.LeftButton:
             self.selection_start = event.position().toPoint()
             self.selecting = True
             self.selected_text = ""
             self.highlighted_lines = []
-            print(f"DEBUG - Selection started at {self.selection_start}")
         super().mousePressEvent(event)
         
     def mouseMoveEvent(self, event):
-        """Update selection with real-time line highlighting"""
+        """Update selection"""
         if self.selecting and self.selection_start:
             self.selection_end = event.position().toPoint()
             self.update_line_selection()
-            self.update()  # Trigger immediate repaint for visual feedback
+            self.update()
         super().mouseMoveEvent(event)
         
     def mouseReleaseEvent(self, event):
@@ -300,20 +303,31 @@ class SelectablePDFLabel(QLabel):
         if event.button() == Qt.LeftButton and self.selecting:
             self.selection_end = event.position().toPoint()
             self.selecting = False
-            self.update_line_selection()
             
-            # Emit the final selected text
-            if self.selected_text.strip():
-                self.text_selected.emit(self.selected_text.strip())
-                print(f"DEBUG - Final selection: '{self.selected_text[:100]}...'")
-            else:
-                self.text_selected.emit("")
+            # Check if this was a meaningful drag (not just a click)
+            if self.selection_start and self.selection_end:
+                drag_distance = (self.selection_end - self.selection_start).manhattanLength()
+                
+                if drag_distance > 10:  # Minimum 10 pixels to count as selection
+                    self.update_line_selection()
+                    
+                    # Emit the final selected text (page number handled via parent window access)
+                    if self.selected_text.strip():
+                        self.text_selected.emit(self.selected_text.strip())
+                        self.update()  # Redraw to show persistent highlight
+                    else:
+                        self.text_selected.emit("")
+                else:
+                    # Just a click, not a drag - don't clear existing highlights
+                    self.selected_text = ""
+                    self.selection_rect = None
+                    self.update()
                 
         super().mouseReleaseEvent(event)
         
     def update_line_selection(self):
-        """Update selection using line-based text editor behavior"""
-        if not self.selection_start or not self.selection_end or not self.text_lines:
+        """Update selection using simple intersection detection"""
+        if not self.selection_start or not self.selection_end or not self.text_blocks:
             self.selected_text = ""
             self.highlighted_lines = []
             return
@@ -321,95 +335,110 @@ class SelectablePDFLabel(QLabel):
         # Create selection rectangle
         self.selection_rect = QRect(self.selection_start, self.selection_end).normalized()
         
-        # Find lines that intersect with selection rectangle
-        selected_lines = []
-        self.highlighted_lines = []
+        # Collect all blocks that intersect with selection rectangle
+        selected_blocks = []
         
-        for i, line in enumerate(self.text_lines):
-            line_bbox = line['bbox']
-            line_rect = QRect(
-                int(line_bbox[0]), int(line_bbox[1]),
-                int(line_bbox[2] - line_bbox[0]), 
-                int(line_bbox[3] - line_bbox[1])
+        for block in self.text_blocks:
+            if not block.get('text', '').strip():
+                continue
+                
+            bbox = block['bbox']
+            block_rect = QRect(
+                int(bbox[0]), int(bbox[1]),
+                int(bbox[2] - bbox[0]), int(bbox[3] - bbox[1])
             )
             
-            # Check if selection intersects with this line
-            if self.selection_rect.intersects(line_rect):
-                # Determine selection type within the line
-                start_y = self.selection_rect.top()
-                end_y = self.selection_rect.bottom()
-                line_center_y = (line_bbox[1] + line_bbox[3]) / 2
+            # Column-aware selection with user-adjustable tolerance
+            if self.selection_rect.intersects(block_rect):
+                center_x = (bbox[0] + bbox[2]) / 2
+                selection_left = min(self.selection_rect.left(), self.selection_rect.right())
+                selection_right = max(self.selection_rect.left(), self.selection_rect.right())
+                selection_width = selection_right - selection_left
                 
-                # If selection spans multiple lines or covers significant portion of line,
-                # select entire line for text editor behavior
-                selection_height = abs(self.selection_rect.height())
-                line_height = line_bbox[3] - line_bbox[1]
+                # Calculate tolerance based on user settings and column mode
+                if self.column_mode in ["Single", "1-Col"]:
+                    # Single column: Very generous tolerance, capture everything in selection
+                    tolerance = selection_width * 2.0  # 200% - basically no X filtering
+                elif self.column_mode in ["Two-Column", "2-Col"]:
+                    # Two column: Strict tolerance to avoid adjacent columns
+                    tolerance = max(selection_width * 0.2, 30)  # 20% with 30px minimum
+                else:  # Auto mode
+                    # Use user's slider setting (20% to 200%)
+                    tolerance = max(selection_width * self.selection_tolerance, 30)  # User-defined with 30px minimum
                 
-                if (selection_height > line_height * 1.5 or  # Multi-line selection
-                    self.selection_rect.width() > (line_bbox[2] - line_bbox[0]) * 0.8):  # Wide selection
-                    
-                    # Select entire line
-                    selected_lines.append(line['text'])
-                    self.highlighted_lines.append({
-                        'rect': QRect(
-                            int(line_bbox[0]),  # Start at actual text position
-                            int(line_bbox[1]),
-                            int(line_bbox[2] - line_bbox[0]),  # Width of actual text
-                            int(line_bbox[3] - line_bbox[1])
-                        ),
-                        'line_index': i
+                if (center_x >= selection_left - tolerance and 
+                    center_x <= selection_right + tolerance):
+                    selected_blocks.append({
+                        'text': block['text'],
+                        'bbox': bbox,
+                        'x': (bbox[0] + bbox[2]) / 2,  # center X for sorting
+                        'y': (bbox[1] + bbox[3]) / 2   # center Y for sorting
                     })
+        
+        if not selected_blocks:
+            self.selected_text = ""
+            self.highlighted_lines = []
+            return
+        
+        # First sort by Y (top to bottom) to process in vertical order
+        selected_blocks.sort(key=lambda b: b['y'])
+        
+        # Group blocks into lines - use vertical center position
+        # Blocks are on same line if their Y-centers are close (within typical line height)
+        lines = []
+        current_line = []
+        
+        for block in selected_blocks:
+            if not current_line:
+                # Start first line
+                current_line.append(block)
+            else:
+                # Calculate average Y-center of current line
+                line_y_avg = sum(b['y'] for b in current_line) / len(current_line)
+                block_y = block['y']
+                
+                # Typical line height is about 12-15 pixels, use half of that as threshold
+                # This catches words on the same baseline even if heights vary slightly
+                y_threshold = 8
+                
+                if abs(block_y - line_y_avg) <= y_threshold:
+                    # Same line
+                    current_line.append(block)
                 else:
-                    # Partial line selection - select words within the selection area
-                    selected_words = []
-                    for block in line['blocks']:
-                        block_bbox = block['bbox']
-                        block_rect = QRect(
-                            int(block_bbox[0]), int(block_bbox[1]),
-                            int(block_bbox[2] - block_bbox[0]),
-                            int(block_bbox[3] - block_bbox[1])
-                        )
-                        
-                        if self.selection_rect.intersects(block_rect):
-                            selected_words.append(block['text'])
-                    
-                    if selected_words:
-                        partial_text = ' '.join(selected_words)
-                        selected_lines.append(partial_text)
-                        
-                        # Highlight only the selected portion
-                        self.highlighted_lines.append({
-                            'rect': self.selection_rect.intersected(line_rect),
-                            'line_index': i
-                        })
+                    # New line - save current and start new
+                    current_line.sort(key=lambda b: b['x'])  # Sort left to right
+                    lines.append(current_line)
+                    current_line = [block]
         
-        # Join selected text from all lines
-        self.selected_text = '\n'.join(selected_lines) if selected_lines else ""
+        # Don't forget the last line
+        if current_line:
+            current_line.sort(key=lambda b: b['x'])
+            lines.append(current_line)
         
-        # Debug output (less verbose during dragging)
-        if not self.selecting:  # Only detailed debug when selection is complete
-            print(f"DEBUG - Line selection complete: {len(selected_lines)} lines selected")
-            print(f"DEBUG - Selected text: '{self.selected_text[:100]}...'")
-            print(f"DEBUG - Highlighted {len(self.highlighted_lines)} line regions")
+        # Build selected text from lines
+        text_lines = []
+        
+        for line_blocks in lines:
+            # Extract text from this line and clean up spacing
+            line_text = ' '.join([b['text'] for b in line_blocks])
+            # Normalize whitespace: collapse multiple spaces, strip leading/trailing
+            line_text = ' '.join(line_text.split())
+            if line_text:  # Only add non-empty lines
+                text_lines.append(line_text)
+        
+        # Join lines with newlines and clean up
+        self.selected_text = '\n'.join(text_lines) if text_lines else ""
         
     def paintEvent(self, event):
-        """Custom paint to show line-based selection highlighting"""
+        """Custom paint to show active selection rectangle"""
         super().paintEvent(event)
         
         painter = QPainter(self)
         
-        # Draw selection highlights for completed selections
-        if self.highlighted_lines:
-            painter.setBrush(QBrush(QColor(49, 106, 197, 100)))  # Text editor blue highlight
-            painter.setPen(QPen(QColor(49, 106, 197, 150), 1))
-            
-            for highlight in self.highlighted_lines:
-                painter.drawRect(highlight['rect'])
-        
-        # Draw real-time selection rectangle while dragging
+        # Draw selection rectangle while actively dragging - good visual feedback
         if self.selecting and self.selection_start and self.selection_end:
-            painter.setBrush(QBrush(QColor(49, 106, 197, 60)))  # Lighter during selection
-            painter.setPen(QPen(QColor(49, 106, 197), 2, Qt.DashLine))
+            painter.setBrush(QBrush(QColor(100, 149, 237, 50)))  # Light blue semi-transparent
+            painter.setPen(QPen(QColor(65, 105, 225), 2, Qt.SolidLine))  # Royal blue solid border
             
             sel_rect = QRect(self.selection_start, self.selection_end).normalized()
             painter.drawRect(sel_rect)
@@ -447,8 +476,9 @@ class SelectablePDFLabel(QLabel):
 class EmbeddedPDFViewer(QWidget):
     """Embedded PDF viewer with proper aspect ratio handling for portrait documents"""
     
-    def __init__(self):
+    def __init__(self, parent_window=None):
         super().__init__()
+        self.parent_window = parent_window  # Reference to main window for callbacks
         self.current_pdf_path = None
         self.current_page = 0  # Track current page
         self.total_pages = 0   # Track total pages
@@ -487,28 +517,82 @@ class EmbeddedPDFViewer(QWidget):
         
         controls.addWidget(QLabel("|"))  # Separator
         
-        self.pdf_info = QLabel("No PDF loaded")
-        self.pdf_info.setAlignment(Qt.AlignCenter)
-        self.pdf_info.setStyleSheet("QLabel { font-weight: bold; font-size: 10px; }")
-        self.pdf_info.setMaximumHeight(20)
-        controls.addWidget(self.pdf_info)
+        # Add view mode control (Letter, A4, etc.)
+        view_label = QLabel("View:")
+        view_label.setStyleSheet("QLabel { font-size: 9px; }")
+        controls.addWidget(view_label)
+        
+        self.view_mode_combo = QComboBox()
+        self.view_mode_combo.addItems([
+            "Fit Page", "Letter", "A4", "Full Width", "Full Height", "1:1 Fixed"
+        ])
+        self.view_mode_combo.setCurrentText("Fit Page")
+        self.view_mode_combo.setMaximumWidth(85)
+        self.view_mode_combo.setStyleSheet("QComboBox { font-size: 10px; padding: 4px; }")
+        self.view_mode_combo.setToolTip("1:1 Fixed = Exact PDF scale for accurate text selection | Letter: 8.5×11 | A4: European")
+        self.view_mode_combo.currentTextChanged.connect(self.change_zoom)
+        controls.addWidget(self.view_mode_combo)
         
         controls.addWidget(QLabel("|"))  # Separator
         
-        # Add zoom control
+        # Add zoom control with extended range
         zoom_label = QLabel("Zoom:")
-        zoom_label.setStyleSheet("QLabel { font-size: 9px; }")
+        zoom_label.setStyleSheet("QLabel { font-size: 10px; }")
         controls.addWidget(zoom_label)
         
         self.zoom_combo = QComboBox()
         self.zoom_combo.addItems([
-            "Fit Width", "Fit Page", "100%", "125%", "150%", "80%", "65%", "50%"
+            "Auto", "50%", "65%", "80%", "100%", "125%", "150%", "175%", "200%"
         ])
-        self.zoom_combo.setCurrentText("Fit Width")
-        self.zoom_combo.setMaximumWidth(100)
-        self.zoom_combo.setStyleSheet("QComboBox { font-size: 9px; padding: 2px; }")
+        self.zoom_combo.setCurrentText("Auto")
+        self.zoom_combo.setMaximumWidth(65)
+        self.zoom_combo.setStyleSheet("QComboBox { font-size: 10px; padding: 4px; }")
+        self.zoom_combo.setToolTip("Adjust text size for readability (200% for small screens)")
         self.zoom_combo.currentTextChanged.connect(self.change_zoom)
         controls.addWidget(self.zoom_combo)
+        
+        controls.addWidget(QLabel("|"))  # Separator
+        
+        # Column mode selector
+        col_label = QLabel("Cols:")
+        col_label.setStyleSheet("QLabel { font-size: 10px; }")
+        controls.addWidget(col_label)
+        
+        self.column_mode_combo = QComboBox()
+        self.column_mode_combo.addItems(["Auto", "1-Col", "2-Col"])
+        self.column_mode_combo.setCurrentText("Auto")
+        self.column_mode_combo.setMaximumWidth(65)
+        self.column_mode_combo.setStyleSheet("QComboBox { font-size: 10px; padding: 4px; }")
+        self.column_mode_combo.setToolTip("Column Mode:\n• Auto: Smart detection\n• 1-Col: Wide tolerance (single column)\n• 2-Col: Strict (avoid adjacent columns)")
+        self.column_mode_combo.currentTextChanged.connect(self.update_column_mode)
+        controls.addWidget(self.column_mode_combo)
+        
+        controls.addWidget(QLabel("|"))  # Separator
+        
+        # Text selection sensitivity slider - make it prominent!
+        sens_label = QLabel("Text:")
+        sens_label.setStyleSheet("QLabel { font-size: 10px; }")
+        sens_label.setToolTip("Text Selection Sensitivity")
+        controls.addWidget(sens_label)
+        
+        self.sensitivity_slider = QSlider(Qt.Horizontal)
+        self.sensitivity_slider.setMinimum(20)  # 20% tolerance
+        self.sensitivity_slider.setMaximum(200)  # 200% tolerance
+        self.sensitivity_slider.setValue(50)  # Start at 50%
+        self.sensitivity_slider.setMinimumWidth(100)
+        self.sensitivity_slider.setMaximumWidth(150)
+        self.sensitivity_slider.setMinimumHeight(20)
+        self.sensitivity_slider.setTickPosition(QSlider.TicksBelow)
+        self.sensitivity_slider.setTickInterval(30)
+        self.sensitivity_slider.setStyleSheet("QSlider::groove:horizontal { height: 6px; background: #ddd; } QSlider::handle:horizontal { width: 16px; background: #4a90e2; margin: -5px 0; border-radius: 8px; }")
+        self.sensitivity_slider.setToolTip("Text Selection Sensitivity (20-200%)\nDrag left = stricter (avoid adjacent columns)\nDrag right = more generous (catch all text)")
+        self.sensitivity_slider.valueChanged.connect(self.update_sensitivity_label)
+        controls.addWidget(self.sensitivity_slider)
+        
+        self.sensitivity_label = QLabel("50%")
+        self.sensitivity_label.setStyleSheet("QLabel { font-size: 12px; font-weight: bold; min-width: 45px; }")
+        self.sensitivity_label.setAlignment(Qt.AlignCenter)
+        controls.addWidget(self.sensitivity_label)
         
         controls.addStretch()
         
@@ -519,16 +603,18 @@ class EmbeddedPDFViewer(QWidget):
         
     def setup_pdf_viewer(self, layout):
         """Setup PDF viewer using PyMuPDF with proper aspect ratio"""
-        # Scrollable area with better space utilization
+        # Scrollable area optimized for portrait documents (8.5×11 Letter aspect ratio)
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setAlignment(Qt.AlignCenter)
         self.scroll_area.setStyleSheet("QScrollArea { border: 1px solid #ccc; background-color: #f0f0f0; }")
         
-        # Remove restrictive width/height constraints - let it use available space
-        self.scroll_area.setMinimumWidth(400)   # Just minimum for readability
-        # No maximum width - use what's available
-        self.scroll_area.setMinimumHeight(500)  # Reasonable minimum height
+        # Set portrait aspect ratio constraints for Letter-sized documents
+        # Letter: 8.5×11 inches = aspect ratio of 0.773 (width/height)
+        # Use minimum width but taller minimum height for portrait orientation
+        self.scroll_area.setMinimumWidth(400)   # Minimum readable width
+        self.scroll_area.setMaximumWidth(650)   # Limit width for portrait aspect
+        self.scroll_area.setMinimumHeight(700)  # Taller for portrait (was 500)
         
         # Use SelectablePDFLabel instead of regular QLabel for text selection
         self.pdf_label = SelectablePDFLabel()
@@ -545,30 +631,60 @@ class EmbeddedPDFViewer(QWidget):
             self.render_current_page()
     
     def calculate_zoom_scale(self, zoom_text):
-        """Calculate scale factor based on zoom selection and actual container size"""
+        """Calculate scale factor based on view mode and zoom selection"""
         # Get actual available space in the PDF container
         available_width = self.scroll_area.width() - 40  # Account for scrollbars/margins
         available_height = self.scroll_area.height() - 40
         
-        if zoom_text == "Fit Width":
-            return available_width / self.pdf_width
-        elif zoom_text == "Fit Page":
-            # Fit to both width and height constraints
+        # First, determine base scale from view mode
+        view_mode = self.view_mode_combo.currentText()
+        
+        if view_mode == "Fit Page":
+            # Fit entire page without scrollbars - scale to fit both dimensions
             width_scale = available_width / self.pdf_width
             height_scale = available_height / self.pdf_height
-            return min(width_scale, height_scale)  # Use smaller scale to fit both dimensions
-        elif zoom_text.endswith("%"):
-            # Parse percentage
-            percentage = int(zoom_text.replace("%", ""))
-            return percentage / 100.0
+            base_scale = min(width_scale, height_scale)
+        elif view_mode == "1:1 Fixed":
+            # No scaling - exact PDF coordinates for perfect text selection
+            base_scale = 1.0
+        elif view_mode == "Letter":
+            # Optimize for 8.5×11 Letter paper (portrait)
+            # Typical Letter PDF is 612×792 points
+            width_scale = available_width / 612
+            height_scale = available_height / 792
+            base_scale = min(width_scale, height_scale)
+        elif view_mode == "A4":
+            # Optimize for A4 paper (portrait)
+            # Typical A4 PDF is 595×842 points
+            width_scale = available_width / 595
+            height_scale = available_height / 842
+            base_scale = min(width_scale, height_scale)
+        elif view_mode == "Full Width":
+            # Fill width, allow vertical scrolling
+            base_scale = available_width / self.pdf_width
+        elif view_mode == "Full Height":
+            # Fill height, allow horizontal scrolling if needed
+            base_scale = available_height / self.pdf_height
         else:
-            return 1.0  # Default to 100%
+            # Fallback: fit to available space
+            width_scale = available_width / self.pdf_width
+            height_scale = available_height / self.pdf_height
+            base_scale = min(width_scale, height_scale)
+        
+        # Then apply zoom multiplier
+        if zoom_text == "Auto":
+            return base_scale
+        elif zoom_text.endswith("%"):
+            # Parse percentage and multiply base scale
+            percentage = int(zoom_text.replace("%", ""))
+            zoom_multiplier = percentage / 100.0
+            return base_scale * zoom_multiplier
+        else:
+            return base_scale
         
     def load_pdf(self, pdf_path):
         """Load PDF with proper aspect ratio calculation and page navigation"""
         self.current_pdf_path = pdf_path
-        filename = Path(pdf_path).name
-        self.pdf_info.setText(f"📄 {filename}")
         
         try:
             import fitz
@@ -610,10 +726,12 @@ class EmbeddedPDFViewer(QWidget):
             
             print(f"DEBUG: Extracted {len(text_blocks)} text blocks for selection")
             self.pdf_label.set_text_blocks(text_blocks)
+            self.pdf_label.current_page = self.current_page  # Update page number for text selection
             
         except Exception as e:
             print(f"DEBUG: Text extraction failed: {e}")
             self.pdf_label.set_text_blocks([])
+            self.pdf_label.current_page = self.current_page
 
     def update_page_controls(self):
         """Update page navigation controls"""
@@ -639,6 +757,17 @@ class EmbeddedPDFViewer(QWidget):
             self.current_page += 1
             self.render_current_page()
             self.update_page_controls()
+    
+    def update_column_mode(self, mode):
+        """Update column detection mode"""
+        if hasattr(self, 'pdf_label'):
+            self.pdf_label.column_mode = mode
+    
+    def update_sensitivity_label(self, value):
+        """Update sensitivity label when slider changes"""
+        self.sensitivity_label.setText(f"{value}%")
+        if hasattr(self, 'pdf_label'):
+            self.pdf_label.selection_tolerance = value / 100.0  # Convert to decimal
     
     def render_current_page(self):
         """Render the current page of the PDF"""
@@ -1085,6 +1214,96 @@ class PDFViewer(QWidget):
             self.current_page += 1
             self.render_page()
             self.update_controls()
+    
+    def find_and_highlight_text(self):
+        """Search for text in PDF using PyMuPDF and add to Human Input"""
+        search_text = self.search_input.text().strip()
+        if not search_text:
+            QMessageBox.information(self, "No Search Text", "Please enter text to search for.")
+            return
+        
+        if not self.pdf_document:
+            QMessageBox.information(self, "No PDF", "Please load a PDF first.")
+            return
+        
+        if not self.parent_window:
+            QMessageBox.warning(self, "Error", "Parent window reference not set.")
+            return
+        
+        try:
+            # Search in current page
+            import fitz
+            page = self.pdf_document[self.current_page]
+            
+            # Search with case-insensitive and dehyphenate flags
+            flags = fitz.TEXT_IGNORECASE | fitz.TEXT_DEHYPHENATE
+            hits = page.search_for(search_text, flags=flags, quads=True)
+            
+            if hits:
+                # Extract the found text instances
+                found_texts = []
+                for i, quads in enumerate(hits):
+                    # Get the actual text from the quad coordinates
+                    rect = quads.rect if hasattr(quads, 'rect') else fitz.Rect(quads)
+                    found_text = page.get_textbox(rect)
+                    if found_text.strip():
+                        found_texts.append(found_text.strip())
+                
+                # Add to Human Input via parent window
+                if found_texts:
+                    result_text = "\n".join(found_texts)
+                    self.parent_window.on_text_selected(result_text)
+                    self.parent_window.statusBar().showMessage(
+                        f"✅ Found {len(found_texts)} match(es) on page {self.current_page + 1}", 3000
+                    )
+                else:
+                    self.parent_window.statusBar().showMessage("No text extracted from matches", 2000)
+            else:
+                self.parent_window.statusBar().showMessage(
+                    f"❌ '{search_text}' not found on page {self.current_page + 1}", 3000
+                )
+                
+        except Exception as e:
+            print(f"Error searching PDF: {e}")
+            QMessageBox.warning(self, "Search Error", f"Error searching PDF:\n{str(e)}")
+    
+    def clear_search_highlights(self):
+        """Clear search input"""
+        self.search_input.clear()
+        if self.parent_window:
+            self.parent_window.statusBar().showMessage("Search cleared", 2000)
+    
+    def add_highlight_annotation(self, selected_text):
+        """Add a real PDF highlight annotation for the selected text"""
+        if not self.pdf_document or not selected_text.strip():
+            return
+        
+        try:
+            import fitz
+            page = self.pdf_document[self.current_page]
+            
+            # Search for the text to get accurate quad coordinates
+            flags = fitz.TEXT_IGNORECASE | fitz.TEXT_DEHYPHENATE
+            quads = page.search_for(selected_text.strip(), flags=flags, quads=True)
+            
+            if quads:
+                # Add highlight annotation with yellow color
+                highlight = page.add_highlight_annot(quads)
+                highlight.set_colors(stroke=(1, 1, 0))  # Yellow highlight
+                highlight.update()
+                
+                print(f"DEBUG: Added highlight annotation for {len(quads)} quad(s)")
+                
+                # Refresh the page display
+                self.render_page()
+                
+                if self.parent_window:
+                    self.parent_window.statusBar().showMessage("✨ Text highlighted in PDF", 2000)
+            else:
+                print(f"DEBUG: Could not find text to highlight: '{selected_text[:50]}'")
+                
+        except Exception as e:
+            print(f"Error adding highlight annotation: {e}")
             
     def change_zoom(self, value):
         """Change zoom level"""
@@ -1166,8 +1385,9 @@ class EnhancedTrainingInterface(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("DocMiner 6.1.0 - Professional Positionality Analysis Interface")
-        # Set reasonable default size but allow user to resize
-        self.resize(1200, 800)  # Default size - user can resize as needed
+        # Set reasonable default size but allow user to resize freely
+        self.resize(1200, 800)  # Default size - user can resize by dragging corners
+        self.setMinimumSize(900, 600)  # Minimum usable size
         
         # Training data storage
         self.training_data = []
@@ -1239,6 +1459,12 @@ class EnhancedTrainingInterface(QMainWindow):
         about_action = help_menu.addAction('📖 About DocMiner...')
         about_action.triggered.connect(self.show_about)
         about_action.setStatusTip('About DocMiner')
+        
+        help_menu.addSeparator()
+        
+        usage_action = help_menu.addAction('💡 Quick Help')
+        usage_action.triggered.connect(self.show_quick_help)
+        usage_action.setStatusTip('Quick help and FAQ')
         
     def check_if_config_needed(self):
         """Check if configuration is needed (returns True if config missing)"""
@@ -1347,10 +1573,70 @@ class EnhancedTrainingInterface(QMainWindow):
             # Exit the application
             QApplication.quit()
     
+    def show_quick_help(self):
+        """Show quick help dialog answering common questions"""
+        help_text = """
+<h3>💡 Quick Help & FAQ</h3>
+
+<p><b>Q: What does the AI analyze?</b><br>
+A: The AI automatically reads and analyzes the <b>entire document</b> - every page, 
+every paragraph. It doesn't just look at what you type in "Human Input".</p>
+
+<p><b>Q: What should I put in "Human Input"?</b><br>
+A: Use "Human Input" to record <b>your own manual findings</b> - specific quotes, 
+page numbers, or observations you want to highlight. This is for YOUR evidence 
+collection, separate from the AI's automatic analysis.</p>
+
+<p><b>Q: Where can I find training data?</b><br>
+A: Current folder: <b>{folder}</b><br>
+The default training folder contains sample PDFs. Use "File → Configuration" to 
+change the folder location. PDFs are located in the "ExtractorPDFs" folder.</p>
+
+<p><b>Q: My PDF doesn't fit in the window properly</b><br>
+A: Use the new <b>View mode</b> dropdown (Letter/A4/Full Width/Full Height) and 
+<b>Zoom controls</b> (up to 200%) to adjust how the PDF displays. 
+The "Selected Text" box below the PDF is collapsible - uncheck it to get more space.</p>
+
+<p><b>Q: How do I collect evidence?</b><br>
+1. Select text in the PDF viewer<br>
+2. Text appears in "Selected Text" box (check the box if hidden)<br>
+3. Click "Copy to Evidence →" button<br>
+4. Evidence appears in "Human Input" tab</p>
+        """.format(
+            folder=Path(self.current_folder).name if hasattr(self, 'current_folder') else "Not loaded yet"
+        )
+        
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Quick Help")
+        msg.setTextFormat(Qt.RichText)
+        msg.setText(help_text)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.setIcon(QMessageBox.Information)
+        msg.exec()
+    
+    def toggle_layout_mode(self, mode):
+        """Toggle between PDF-only, Split, and Analysis-only layouts (Overleaf-style)"""
+        if mode == "pdf_only":
+            # Show only PDF panel
+            self.pdf_panel.setVisible(True)
+            self.analysis_panel.setVisible(False)
+            
+        elif mode == "analysis_only":
+            # Show only Analysis panel
+            self.pdf_panel.setVisible(False)
+            self.analysis_panel.setVisible(True)
+            
+        elif mode == "split":
+            # Show both panels (default)
+            self.pdf_panel.setVisible(True)
+            self.analysis_panel.setVisible(True)
+    
+
+    
     def show_about(self):
         """Show about dialog"""
-        QMessageBox.about(self, "About DocMiner 6.0.2", 
-                         "🎓 DocMiner 6.0.2\n\n"
+        QMessageBox.about(self, "About DocMiner 6.1.0", 
+                         "🎓 DocMiner 6.1.0\n\n"
                          "Professional Positionality Analysis Interface\n\n"
                          "Features:\n"
                          "• Paper state persistence\n"
@@ -1392,56 +1678,87 @@ class EnhancedTrainingInterface(QMainWindow):
         folder_btn.setStyleSheet("QPushButton { font-weight: bold; padding: 8px; }")
         header_layout.addWidget(folder_btn)
         
-        # Spacer to push Robbie to the right
+        # Spacer to push layout controls and Robbie to the right
         header_layout.addStretch()
         
-        # Animated Robbie processing indicator (always visible, animates during AI analysis)
+        # Layout toggle buttons (Overleaf-style) - positioned left of Robbie
+        layout_label = QLabel("Layout:")
+        layout_label.setStyleSheet("QLabel { font-weight: bold; margin-right: 5px; }")
+        header_layout.addWidget(layout_label)
+        
+        self.layout_btn_group = QButtonGroup()
+        self.layout_btn_group.setExclusive(True)
+        
+        self.layout_pdf_only = QPushButton("📄 PDF")
+        self.layout_pdf_only.setCheckable(True)
+        self.layout_pdf_only.setToolTip("Show PDF viewer only - reading mode (Ctrl+1)")
+        self.layout_pdf_only.setStyleSheet("QPushButton { padding: 6px 12px; } QPushButton:checked { background-color: #2196F3; color: white; font-weight: bold; }")
+        self.layout_btn_group.addButton(self.layout_pdf_only, 1)
+        header_layout.addWidget(self.layout_pdf_only)
+        
+        self.layout_split = QPushButton("🔀 Split")
+        self.layout_split.setCheckable(True)
+        self.layout_split.setChecked(True)  # Default
+        self.layout_split.setToolTip("Show both PDF and Analysis panels - default mode (Ctrl+2)")
+        self.layout_split.setStyleSheet("QPushButton { padding: 6px 12px; } QPushButton:checked { background-color: #2196F3; color: white; font-weight: bold; }")
+        self.layout_btn_group.addButton(self.layout_split, 2)
+        header_layout.addWidget(self.layout_split)
+        
+        self.layout_analysis_only = QPushButton("✏️ Analysis")
+        self.layout_analysis_only.setCheckable(True)
+        self.layout_analysis_only.setToolTip("Show Analysis panel only - writing mode (Ctrl+3)")
+        self.layout_analysis_only.setStyleSheet("QPushButton { padding: 6px 12px; } QPushButton:checked { background-color: #2196F3; color: white; font-weight: bold; }")
+        self.layout_btn_group.addButton(self.layout_analysis_only, 3)
+        header_layout.addWidget(self.layout_analysis_only)
+        
+        # Connect layout toggle signals
+        self.layout_pdf_only.clicked.connect(lambda: self.toggle_layout_mode("pdf_only"))
+        self.layout_split.clicked.connect(lambda: self.toggle_layout_mode("split"))
+        self.layout_analysis_only.clicked.connect(lambda: self.toggle_layout_mode("analysis_only"))
+        
+        header_layout.addWidget(QLabel("|"))  # Separator before Robbie
+        
+        # Animated Robbie processing indicator (animated GIF - always visible)
         self.processing_indicator = QLabel("")
-        self.processing_indicator.setMinimumSize(60, 60)  # Reserve space but don't force resize
+        self.processing_indicator.setMinimumSize(60, 60)  # Reserve space
         self.processing_indicator.setMaximumSize(60, 60)  # Limit size
-        self.processing_indicator.setScaledContents(True)  # Scale image to fit
-        self.processing_indicator.setAlignment(Qt.AlignCenter)  # Center the image
+        self.processing_indicator.setScaledContents(True)  # Scale GIF to fit
+        self.processing_indicator.setAlignment(Qt.AlignCenter)  # Center the GIF
         self.processing_indicator.setVisible(True)  # Always visible
         header_layout.addWidget(self.processing_indicator)
         
-        # Load Robbie animation frames
-        self.robbie_frames = []
-        for i in range(1, 4):  # Load 3 transparent frames (60x60)
-            # Check if running as frozen exe (PyInstaller bundle)
-            if getattr(sys, 'frozen', False):
-                frame_path = os.path.join(sys._MEIPASS, 'images', f'robbie_anim_{i}.png')
-            else:
-                frame_path = os.path.join(os.path.dirname(__file__), 'images', f'robbie_anim_{i}.png')
-            
-            if os.path.exists(frame_path):
-                pixmap = QPixmap(frame_path)
-                self.robbie_frames.append(pixmap)
+        # Load Robbie animated GIF
+        from PySide6.QtGui import QMovie
+        from PySide6.QtCore import QSize
         
-        # Set initial static frame (first frame, not animating)
-        if self.robbie_frames:
-            self.processing_indicator.setPixmap(self.robbie_frames[0])
+        # Check if running as frozen exe (PyInstaller bundle)
+        if getattr(sys, 'frozen', False):
+            robbie_path = os.path.join(sys._MEIPASS, 'images', 'robbie_slow.gif')
+        else:
+            robbie_path = os.path.join(os.path.dirname(__file__), 'images', 'robbie_slow.gif')
         
-        # Fallback if Robbie frames not found
-        if not self.robbie_frames:
-            print("Warning: Robbie animation frames not found, using text fallback")
-        
-        # Animation timer for processing indicator
-        self.processing_timer = QTimer()
-        self.processing_timer.timeout.connect(self.update_processing_animation)
-        self.animation_frame = 0
+        if os.path.exists(robbie_path):
+            self.robbie_movie = QMovie(robbie_path)
+            self.robbie_movie.setScaledSize(QSize(60, 60))  # Scale to fit
+            self.processing_indicator.setMovie(self.robbie_movie)
+            # DON'T start animation - will start when AI analysis begins
+            print(f"DEBUG: Loaded animated Robbie GIF from {robbie_path}")
+        else:
+            print(f"Warning: Robbie GIF not found at {robbie_path}")
+            self.robbie_movie = None
+            self.processing_indicator.setText("🤖")  # Fallback emoji
         
         layout.addLayout(header_layout)
         
-        # Main content area with splitter
-        splitter = QSplitter(Qt.Horizontal)
-        splitter.setHandleWidth(1)  # Thin separator line
-        splitter.setChildrenCollapsible(False)  # Prevent collapsing
+        # Main content area with fixed horizontal layout (NO splitter for stability)
+        self.main_content = QHBoxLayout()
+        self.main_content.setSpacing(4)
+        self.main_content.setContentsMargins(0, 0, 0, 0)
         
-        # Left panel: PDF Viewer - prioritize PDF display
-        pdf_panel = QGroupBox("PDF Document Viewer")
-        pdf_panel.setMinimumWidth(600)   # Wider for better PDF viewing
-        # Remove maximum width to let it expand naturally
-        pdf_layout = QVBoxLayout(pdf_panel)
+        # Left panel: PDF Viewer - fixed width for coordinate stability
+        self.pdf_panel = QGroupBox("PDF Document Viewer")
+        self.pdf_panel.setFixedWidth(700)  # Fixed width for stable text selection coordinates
+        pdf_layout = QVBoxLayout(self.pdf_panel)
         
         # Paper info + status dot
         paper_info_layout = QHBoxLayout()
@@ -1468,59 +1785,26 @@ class EnhancedTrainingInterface(QMainWindow):
         pdf_layout.addWidget(pdf_note)
         
         # PDF viewer - use embedded system viewer
-        self.pdf_viewer = EmbeddedPDFViewer()
+        self.pdf_viewer = EmbeddedPDFViewer(parent_window=self)
         
         # Connect text selection signal from PDF viewer to main interface
         self.pdf_viewer.pdf_label.text_selected.connect(self.on_text_selected)
         
         pdf_layout.addWidget(self.pdf_viewer)
         
-
+        # Simple tip about text selection workflow
+        selection_tip = QLabel("💡 Select text in PDF → Automatically added to Human Input tab")
+        selection_tip.setStyleSheet("QLabel { color: #666; font-size: 10px; font-style: italic; padding: 5px; background: #f0f8ff; border-radius: 3px; }")
+        selection_tip.setWordWrap(True)
+        pdf_layout.addWidget(selection_tip)
         
-        # Quick text extraction area
-        text_extract_group = QGroupBox("Selected Text for Evidence")
-        text_extract_layout = QVBoxLayout(text_extract_group)
-        text_extract_layout.setContentsMargins(2, 2, 2, 2)  # Minimal margins
-        text_extract_layout.setSpacing(1)  # Very tight spacing
+        # Add PDF panel to fixed layout
+        self.main_content.addWidget(self.pdf_panel)
         
-        self.extracted_text = QPlainTextEdit()
-        self.extracted_text.setReadOnly(False)  # Allow manual typing
-        self.extracted_text.setFont(QFont("Courier New", 12))  # Larger, more readable font
-        self.extracted_text.setStyleSheet("QPlainTextEdit { margin: 0px; padding: 1px; border: 1px solid #ddd; }")
-        self.extracted_text.setPlaceholderText("Select text in PDF above or type quotes for evidence...")
-        self.extracted_text.setMinimumHeight(180)  # Expanded to use space from removed AI Detection section
-        text_extract_layout.addWidget(self.extracted_text)
-        
-        # Quick action buttons
-        text_actions = QHBoxLayout()
-        
-        copy_to_evidence_btn = QPushButton("📋 Copy to Evidence")
-        copy_to_evidence_btn.clicked.connect(self.copy_to_evidence)
-        copy_to_evidence_btn.setStyleSheet("QPushButton { background-color: #2196F3; color: white; }")
-        text_actions.addWidget(copy_to_evidence_btn)
-        
-        clear_text_btn = QPushButton("🗑️ Clear")
-        clear_text_btn.clicked.connect(lambda: self.extracted_text.clear())
-        text_actions.addWidget(clear_text_btn)
-        
-        text_actions.addStretch()
-        text_extract_layout.addLayout(text_actions)
-        
-        pdf_layout.addWidget(text_extract_group)
-        
-        # Set PDF panel to prefer smaller size
-        pdf_panel.setMaximumWidth(500)  # Limit PDF panel width
-        pdf_panel.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        
-        splitter.addWidget(pdf_panel)
-        
-        # Right panel: Training interface - make it larger
-        training_panel = QGroupBox("Evidence")
-        training_panel.setMinimumWidth(400)  # Adequate minimum for usability
-        # No maximum width - let it expand as needed
-        # Remove maximum width constraint to let it use full available space
-        training_panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        right_layout = QVBoxLayout(training_panel)
+        # Right panel: Training interface - expands to fill remaining space
+        self.analysis_panel = QGroupBox("Evidence")
+        self.analysis_panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        right_layout = QVBoxLayout(self.analysis_panel)
         right_layout.setContentsMargins(2, 2, 2, 2)  # Minimal margins
         right_layout.setSpacing(1)  # Very tight spacing
         
@@ -1586,7 +1870,17 @@ class EnhancedTrainingInterface(QMainWindow):
         human_layout = QVBoxLayout(human_tab)
         human_layout.setContentsMargins(2, 2, 2, 2)
         
-        human_layout.addWidget(QLabel("Human Evidence:"))
+        # Add helpful info label
+        human_info = QLabel("📝 Manual Evidence Collection - Enter quotes/citations you manually identified:")
+        human_info.setStyleSheet("QLabel { color: #1976D2; font-size: 10px; font-weight: bold; padding: 3px; background-color: #E3F2FD; border-radius: 3px; }")
+        human_info.setWordWrap(True)
+        human_info.setToolTip(
+            "This field is for YOUR manual evidence collection.\n\n"
+            "The AI analyzes the ENTIRE document automatically, not just what you put here.\n"
+            "Use this field to record specific quotes, page numbers, or notes that you want to highlight."
+        )
+        human_layout.addWidget(human_info)
+        
         self.human_input = QTextEdit()
         self.human_input.setMinimumHeight(200)
         self.human_input.setFont(QFont("Arial", 13))  # Increased from 12
@@ -1601,7 +1895,17 @@ class EnhancedTrainingInterface(QMainWindow):
         ai_layout = QVBoxLayout(ai_tab)
         ai_layout.setContentsMargins(2, 2, 2, 2)
         
-        ai_layout.addWidget(QLabel("AI Analysis:"))
+        # Add helpful info label
+        ai_info = QLabel("🤖 AI Automatic Analysis - The AI reads and analyzes the ENTIRE document:")
+        ai_info.setStyleSheet("QLabel { color: #388E3C; font-size: 10px; font-weight: bold; padding: 3px; background-color: #E8F5E9; border-radius: 3px; }")
+        ai_info.setWordWrap(True)
+        ai_info.setToolTip(
+            "The AI automatically processes the complete document text.\n\n"
+            "This analysis is independent of what you enter in 'Human Input'.\n"
+            "The AI scans the full paper to identify positionality statements, patterns, and context."
+        )
+        ai_layout.addWidget(ai_info)
+        
         self.ai_input = QTextEdit()
         self.ai_input.setMinimumHeight(200)
         self.ai_input.setFont(QFont("Arial", 13))  # Increased from 11
@@ -1613,6 +1917,13 @@ class EnhancedTrainingInterface(QMainWindow):
         
         self.evidence_tabs.addTab(ai_tab, "AI Input")
 
+        # Clear button for active evidence tab
+        clear_evidence_btn = QPushButton("🗑️ Clear Current Tab")
+        clear_evidence_btn.setStyleSheet("QPushButton { background-color: #607D8B; color: white; padding: 8px; font-weight: bold; font-size: 11px; } QPushButton:hover { background-color: #546E7A; }")
+        clear_evidence_btn.clicked.connect(self.clear_current_evidence_tab)
+        clear_evidence_btn.setToolTip("Clear all text from the currently active tab (Human Input or AI Input)")
+        right_layout.addWidget(clear_evidence_btn)
+
         right_layout.addWidget(self.evidence_tabs)
 
         # Update paper status when human/AI input changes
@@ -1623,16 +1934,11 @@ class EnhancedTrainingInterface(QMainWindow):
         except Exception:
             pass
         
-        splitter.addWidget(training_panel)
+        # Add analysis panel to layout - it expands to fill remaining space
+        self.main_content.addWidget(self.analysis_panel)
         
-        # Set stretch factors for better proportions
-        splitter.setStretchFactor(0, 1)  # PDF panel gets 1 part  
-        splitter.setStretchFactor(1, 1)  # Analysis panel gets 1 part (equal space)
-        
-        layout.addWidget(splitter)
-        
-        # Set more balanced default proportions
-        splitter.setSizes([500, 700])  # Give more space to the right panel
+        # Add the fixed layout to main layout
+        layout.addLayout(self.main_content)
         
         # Bottom buttons
         button_layout = QHBoxLayout()
@@ -1668,11 +1974,30 @@ class EnhancedTrainingInterface(QMainWindow):
         
         layout.addLayout(button_layout)
         
+        # Setup keyboard shortcuts for layout modes
+        self.setup_keyboard_shortcuts()
+        
         # Create permanent status bar widgets with clickable indicators
         self.create_status_bar_widgets()
         
         # Initial status message
         self.update_status_indicators()
+    
+    def setup_keyboard_shortcuts(self):
+        """Setup keyboard shortcuts for quick layout switching"""
+        from PySide6.QtGui import QShortcut, QKeySequence
+        
+        # Ctrl+1: PDF only mode
+        shortcut_pdf = QShortcut(QKeySequence("Ctrl+1"), self)
+        shortcut_pdf.activated.connect(lambda: [self.layout_pdf_only.setChecked(True), self.toggle_layout_mode("pdf_only")])
+        
+        # Ctrl+2: Split mode (default)
+        shortcut_split = QShortcut(QKeySequence("Ctrl+2"), self)
+        shortcut_split.activated.connect(lambda: [self.layout_split.setChecked(True), self.toggle_layout_mode("split")])
+        
+        # Ctrl+3: Analysis only mode
+        shortcut_analysis = QShortcut(QKeySequence("Ctrl+3"), self)
+        shortcut_analysis.activated.connect(lambda: [self.layout_analysis_only.setChecked(True), self.toggle_layout_mode("analysis_only")])
         
     def create_status_bar_widgets(self):
         """Create clickable status indicators in the status bar"""
@@ -1811,26 +2136,9 @@ class EnhancedTrainingInterface(QMainWindow):
             pass
         
     def update_processing_animation(self):
-        """Update the animated Robbie processing indicator"""
-        if self.robbie_frames:
-            # Cycle through Robbie animation frames
-            frame_index = self.animation_frame % len(self.robbie_frames)
-            self.processing_indicator.setPixmap(self.robbie_frames[frame_index])
-        else:
-            # Fallback to gear text animation if images not loaded
-            spinners = [
-                "⚙️ ⚙️ ⚙️",
-                " ⚙️ ⚙️",
-                "  ⚙️",
-                "   ⚙️",
-                "    ⚙️",
-                "   ⚙️",
-                "  ⚙️",
-                " ⚙️ ⚙️",
-            ]
-            self.processing_indicator.setText(spinners[self.animation_frame % len(spinners)])
-        
-        self.animation_frame += 1
+        """No-op: Robbie GIF animates itself automatically"""
+        # The animated GIF plays continuously, no manual frame updates needed
+        pass
         
     def open_pdf_externally(self):
         """Open the current PDF in the system's default PDF viewer"""
@@ -1900,7 +2208,6 @@ class EnhancedTrainingInterface(QMainWindow):
             btn.setChecked(False)
         self.human_input.clear()
         self.ai_input.clear()
-        self.extracted_text.clear()
         
     def save_and_next(self):
         """Save current training data and move to next paper"""
@@ -1930,7 +2237,7 @@ class EnhancedTrainingInterface(QMainWindow):
             "filename": filename,
             "timestamp": datetime.now().isoformat(),
             "judgment": judgment,
-            "evidence": self.extracted_text.toPlainText().strip(),
+            "evidence": self.human_input.toPlainText().strip(),
             "ai_analysis": self.ai_input.toPlainText().strip(),
             "pattern_types": [],  # Simplified - no pattern checkboxes in current interface
             "confidence": 3,  # Default confidence
@@ -2054,7 +2361,7 @@ class EnhancedTrainingInterface(QMainWindow):
             return
             
         # Get current evidence
-        human_evidence = self.extracted_text.toPlainText().strip()
+        human_evidence = self.human_input.toPlainText().strip()
         ai_evidence = self.ai_input.toPlainText().strip()
         
         if not human_evidence and not ai_evidence:
@@ -2159,7 +2466,7 @@ class EnhancedTrainingInterface(QMainWindow):
             
             # Check if user has made any selections for current paper
             judgment_selected = any(btn.isChecked() for btn in self.judgment_buttons.values())
-            evidence_text = self.extracted_text.toPlainText().strip()
+            evidence_text = self.human_input.toPlainText().strip()
             
             if judgment_selected or evidence_text:
                 # Auto-save current paper's data
@@ -2170,7 +2477,7 @@ class EnhancedTrainingInterface(QMainWindow):
         # Now check if we have any training data at all
         if not self.training_data:
             # Check if there's at least some evidence in the interface
-            evidence_text = self.extracted_text.toPlainText().strip()
+            evidence_text = self.human_input.toPlainText().strip()
             ai_analysis = self.ai_input.toPlainText().strip()
             
             if evidence_text or ai_analysis:
@@ -2222,37 +2529,7 @@ class EnhancedTrainingInterface(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Decision Error", f"Could not record or upload decision: {e}")
                 
-    def connect_pdf_selection(self):
-        """Connect PDF text selection to the extraction area"""
-        # Connect mouse release to update extracted text
-        original_mouse_release = self.pdf_viewer.pdf_label.mouseReleaseEvent
-        
-        def enhanced_mouse_release(event):
-            original_mouse_release(event)
-            # Update extracted text area when selection is made
-            if self.pdf_viewer.pdf_label.selected_text:
-                # Clean the text before displaying
-                cleaned = clean_extracted_text(self.pdf_viewer.pdf_label.selected_text)
-                self.extracted_text.setPlainText(cleaned)
-                
-        self.pdf_viewer.pdf_label.mouseReleaseEvent = enhanced_mouse_release
-        
-        # Also override the copy method to update extraction area
-        original_copy = self.pdf_viewer.pdf_label.copy_selected_text
-        
-        def enhanced_copy():
-            original_copy()
-            if self.pdf_viewer.pdf_label.selected_text:
-                # Clean the text before adding
-                cleaned = clean_extracted_text(self.pdf_viewer.pdf_label.selected_text)
-                current_text = self.extracted_text.toPlainText()
-                if current_text and current_text != cleaned:
-                    new_text = current_text + "\n\n" + cleaned
-                else:
-                    new_text = cleaned
-                self.extracted_text.setPlainText(new_text)
-                
-        self.pdf_viewer.pdf_label.copy_selected_text = enhanced_copy
+
         
     def initialize_with_readme(self):
         """Initialize with default ExtractorPDFs folder and show README first"""
@@ -2397,6 +2674,8 @@ class EnhancedTrainingInterface(QMainWindow):
                         self.paper_states = settings["paper_states"]
                     if "current_paper_index" in settings:
                         self.current_paper_index = settings["current_paper_index"]
+                    
+                    # Note: PDF highlights no longer persisted - text capture is sufficient
         except Exception as e:
             print(f"Could not load settings: {e}")
             self.pdf_folder = str(self.default_pdf_folder)
@@ -2406,6 +2685,7 @@ class EnhancedTrainingInterface(QMainWindow):
         try:
             # Get current window geometry
             geometry = self.geometry()
+            
             settings = {
                 "pdf_folder": self.pdf_folder,
                 "window_geometry": {
@@ -2428,23 +2708,21 @@ class EnhancedTrainingInterface(QMainWindow):
             print(f"Could not save settings: {e}")
 
     def on_text_selected(self, selected_text):
-        """Handle text selection from PDF viewer"""
+        """Handle text selection from PDF viewer - directly append to Human Input and add PDF highlight"""
         print(f"DEBUG - on_text_selected called with: '{selected_text[:100] if selected_text else 'EMPTY'}'")
         if selected_text.strip():
-            self.extracted_text.setPlainText(selected_text)
-            self.statusBar().showMessage("Text selected from PDF", 2000)
-            print(f"DEBUG - Text set in extracted_text widget")
-        else:
-            self.extracted_text.clear()
-            print(f"DEBUG - Cleared extracted_text widget")
+            # Add real PDF highlight annotation (if method exists and PDF is loaded)
+            if hasattr(self.pdf_viewer, 'add_highlight_annotation') and self.pdf_viewer.pdf_document:
+                self.pdf_viewer.add_highlight_annotation(selected_text)
             
-    def copy_to_evidence(self):
-        """Copy extracted text to Human Input tab and switch focus"""
-        text = self.extracted_text.toPlainText().strip()
-        if text:
-            # Clean up the text before copying
-            text = clean_extracted_text(text)
+            # Clean up the text
+            text = clean_extracted_text(selected_text)
             
+            # Prepend page number from PDF viewer's current page
+            page_number = self.pdf_viewer.current_page + 1  # +1 for 1-based numbering
+            text = f"[Page {page_number}]\n{text}"
+            
+            # Append to Human Input tab
             current_evidence = self.human_input.toPlainText().strip()
             if current_evidence:
                 new_evidence = current_evidence + "\n\n" + text
@@ -2452,11 +2730,41 @@ class EnhancedTrainingInterface(QMainWindow):
                 new_evidence = text
             self.human_input.setPlainText(new_evidence)
             
-            # Switch to Human Input tab
+            # Automatically switch to Human Input tab so user sees the result
             self.evidence_tabs.setCurrentIndex(0)  # Human Input is index 0
             
             # Show confirmation
-            self.statusBar().showMessage("Text copied to Human Input", 2000)
+            self.statusBar().showMessage("✅ Text highlighted and added to Human Input", 2000)
+            print(f"DEBUG - Text added to Human Input tab with highlight")
+    
+    def clear_current_evidence_tab(self):
+        """Clear the currently active evidence tab (Human Input or AI Input)"""
+        current_index = self.evidence_tabs.currentIndex()
+        
+        if current_index == 0:  # Human Input tab
+            if self.human_input.toPlainText().strip():
+                reply = QMessageBox.question(
+                    self, 
+                    "Clear Human Input",
+                    "Are you sure you want to clear all Human Input text?",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No
+                )
+                if reply == QMessageBox.Yes:
+                    self.human_input.clear()
+                    self.statusBar().showMessage("✅ Human Input cleared", 2000)
+        elif current_index == 1:  # AI Input tab
+            if self.ai_input.toPlainText().strip():
+                reply = QMessageBox.question(
+                    self, 
+                    "Clear AI Input",
+                    "Are you sure you want to clear all AI Input text?",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No
+                )
+                if reply == QMessageBox.Yes:
+                    self.ai_input.clear()
+                    self.statusBar().showMessage("✅ AI Input cleared", 2000)
     
     def run_initial_analysis(self):
         """Run AI analysis on current paper and display findings asynchronously"""
@@ -2493,9 +2801,9 @@ class EnhancedTrainingInterface(QMainWindow):
         self.analysis_progress.setVisible(True)
         self.analysis_progress.setValue(0)
         
-        # Start animated processing indicator (Robbie is always visible, just animate it)
-        self.animation_frame = 0
-        self.processing_timer.start(200)  # Update every 200ms
+        # Start Robbie animation during processing
+        if hasattr(self, 'robbie_movie') and self.robbie_movie:
+            self.robbie_movie.start()
         
         self.statusBar().showMessage("🔄 Starting analysis...")
         self.initial_analysis_btn.setEnabled(False)
@@ -2534,10 +2842,10 @@ class EnhancedTrainingInterface(QMainWindow):
             QApplication.processEvents()
 
         def on_analysis_finished(result, paper_name):
-            # Stop animation and reset to static first frame
-            self.processing_timer.stop()
-            if self.robbie_frames:
-                self.processing_indicator.setPixmap(self.robbie_frames[0])
+            # Stop Robbie animation
+            if hasattr(self, 'robbie_movie') and self.robbie_movie:
+                self.robbie_movie.stop()
+                self.robbie_movie.jumpToFrame(0)  # Reset to first frame
             
             self.analysis_progress.setVisible(False)
             findings_text = self.format_ai_findings(result, paper_name)
@@ -2552,10 +2860,10 @@ class EnhancedTrainingInterface(QMainWindow):
             self.initial_analysis_btn.setEnabled(True)
 
         def on_analysis_error(e):
-            # Stop animation and reset to static first frame
-            self.processing_timer.stop()
-            if self.robbie_frames:
-                self.processing_indicator.setPixmap(self.robbie_frames[0])
+            # Stop Robbie animation
+            if hasattr(self, 'robbie_movie') and self.robbie_movie:
+                self.robbie_movie.stop()
+                self.robbie_movie.jumpToFrame(0)  # Reset to first frame
             
             self.analysis_progress.setVisible(False)
             error_msg = str(e).lower()
