@@ -1,4 +1,4 @@
-# DocMiner 6.3.0 - Professional Positionality Analysis Interface
+# DocMiner 6.3.1 - Professional Positionality Analysis Interface
 
 **Simple, professional software for analyzing academic papers and detecting positionality statements.**
 
@@ -6,16 +6,20 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ---
 
-## 🆕 **What's New in v6.3.0** (October 2025)
+## 🆕 **What's New in v6.3.1** (October 2025)
 
-**User-Adjustable Text Selection Sensitivity:**
+**Intel-Compatible macOS Build:**
+- **Universal Compatibility**: Works on both Intel and Apple Silicon Macs
+- **Intel Macs**: Runs natively at full speed
+- **Apple Silicon**: Runs seamlessly via Rosetta 2
+- **No Separate Downloads**: One DMG for all Mac users
+
+**Previous Features (v6.3.0):**
 - **Sensitivity Slider**: Dial in precise text selection tolerance (20-200%)
 - **Column Mode Selector**: Choose Auto, 1-Col, or 2-Col for different page layouts
 - **Perfect for Complex PDFs**: Handle single-column, two-column, and mixed layouts
-- **Real-Time Adjustment**: Change sensitivity on-the-fly while selecting text
-- **Cleaner Interface**: Streamlined toolbar with consistent styling
 
-**Previous Features (v6.1.0):**
+**v6.1.0 Features:**
 - **Status Dots**: Real-time visual indicators showing analysis state for each PDF
 - **Position Counter**: "X of Y" display shows your progress through papers
 - **Full Session Persistence**: All evidence, decisions, and progress automatically saved
@@ -27,14 +31,14 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 **No Python, no setup, no terminal commands - just download and double-click!**
 
-### **v6.3.0 - Latest Release** 🆕
+### **v6.3.1 - Latest Release** 🆕
 
-**✅ Ready to download!** macOS • Windows • Linux (coming soon)
+**✅ Ready to download!** macOS (Intel compatible) • Windows
 
 Choose your platform and download:
 
-- **🍎 macOS** (Intel & Apple Silicon): [**Download DocMiner-6.3.0-macOS.dmg**](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.0/DocMiner-6.3.0-macOS.dmg)
-- **🪟 Windows** (64-bit): [**Download DocMiner-6.3.0-Windows.zip**](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.0/DocMiner-6.3.0-Windows.zip)
+- **🍎 macOS** (Intel & Apple Silicon): [**Download DocMiner-6.3.1-macOS.dmg**](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.1/DocMiner-6.3.1-macOS.dmg)
+- **🪟 Windows** (64-bit): [**Download DocMiner-6.3.1-Windows.zip**](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.1/DocMiner-6.3.1-Windows.zip)
 - **🐧 Linux** (x86_64): [Browse All Releases](https://github.com/OhioMathTeacher/docminer/releases) (AppImage coming soon)
 
 ### **Installation Instructions**
