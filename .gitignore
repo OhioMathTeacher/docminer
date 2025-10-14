@@ -206,3 +206,4 @@ interface_settings.json
 AppDir/
 dist/
 build/
+run_dev.sh
