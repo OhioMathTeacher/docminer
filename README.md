@@ -9,17 +9,17 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 ## 🆕 **What's New in v6.3.0** (October 2025)
 
 **User-Adjustable Text Selection Sensitivity:**
-- 🎚️ **Sensitivity Slider**: Dial in precise text selection tolerance (20-200%)
-- 📋 **Column Mode Selector**: Choose Auto, 1-Col, or 2-Col for different page layouts
-- 🎯 **Perfect for Complex PDFs**: Handle single-column, two-column, and mixed layouts
-- 🖱️ **Real-Time Adjustment**: Change sensitivity on-the-fly while selecting text
-- ✨ **Cleaner Interface**: Streamlined toolbar with consistent styling
+- **Sensitivity Slider**: Dial in precise text selection tolerance (20-200%)
+- **Column Mode Selector**: Choose Auto, 1-Col, or 2-Col for different page layouts
+- **Perfect for Complex PDFs**: Handle single-column, two-column, and mixed layouts
+- **Real-Time Adjustment**: Change sensitivity on-the-fly while selecting text
+- **Cleaner Interface**: Streamlined toolbar with consistent styling
 
 **Previous Features (v6.1.0):**
-- 🟢 🟡 🔴 **Status Dots**: Real-time visual indicators showing analysis state for each PDF
-- 📊 **Position Counter**: "X of Y" display shows your progress through papers
-- 💾 **Full Session Persistence**: All evidence, decisions, and progress automatically saved
-- 📁 **Smart Folder Memory**: Remembers your last working folder across sessions
+- **Status Dots**: Real-time visual indicators showing analysis state for each PDF
+- **Position Counter**: "X of Y" display shows your progress through papers
+- **Full Session Persistence**: All evidence, decisions, and progress automatically saved
+- **Smart Folder Memory**: Remembers your last working folder across sessions
 
 ---
 
@@ -31,11 +31,9 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 Choose your platform and download:
 
-- 🍎 **macOS** (Intel & Apple Silicon): [DocMiner-6.3.0-macOS.dmg](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.0/DocMiner-6.3.0-macOS.dmg)
-- 🪟 **Windows** (64-bit): [DocMiner-6.3.0-Windows.zip](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.0/DocMiner-6.3.0-Windows.zip)
-- 🐧 **Linux** (x86_64): [DocMiner-6.3.0-x86_64.AppImage](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.0/DocMiner-6.3.0-x86_64.AppImage)
-
-*Note: Download links will be active once the build completes (~15 minutes after tagging)*
+- **macOS** (Intel & Apple Silicon): [DocMiner-6.3.0-macOS.dmg](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.0/DocMiner-6.3.0-macOS.dmg)
+- **Windows** (64-bit): [DocMiner-6.3.0-Windows.zip](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.0/DocMiner-6.3.0-Windows.zip)
+- **Linux** (x86_64): [DocMiner-6.3.0-x86_64.AppImage](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.0/DocMiner-6.3.0-x86_64.AppImage)
 
 ### **Installation Instructions**
 
@@ -78,13 +76,13 @@ Learn how to:
 
 ## ✨ **What It Does**
 
-* **PDF Viewer** – Professional navigation with adjustable sensitivity for text selection
-* **Smart Text Selection** – User-controlled tolerance slider for precise quote extraction
-* **Column Detection** – Handle single-column, two-column, and complex page layouts
-* **AI Assistant** – Optional AI pre-screening (requires OpenAI API key)
-* **Manual Analysis** – Works immediately without any API keys
-* **Training Data** – Export reviewer decisions for analysis
-* **GitHub Integration** – Upload results automatically (optional)
+* **PDF Viewer** - Professional navigation with adjustable sensitivity for text selection
+* **Smart Text Selection** - User-controlled tolerance slider for precise quote extraction
+* **Column Detection** - Handle single-column, two-column, and complex page layouts
+* **AI Assistant** - Optional AI pre-screening (requires OpenAI API key)
+* **Manual Analysis** - Works immediately without any API keys
+* **Training Data** - Export reviewer decisions for analysis
+* **GitHub Integration** - Upload results automatically (optional)
 
 ---
 
