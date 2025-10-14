@@ -58,13 +58,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
-            platform: Linux
-            artifact_name: DocMiner-linux
+          # - os: ubuntu-20.04
+          #   platform: Linux
+          #   artifact_name: DocMiner-linux
           - os: windows-latest
             platform: Windows
             artifact_name: DocMiner-windows
-          - os: macos-latest
+          - os: macos-13
             platform: macOS
             artifact_name: DocMiner-macos
 
