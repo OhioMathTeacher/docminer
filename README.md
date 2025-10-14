@@ -47,7 +47,11 @@ Choose your platform and download:
 1. Download the DMG file
 2. Double-click to open
 3. Drag DocMiner to your Applications folder
-4. If blocked by security: Open Terminal and run: `xattr -cr /Applications/DocMiner6.3.app`
+4. **If you see "unidentified developer" warning:**
+   - **Method 1** (Easiest): Right-click the app → "Open" → Click "Open" again
+   - **Method 2** (Terminal): Run `xattr -cr /Applications/DocMiner6.3.app`
+   
+   *This is normal for academic software without Apple's $99/year signing certificate*
 
 **Windows:**
 1. Download the ZIP file
