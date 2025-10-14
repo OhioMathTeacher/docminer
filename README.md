@@ -29,13 +29,13 @@ Perfect for graduate assistants, researchers, and academic institutions conducti
 
 ### **v6.3.0 - Latest Release** 🆕
 
-**Ready to download:** ✅ macOS | ✅ Windows | ⏳ Linux (building...)
+**✅ Ready to download!** macOS • Windows • Linux (coming soon)
 
 Choose your platform and download:
 
-- **🍎 macOS** (Intel & Apple Silicon): [**Download DocMiner-6.3.0-macOS.dmg**](/Users/todd/docminer/temp-release/DocMiner-6.3.0-macOS.dmg)
-- **🪟 Windows** (64-bit): [**Download DocMiner-6.3.0-Windows.zip**](/Users/todd/docminer/temp-release/DocMiner-6.3.0-Windows.zip)
-- **🐧 Linux** (x86_64): [Coming Soon!](https://github.com/OhioMathTeacher/docminer/releases) (Linux build completing soon)
+- **🍎 macOS** (Intel & Apple Silicon): [**Download DocMiner-6.3.0-macOS.dmg**](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.0/DocMiner-6.3.0-macOS.dmg)
+- **🪟 Windows** (64-bit): [**Download DocMiner-6.3.0-Windows.zip**](https://github.com/OhioMathTeacher/docminer/releases/download/v6.3.0/DocMiner-6.3.0-Windows.zip)
+- **🐧 Linux** (x86_64): [Browse All Releases](https://github.com/OhioMathTeacher/docminer/releases) (AppImage coming soon)
 
 ### **Installation Instructions**
 
