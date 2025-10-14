@@ -1,0 +1,55 @@
+# Training Session Report
+
+## Session Information
+- **GA Name**: todd
+- **Session ID**: 20251013_2242
+- **Timestamp**: 2025-10-13T22:42:51.656480
+- **Papers Analyzed**: 1
+
+## Summary Statistics
+
+### Judgment Distribution
+- **positive_subtle**: 1 papers (100.0%)
+
+### Pattern Analysis
+- **Total Evidence Quotes**: 1
+- **Average Confidence**: 3.0/5
+
+## Evidence Examples
+
+
+### Example 1: Armstrong-ETHICALENGAGEMENTANTHROPOLOGY-2025.pdf
+- **Confidence**: 3/5
+- **Patterns**: None specified
+- **Evidence**: "[Page 3]
+distribution, and food as symbol and meaning. Related to agency, is
+people’s access to food that is ethical, safe, nutritious, plentiful, affordable, and culturally appropriate. Our courses e..."
+
+## Pattern Suggestions
+
+No pattern suggestions provided.
+
+## Next Steps for Analysis
+
+1. **Pattern Discovery**: Analyze evidence quotes for new regex patterns
+2. **False Negative Review**: Check papers marked negative for missed statements  
+3. **Validation Testing**: Test discovered patterns on validation set
+4. **System Integration**: Add successful patterns to detection engine
+
+## Raw Data
+
+```json
+[
+  {
+    "filename": "Armstrong-ETHICALENGAGEMENTANTHROPOLOGY-2025.pdf",
+    "timestamp": "2025-10-13T22:42:51.651759",
+    "judgment": "positive_subtle",
+    "evidence": "[Page 3]\ndistribution, and food as symbol and meaning. Related to agency, is\npeople\u2019s access to food that is ethical, safe, nutritious, plentiful, affordable, and culturally appropriate. Our courses emphasize food access and\nagency, given the study of food systems through ethical and social justice\nperspectives, and extensive coverage in both classes of food activism and\nfood justice movements.\nThough the courses originated independently, our respective focus on",
+    "ai_analysis": "AI Analysis for Armstrong-ETHICALENGAGEMENTANTHROPOLOGY-2025.pdf\n\nConfidence Level: High (0.750)\nRecommendation: Explicit positionality detected\nPatterns Detected: Subtle Positionality, Comprehensive Review\n\n\nEvidence Excerpts Found: #1 - Ai Explanation\nLikely Location: Body/Content\nSTRONG positionality detected (Confidence: 0.75) Patterns identified: subtle_positionality, comprehensive_review Key evidence: \u2022 subtle: 1. **Passage**: \"Though the courses originated independently, our respective focus on access and agency spurred exploration of foodways on campus thr....\n\n\n#2 - Final Assessment\nLikely Location: Results/Findings\nThe preliminary findings indicate a nuanced understanding of positionality within the context of community-based learning and foodways exploration. The evidence suggests that the authors are aware of their positionality, particularly in how their focus on access and agency influences their engagement with foodways on campus....\n\n\n#3 - Subtle\nLikely Location: Body/Content\n1. **Passage**: \"Though the courses originated independently, our respective focus on access and agency spurred exploration of foodways on campus through campus kitchen tours and food management, Lawrence University\u2019s student-run garden, Sustainable Lawrence University Garden (SLUG), and our campus food pantry....\n\n\n#4 - Supplemental\nLikely Location: Body/Content\nNone. The significance of what was found lies in the acknowledgment of positionality as a critical factor in community engagement and food security initiatives. The authors' focus on access and agency suggests a commitment to ethical engagement, which is essential in fostering trust and collaboration with the communities they serve....\n\n\n\nAI Recommendation:\nStrong evidence of explicit positionality statements. Recommend categorizing as Explicit.",
+    "pattern_types": [],
+    "confidence": 3,
+    "explanation": "",
+    "pattern_suggestions": ""
+  }
+]
+```
