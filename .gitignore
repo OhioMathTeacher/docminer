@@ -43,6 +43,10 @@ distribution/
 *.rpm
 *.zip
 *.tar.gz
+*.AppImage
+appimagetool-x86_64.AppImage
+squashfs-root/
+*.AppDir/
 
 # Installer logs
 pip-log.txt
