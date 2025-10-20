@@ -89,6 +89,49 @@ jobs:
       run: |
         python -m PyInstaller build_files/${{ needs.detect-version.outputs.spec_file }} --distpath ./dist --workpath ./build --clean --noconfirm
     
+    - name: 🍎 Setup macOS code signing (macOS only)
+      if: matrix.platform == 'macOS'
+      run: |
+        # Import certificate from secrets
+        echo "${{ secrets.APPLE_CERTIFICATE_P12 }}" | base64 --decode > certificate.p12
+        
+        # Create temporary keychain
+        security create-keychain -p actions build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p actions build.keychain
+        security set-keychain-settings -t 3600 -u build.keychain
+        
+        # Import certificate
+        security import certificate.p12 -k build.keychain -P "${{ secrets.APPLE_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+        security set-key-partition-list -S apple-tool:,apple: -s -k actions build.keychain
+        
+        # Download Apple intermediate certificate
+        curl -o DeveloperIDG2CA.cer https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
+        security import DeveloperIDG2CA.cer -k build.keychain -T /usr/bin/codesign
+        
+        # Verify certificate is available
+        security find-identity -v -p codesigning
+        
+        # Clean up
+        rm certificate.p12 DeveloperIDG2CA.cer
+    
+    - name: 🔏 Code sign app bundle (macOS only)
+      if: matrix.platform == 'macOS'
+      run: |
+        SPEC_BASE=$(basename "${{ needs.detect-version.outputs.spec_file }}" .spec)
+        APP_PATH="dist/${SPEC_BASE}.app"
+        
+        # Sign the app bundle
+        codesign --deep --force --verify --verbose \
+          --sign "Developer ID Application: Michael Edwards (PQF3LP3FR2)" \
+          --options runtime \
+          --entitlements build_files/entitlements.plist \
+          "$APP_PATH"
+        
+        # Verify signature
+        codesign --verify --verbose=4 "$APP_PATH"
+        echo "✅ App bundle signed successfully"
+    
     - name: 📁 Prepare release files
       shell: bash
       run: |
@@ -103,20 +146,37 @@ jobs:
           cd dist/${SPEC_BASE}
           powershell -Command "Compress-Archive -Path * -DestinationPath ../../release-files/DocMiner-${VERSION_NUM}-Windows.zip"
         elif [ "${{ matrix.platform }}" == "macOS" ]; then
-          # Install create-dmg
-          brew install create-dmg
-          
           # Create DMG
-          create-dmg \
-            --volname "DocMiner ${VERSION_NUM}" \
-            --window-pos 200 120 \
-            --window-size 600 400 \
-            --icon-size 100 \
-            --app-drop-link 425 120 \
-            "release-files/DocMiner-${VERSION_NUM}-macOS.dmg" \
-            "dist/${SPEC_BASE}.app" || \
-          # Fallback if create-dmg fails
-          hdiutil create -volname "DocMiner ${VERSION_NUM}" -srcfolder "dist/${SPEC_BASE}.app" -ov -format UDZO "release-files/DocMiner-${VERSION_NUM}-macOS.dmg"
+          hdiutil create -volname "DocMiner ${VERSION_NUM}" \
+            -srcfolder "dist/${SPEC_BASE}.app" \
+            -ov -format UDZO \
+            "DocMiner-${VERSION_NUM}-macOS.dmg"
+          
+          # Sign the DMG
+          codesign --force --sign "Developer ID Application: Michael Edwards (PQF3LP3FR2)" \
+            "DocMiner-${VERSION_NUM}-macOS.dmg"
+          
+          echo "✅ DMG created and signed"
+          
+          # Notarize the DMG
+          echo "📤 Submitting DMG for notarization..."
+          xcrun notarytool submit "DocMiner-${VERSION_NUM}-macOS.dmg" \
+            --apple-id "${{ secrets.APPLE_ID }}" \
+            --password "${{ secrets.APPLE_APP_PASSWORD }}" \
+            --team-id "${{ secrets.APPLE_TEAM_ID }}" \
+            --wait
+          
+          # Staple notarization ticket
+          echo "📎 Stapling notarization ticket..."
+          xcrun stapler staple "DocMiner-${VERSION_NUM}-macOS.dmg"
+          
+          # Verify stapling
+          xcrun stapler validate "DocMiner-${VERSION_NUM}-macOS.dmg"
+          
+          echo "✅ DMG notarized and stapled successfully"
+          
+          # Move to release files
+          mv "DocMiner-${VERSION_NUM}-macOS.dmg" release-files/
         else
           # Linux - create both tar.gz and try AppImage
           cd dist
