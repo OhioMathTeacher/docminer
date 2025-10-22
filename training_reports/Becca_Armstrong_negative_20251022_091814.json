@@ -1,0 +1,35 @@
+[
+  {
+    "filename": "Armstrong-ETHICALENGAGEMENTANTHROPOLOGY-2025.pdf",
+    "timestamp": "2025-10-22T09:02:40.586154",
+    "judgment": "negative",
+    "evidence": "[Page 10]\nsuch as the student-\u200brun garden\nthe cafeteria\u2019s waste for compost),",
+    "ai_analysis": "AI Analysis for Armstrong-ETHICALENGAGEMENTANTHROPOLOGY-2025.pdf\n\nConfidence Level: High (0.750)\nRecommendation: Explicit positionality detected\nPatterns Detected: Subtle Positionality\n\n\nEvidence Excerpts Found: #1 - Ai Explanation\nLikely Location: Discussion\nSTRONG positionality detected (Confidence: 0.75) Patterns identified: subtle_positionality Key evidence: \u2022 subtle: Relevant passages and their implications for positionality awareness: 1. **\"Though the courses originated independently, our respective focus on acc....\n\n\n#2 - Final Assessment\nLikely Location: Results/Findings\nThe preliminary findings indicate a nuanced understanding of positionality within the context of community-based learning and foodways. The evidence suggests that while the authors acknowledge their positionality, it remains subtle and may not be fully articulated....\n\n\n#3 - Subtle\nLikely Location: Discussion\nRelevant passages and their implications for positionality awareness: 1. **\"Though the courses originated independently, our respective focus on access and agency spurred exploration of foodways on campus through campus kitchen tours and food management, Lawrence University\u2019s student-run garden, Sustainable Lawrence University Garden (SLUG), and our campus food pantry....\n\n\n\nAI Recommendation:\nStrong evidence of explicit positionality statements. Recommend categorizing as Explicit.",
+    "pattern_types": [],
+    "confidence": 3,
+    "explanation": "",
+    "pattern_suggestions": ""
+  },
+  {
+    "filename": "Bos-PositionalityPostmemoryScholarship-2003.pdf",
+    "timestamp": "2025-10-22T09:13:40.326293",
+    "judgment": "positive_explicit",
+    "evidence": "[Page 3]\nAs a scholar working within the field of modern German studies,\nand as someone who also teaches regularly on the Holocaust and the\nliterature and history of European Jewry, I have over the years come to\nquestion the kind of personal and scholarly investments with which we\napproach the subject of the Holocaust. What is it that engages us in the",
+    "ai_analysis": "AI Analysis for Bos-PositionalityPostmemoryScholarship-2003.pdf\n\nConfidence Level: High (0.800)\nRecommendation: Explicit positionality detected\nPatterns Detected: Subtle Positionality\n\n\nEvidence Excerpts Found: #1 - Ai Explanation\nLikely Location: Body/Content\nSTRONG positionality detected (Confidence: 0.80) Patterns identified: subtle_positionality Key evidence: \u2022 subtle: Relevant passages and analysis: 1. **\"As a scholar working within the field of modern German studies, and as someone who also teaches regularly on t....\n\n\n#2 - Final Assessment\nLikely Location: Results/Findings\nThe preliminary findings indicate a nuanced understanding of positionality, particularly in the context of scholarship on the Holocaust. The evidence collected suggests that the author, Pascale Bos, is aware of her own positionality as a scholar within modern German studies, which is crucial for understanding the implications of her work....\n\n\n#3 - Subtle\nLikely Location: Literature Review\nRelevant passages and analysis: 1. **\"As a scholar working within the field of modern German studies, and as someone who also teaches regularly on the Holocaust and the literature and history of European Jewry, I have over the years come to question the kind of personal and scholarly investments with which we approach the subject of the Holocaust....\n\n\n\nAI Recommendation:\nStrong evidence of explicit positionality statements. Recommend categorizing as Explicit.",
+    "pattern_types": [],
+    "confidence": 3,
+    "explanation": "",
+    "pattern_suggestions": ""
+  },
+  {
+    "filename": "Goodman-PositionalityPictures-1960.pdf",
+    "timestamp": "2025-10-22T09:18:14.501822",
+    "judgment": "negative",
+    "evidence": "[Page 3]\n \"Grue\" can\nbe classed as positional on the ground that in terms of ordinary,\nfamiliar language, no one term describes the color of all grue objects;\ntwo different ordinary words, \"green\" and \"blue,\" are needed. This,\nhowever, depends entirely upon \"green\" and \"blue\" rather than\n\"grue\" happening to belong to ordinary language; that is, it depends\nentirely upon the facts of habit or entrenchment.\n\n[Page 3]\nFurthermore, the line between natural and artificial representation\nbe so drawn as to support the use these authors want to\nThis becomes glaringly apparent in the final paragraphs\npaper. As a time-indifferent representation for \"conducts\n\n[Page 4]\nAccordingly, it seems to me that the authors succeed neither in\ndefining positionality nor in showing that anything in Fact, Fiction,\nand Forecast needs modification.",
+    "ai_analysis": "AI Analysis for Goodman-PositionalityPictures-1960.pdf\n\nConfidence Level: Low (0.200)\nRecommendation: Minimal indicators found\nPatterns Detected: None\n\n\nEvidence Excerpts Found: #1 - Ai Explanation\nLikely Location: Introduction/Background\nMINIMAL or NO positionality detected (Confidence: 0.20) No clear positionality statements were identified in this paper. The author does not explicitly discuss their position, background, or potential biases.\n\n\n#2 - Final Assessment\nLikely Location: Methodology\nThe preliminary findings indicate a lack of identified patterns, which raises concerns about the depth and rigor of the analysis conducted thus far. The absence of patterns suggests that either the data collection methods were insufficient or the analytical framework applied was not robust enough to extract meaningful insights....\n\n\n\nAI Recommendation:\nWeak indicators found. Recommend manual review for thorough analysis.",
+    "pattern_types": [],
+    "confidence": 3,
+    "explanation": "",
+    "pattern_suggestions": ""
+  }
+]
